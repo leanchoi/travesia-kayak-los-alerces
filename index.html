@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travesía y Bajada de Kayak en Parque Nacional Los Alerces | UNPSJB FCE</title>
+    <meta name="description" content="Sitio oficial de la Travesía y Bajada de Kayak en el Parque Nacional Los Alerces, organizada por la Facultad de Ciencias Económicas de la Universidad Nacional de la Patagonia San Juan Bosco (UNPSJB). Próxima edición: 12 y 13 de Diciembre de 2026.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#hero" class="nav-brand">
+                <img src="assets/fce-logo.jpg" alt="Escudo FCE UNPSJB" class="nav-logo-mini">
+                <div class="brand-text">
+                    <span class="brand-title">Travesía Los Alerces</span>
+                    <span class="brand-sub">FCE UNPSJB · Sede Esquel</span>
+                </div>
+            </a>
+
+            <nav class="nav-menu" id="navMenu">
+                <button class="nav-link active" data-tab="inicio"><i class="fa-solid fa-water"></i> Inicio</button>
+                <button class="nav-link" data-tab="historia"><i class="fa-solid fa-landmark"></i> La Travesía</button>
+                <button class="nav-link" data-tab="galeria"><i class="fa-solid fa-camera-retro"></i> Galería de Fotos</button>
+                <button class="nav-link" data-tab="organizadores"><i class="fa-solid fa-users"></i> Organizadores</button>
+                <button class="nav-link" data-tab="resenas"><i class="fa-solid fa-star"></i> Auspiciantes & Reseñas</button>
+            </nav>
+
+            <div class="nav-cta">
+                <a href="#proxima-edicion" class="btn-primary"><i class="fa-regular fa-calendar-check"></i> 12 y 13 Dic 2026</a>
+            </div>
+
+            <button class="hamburger-btn" id="hamburgerBtn" aria-label="Abrir menú">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINERS (TABS) -->
+
+    <!-- 1. HERO & INICIO -->
+    <section id="hero" class="hero-section tab-content active-tab" data-section="inicio">
+        <!-- Parallax Video Background from YouTube -->
+        <div class="video-background-wrapper" id="parallaxBg">
+            <iframe 
+                id="ytplayer"
+                src="https://www.youtube.com/embed/t5qNJe3UqBc?autoplay=1&mute=1&loop=1&playlist=t5qNJe3UqBc&controls=0&showinfo=0&autohide=1&modestbranding=1&enablejsapi=1&rel=0" 
+                title="Travesía de Kayak Parque Nacional Los Alerces"
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+            <div class="hero-overlay"></div>
+        </div>
+
+        <div class="hero-content-container">
+            <!-- Floating Parallax Shield Logo -->
+            <div class="hero-parallax-shield" id="parallaxShield">
+                <div class="shield-glass">
+                    <img src="assets/fce-logo.jpg" alt="Escudo Transparente FCE UNPSJB" class="fce-shield-img">
+                    <div class="shield-tag">FCE · UNPSJB</div>
+                </div>
+            </div>
+
+            <!-- Main Hero Announcement & Text -->
+            <div class="hero-text-card">
+                <div class="hero-badge">
+                    <span class="badge-pulse"></span> Organiza Facultad de Ciencias Económicas - UNPSJB
+                </div>
+                <h1 class="hero-title">
+                    Travesía y Bajada de Kayak<br>
+                    <span class="gradient-text">Parque Nacional Los Alerces</span>
+                </h1>
+                <p class="hero-subtitle">
+                    20 kilómetros navegando las prístinas aguas del Lago Verde, el místico Río Arrayanes y Bahía Rosales en la Patagonia Argentina. La mítica bajada universitaria recuperada con pasión ambiental y deportiva.
+                </p>
+
+                <!-- Floating Next Edition Banner -->
+                <div class="next-edition-card" id="proxima-edicion">
+                    <div class="date-icon">
+                        <i class="fa-solid fa-calendar-days"></i>
+                    </div>
+                    <div class="date-details">
+                        <span class="date-label">PRÓXIMA EDICIÓN CONFIRMADA</span>
+                        <strong class="date-highlight">12 y 13 de Diciembre de 2026</strong>
+                        <span class="date-location"><i class="fa-solid fa-location-dot"></i> Parque Nacional Los Alerces · Esquel, Chubut</span>
+                    </div>
+                    <button class="btn-register" id="openInscripcionBtn">
+                        Inscribirse / Más Info <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <div class="hero-quick-stats">
+                    <div class="stat-item">
+                        <span class="stat-num">20 km</span>
+                        <span class="stat-desc">Recorrido Náutico</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-num">42+</span>
+                        <span class="stat-desc">Remeros Edición 2026</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-num">1997-2026</span>
+                        <span class="stat-desc">Tradición Reactivada</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <a href="#resumen-travesia" class="scroll-down-indicator" id="scrollDownBtn">
+            <span>Descubrir la Travesía</span>
+            <i class="fa-solid fa-chevron-down"></i>
+        </a>
+    </section>
+
+    <!-- SECTION: HIGHLIGHTS & RESUMEN (Under Hero) -->
+    <section class="section-container" id="resumen-travesia">
+        <div class="container">
+            <div class="section-header text-center">
+                <span class="section-tag">UN EVENTO DEPORTIVO Y COMUNITARIO</span>
+                <h2 class="section-title">Navegar la Patagonia en Estado Puro</h2>
+                <p class="section-lead">
+                    Una experiencia única en el ecosistema protegido de la Comarca del Ande, articulando universidad, turismo sustentable y conservación ambiental.
+                </p>
+            </div>
+
+            <div class="grid-3-col">
+                <div class="feature-card">
+                    <div class="card-icon"><i class="fa-solid fa-route"></i></div>
+                    <h3>Ruta Inigualable</h3>
+                    <p>Inicio en el prístino Lago Verde, atravesando la corriente turquesa del Río Arrayanes hasta desembarcar en el camping agreste de Bahía Rosales (Lago Futalaufquen).</p>
+                </div>
+                <div class="feature-card highlight-card">
+                    <div class="card-icon"><i class="fa-solid fa-rotate-left"></i></div>
+                    <h3>Historia Recuperada</h3>
+                    <p>La bajada histórica realizada en los años 90 (última edición formal en 1997) fue recuperada en abril de 2026 por la Facultad de Ciencias Económicas con un impacto regional histórico.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="card-icon"><i class="fa-solid fa-hands-holding-child"></i></div>
+                    <h3>Clínicas & Seguridad</h3>
+                    <p>Capacitación previa obligatoria en remo y maniobras de autorrescate con el resguardo constante de Prefectura Naval Argentina y el Ejército Argentino.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. LA TRAVESÍA & ARTÍCULOS PERIODÍSTICOS (TAB 2) -->
+    <section class="tab-content" data-section="historia">
+        <div class="container section-padding">
+            <div class="section-header">
+                <span class="section-tag">HISTORIA E IMPACTO REGIONAL</span>
+                <h2 class="section-title">La Bajada del Río Arrayanes: De 1997 a la 7ª Edición 2026</h2>
+                <p class="section-lead">
+                    Prensa, testimonios y la memoria viva de una travesía que une la academia con la naturaleza salvaje de Los Alerces.
+                </p>
+            </div>
+
+            <div class="story-grid">
+                <div class="story-content">
+                    <div class="badge-tag"><i class="fa-solid fa-newspaper"></i> Reportaje Especial</div>
+                    <h3>"42 remeros devolvieron la vida a las aguas navegables de la UNPSJB"</h3>
+                    <p class="story-paragraph">
+                        En abril de 2026, las aguas turquesas del Río Arrayanes volvieron a teñirse con el colorido de decenas de kayaks universitarios. La **Facultad de Ciencias Económicas (UNPSJB) Sede Esquel** logró reactivar la emblemática Travesía de Kayak que no se llevaba a cabo formalmente desde 1997.
+                    </p>
+                    <p class="story-paragraph">
+                        Durante una intensa jornada de 20 kilómetros, participantes de diversas edades y niveles recorrieron el ecosistema protegido de alerzales milenarios, contando con el acompañamiento técnico de Chubut Deportes, la Municipalidad de Esquel y las fuerzas de seguridad nacional.
+                    </p>
+                    <blockquote class="press-quote">
+                        <i class="fa-solid fa-quote-left quote-icon"></i>
+                        <p>"Esta bajada no es sólo un evento deportivo; es la reafirmación del compromiso universitario con la salud, la integración social y la preservación ambiental de nuestros Parques Nacionales."</p>
+                        <cite>— Extraído del suplemento periodístico regional SuperDépor / El Chubut</cite>
+                    </blockquote>
+                </div>
+                <div class="story-media">
+                    <img src="assets/gallery-1.jpg" alt="Kayaks navegando Río Arrayanes" class="rounded-img shadow-lg">
+                    <div class="story-stat-box">
+                        <i class="fa-solid fa-tree"></i>
+                        <div>
+                            <strong>Parque Nacional Los Alerces</strong>
+                            <span>Sitio Patrimonio Mundial UNESCO</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparison / Inspiration from world kayaking events -->
+            <div class="comparison-box">
+                <h3><i class="fa-solid fa-compass"></i> Estándar de Travesías de Clase Mundial</h3>
+                <p>
+                    Al igual que la mítica *Travesía del Sella* en Asturias o los descensos patagónicos en el Río Baker, la **Bajada de Kayak FCE UNPSJB** combina la exigencia técnica de remo en ríos de aguas transparentes con el espíritu de camaradería universitaria, clínicas preparatorias y campamentos comunitarios.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. GALERÍA DE FOTOS (TAB 3) -->
+    <section class="tab-content" data-section="galeria">
+        <div class="container section-padding">
+            <div class="section-header text-center">
+                <span class="section-tag">REGISTRO FOTOGRÁFICO</span>
+                <h2 class="section-title">Galería de la Travesía Los Alerces</h2>
+                <p class="section-lead">
+                    Revive los momentos más deslumbrantes en el Lago Verde, Río Arrayanes y Bahía Rosales.
+                </p>
+            </div>
+
+            <!-- View Controller Bar -->
+            <div class="gallery-controls">
+                <div class="view-switchers">
+                    <button class="view-btn active" id="btnViewMasonry"><i class="fa-solid fa-border-all"></i> Grilla Mosaico</button>
+                    <button class="view-btn" id="btnViewCarousel"><i class="fa-solid fa-sliders"></i> Modo Carrusel</button>
+                </div>
+                <a href="https://drive.google.com/drive/folders/1t2gUt2ecHjFj2KRR2Z2_L6Mwt_5ZMMUS" target="_blank" rel="noopener noreferrer" class="drive-folder-btn">
+                    <i class="fa-brands fa-google-drive"></i> Ver Álbum Completo en Google Drive <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>
+            </div>
+
+            <!-- Masonry Grid View -->
+            <div class="gallery-grid active-view" id="galleryGrid">
+                <div class="gallery-item" data-src="assets/gallery-1.jpg" data-caption="Remando por las aguas turquesas del Río Arrayanes entre bosquecillos milenarios">
+                    <img src="assets/gallery-1.jpg" alt="Río Arrayanes Kayak">
+                    <div class="gallery-overlay">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i>
+                        <span>Río Arrayanes</span>
+                    </div>
+                </div>
+
+                <div class="gallery-item" data-src="assets/gallery-2.jpg" data-caption="Reflejos cristalinos en Lago Verde al inicio de la jornada">
+                    <img src="assets/gallery-2.jpg" alt="Lago Verde Kayak">
+                    <div class="gallery-overlay">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i>
+                        <span>Lago Verde</span>
+                    </div>
+                </div>
+
+                <div class="gallery-item" data-src="assets/gallery-3.jpg" data-caption="Llegada y desembarque victorioso en la playa de Bahía Rosales">
+                    <img src="assets/gallery-3.jpg" alt="Bahía Rosales Desembarque">
+                    <div class="gallery-overlay">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i>
+                        <span>Bahía Rosales</span>
+                    </div>
+                </div>
+
+                <div class="gallery-item" data-src="assets/gallery-4.jpg" data-caption="Vista aérea de la flotilla de 42 kayaks avanzando en formación">
+                    <img src="assets/gallery-4.jpg" alt="Flotilla Kayaks Los Alerces">
+                    <div class="gallery-overlay">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i>
+                        <span>Vista Aérea Flotilla</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carousel View Container -->
+            <div class="gallery-carousel-wrapper" id="galleryCarousel">
+                <div class="carousel-track-container">
+                    <div class="carousel-track">
+                        <div class="carousel-slide active">
+                            <img src="assets/gallery-1.jpg" alt="Río Arrayanes">
+                            <div class="slide-caption">Navegación turquesa en el Río Arrayanes</div>
+                        </div>
+                        <div class="carousel-slide">
+                            <img src="assets/gallery-2.jpg" alt="Lago Verde">
+                            <div class="slide-caption">Amanecer en Lago Verde</div>
+                        </div>
+                        <div class="carousel-slide">
+                            <img src="assets/gallery-3.jpg" alt="Bahía Rosales">
+                            <div class="slide-caption">Desembarque festivo en Bahía Rosales</div>
+                        </div>
+                        <div class="carousel-slide">
+                            <img src="assets/gallery-4.jpg" alt="Flotilla">
+                            <div class="slide-caption">42 kayaks en formación sobre las aguas cristalinas</div>
+                        </div>
+                    </div>
+                </div>
+                <button class="carousel-nav prev" id="prevSlideBtn"><i class="fa-solid fa-chevron-left"></i></button>
+                <button class="carousel-nav next" id="nextSlideBtn"><i class="fa-solid fa-chevron-right"></i></button>
+                <div class="carousel-dots" id="carouselDots"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. ORGANIZADORES (TAB 4) -->
+    <section class="tab-content" data-section="organizadores">
+        <div class="container section-padding">
+            <div class="section-header text-center">
+                <span class="section-tag">EQUIPO ORGANIZADOR</span>
+                <h2 class="section-title">Liderazgo e Impulso Institucional</h2>
+                <p class="section-lead">
+                    Conoce a las personas y comisiones detrás del retorno de esta histórica travesía patagónica.
+                </p>
+            </div>
+
+            <!-- Key Organizer Feature Card: Adrián Cardacci -->
+            <div class="organizer-main-card">
+                <div class="organizer-photo-wrapper">
+                    <img src="assets/cardacci.jpg" alt="Cr. Adrián Cardacci" class="organizer-photo">
+                    <div class="organizer-badge">Coordinación General</div>
+                </div>
+                <div class="organizer-info">
+                    <span class="organizer-role">Delegado Académico · FCE UNPSJB Sede Esquel</span>
+                    <h3 class="organizer-name">Cr. / Lic. Adrián Cardacci</h3>
+                    <p class="organizer-bio">
+                        Lideró el proyecto de recuperación institucional de la Bajada de Kayak en el Parque Nacional Los Alerces en abril de 2026. Gracias a su visión estratégica y de articulación con organismos locales y provinciales, logró rearticular este suceso universitario pausado desde 1997, garantizando capacitación, clínicas previas y estándares de seguridad náutica.
+                    </p>
+                    <div class="organizer-quotes">
+                        <i class="fa-solid fa-quote-left"></i>
+                        <em>"Lograr que 42 remeros universitarios y vecinos volvieran a navegar el Río Arrayanes de forma cuidada y organizada demuestra el potencial transformador de la universidad pública en nuestro territorio."</em>
+                    </div>
+                    <div class="organizer-contacts">
+                        <span class="contact-pill"><i class="fa-solid fa-building-columns"></i> Facultad de Ciencias Económicas UNPSJB</span>
+                        <span class="contact-pill"><i class="fa-solid fa-envelope"></i> esquel@economicasunp.edu.ar</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Organizing Entities Grid -->
+            <div class="org-teams-grid">
+                <div class="team-card">
+                    <div class="team-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                    <h4>Comisión de Deportes FCE</h4>
+                    <p>Gestión de inscripciones, logística de transportes, clínicas de remo preparatorias y bienestar estudiantil.</p>
+                </div>
+                <div class="team-card">
+                    <div class="team-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h4>Comité de Seguridad Náutica</h4>
+                    <p>Coordinación operativa en el agua junto a Prefectura Naval Argentina y rescate del Ejército Argentino.</p>
+                </div>
+                <div class="team-card">
+                    <div class="team-icon"><i class="fa-solid fa-mountain-sun"></i></div>
+                    <h4>Intendencia PN Los Alerces</h4>
+                    <p>Protocolos de conservación ambiental, monitoreo de cuencas e impacto cero en la flora y fauna nativa.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. AUSPICIANTES & RESEÑAS (TAB 5 & OVERVIEW) -->
+    <section class="tab-content" data-section="resenas">
+        <div class="container section-padding">
+            <div class="section-header text-center">
+                <span class="section-tag">APOYO & TESTIMONIOS</span>
+                <h2 class="section-title">Reseñas y Alianzas Estratégicas</h2>
+                <p class="section-lead">
+                    Voces de participantes, medios periodísticos e instituciones que hacen posible este evento.
+                </p>
+            </div>
+
+            <!-- Reseñas Grid / Reviews Showcase -->
+            <div class="reviews-grid">
+                <div class="review-card">
+                    <div class="review-stars">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="review-text">"La organización fue impecable desde la clínica en el Gimnasio Municipal hasta el desembarque en Bahía Rosales. Navegar el Río Arrayanes sin motores es un regalo para el alma."</p>
+                    <div class="reviewer-meta">
+                        <strong>Martín González</strong>
+                        <span>Participante 7ª Edición · Esquel</span>
+                    </div>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-stars">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="review-text">"Desde la Facultad de Ciencias Económicas celebramos recuperar este hito. Integra la academia, la salud, la economía regional y el turismo sustentable en Los Alerces."</p>
+                    <div class="reviewer-meta">
+                        <strong>Equipo Académico FCE</strong>
+                        <span>UNPSJB Sede Esquel</span>
+                    </div>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-stars">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="review-text">"El acompañamiento de seguridad con Prefectura y Ejército dio máxima tranquilidad a los 42 remeros. Una travesía modelo para emular en toda la Patagonia."</p>
+                    <div class="reviewer-meta">
+                        <strong>Chubut Deportes</strong>
+                        <span>Prensa Oficial</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action to Add Review or View Document -->
+            <div class="document-link-card">
+                <div class="doc-icon"><i class="fa-solid fa-file-word"></i></div>
+                <div class="doc-details">
+                    <h4>Documento Oficial de Reseñas y Auspiciantes</h4>
+                    <p>Consulta las reseñas completas y la memoria de auspicios en el documento de trabajo interactivo.</p>
+                </div>
+                <a href="https://docs.google.com/document/d/19LmdzNiZezFDLwy8k-WqJpZpF3EknkVx/edit" target="_blank" rel="noopener noreferrer" class="btn-doc-link">
+                    <i class="fa-solid fa-up-right-from-square"></i> Abrir Google Doc Reseñas
+                </a>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- SECTION: SPONSORS (UBICADO ABAJO PERO NO EN EL FOOTER) -->
+    <section class="sponsors-section" id="sponsors-strip">
+        <div class="container">
+            <div class="sponsors-header">
+                <span class="sponsors-subtitle">INSTITUCIONES Y AUSPICIANTES OFICIALES</span>
+                <h3 class="sponsors-title">Unidos por el Deporte y la Patagonia</h3>
+            </div>
+
+            <div class="sponsors-logos-grid">
+                <div class="sponsor-item" title="Facultad de Ciencias Económicas UNPSJB">
+                    <div class="sponsor-logo-box">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <span>FCE UNPSJB</span>
+                    </div>
+                </div>
+                <div class="sponsor-item" title="Parques Nacionales Argentina">
+                    <div class="sponsor-logo-box">
+                        <i class="fa-solid fa-tree"></i>
+                        <span>Parques Nacionales</span>
+                    </div>
+                </div>
+                <div class="sponsor-item" title="Chubut Deportes">
+                    <div class="sponsor-logo-box">
+                        <i class="fa-solid fa-person-swimming"></i>
+                        <span>Chubut Deportes</span>
+                    </div>
+                </div>
+                <div class="sponsor-item" title="Municipalidad de Esquel">
+                    <div class="sponsor-logo-box">
+                        <i class="fa-solid fa-city"></i>
+                        <span>Muni Esquel</span>
+                    </div>
+                </div>
+                <div class="sponsor-item" title="Prefectura Naval Argentina">
+                    <div class="sponsor-logo-box">
+                        <i class="fa-solid fa-anchor"></i>
+                        <span>Prefectura Naval</span>
+                    </div>
+                </div>
+                <div class="sponsor-item" title="Ejército Argentino">
+                    <div class="sponsor-logo-box">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Ejército Argentino</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center margin-top-md">
+                <button class="btn-secondary" id="openReviewsModalBtn">
+                    <i class="fa-solid fa-comments"></i> Ventana de Reseñas y Auspiciantes
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <img src="assets/fce-logo.jpg" alt="FCE UNPSJB Logo" class="footer-logo">
+                <div>
+                    <h4>Facultad de Ciencias Económicas</h4>
+                    <p>Universidad Nacional de la Patagonia San Juan Bosco · Sede Esquel</p>
+                    <p class="footer-copy">&copy; 2026 Travesía y Bajada de Kayak Parque Nacional Los Alerces. Todos los derechos reservados.</p>
+                </div>
+            </div>
+            <div class="footer-links">
+                <a href="https://drive.google.com/drive/folders/1t2gUt2ecHjFj2KRR2Z2_L6Mwt_5ZMMUS" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-google-drive"></i> Fotos Google Drive</a>
+                <a href="https://docs.google.com/document/d/19LmdzNiZezFDLwy8k-WqJpZpF3EknkVx/edit" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-file-lines"></i> Google Doc Reseñas</a>
+                <a href="https://youtube.com/shorts/t5qNJe3UqBc" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-youtube"></i> Video YouTube</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL WINDOW FOR SPONSOR REVIEWS & INSCRIPCIÓN -->
+    <div class="modal-backdrop" id="reviewsModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-award"></i> Ventana Dedicada: Reseñas & Auspiciantes</h3>
+                <button class="modal-close-btn" id="closeReviewsModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-intro">
+                    Reseñas institucionales y reconocimientos a las entidades sponsor del evento en Parque Nacional Los Alerces:
+                </p>
+
+                <div class="modal-reviews-list">
+                    <div class="modal-review-item">
+                        <div class="m-sponsor-header">
+                            <span class="m-sponsor-name"><i class="fa-solid fa-building-columns"></i> FCE UNPSJB - Sede Esquel</span>
+                            <span class="m-badge">Organizador Principal</span>
+                        </div>
+                        <p class="m-quote">"Impulsar la bajada en kayak fortalece nuestro vínculo con el territorio, el turismo activo de la Comarca del Ande y fomenta la vida saludable universitaria."</p>
+                    </div>
+
+                    <div class="modal-review-item">
+                        <div class="m-sponsor-header">
+                            <span class="m-sponsor-name"><i class="fa-solid fa-tree"></i> Intendencia Parque Nacional Los Alerces</span>
+                            <span class="m-badge">Co-Organizador Sustentable</span>
+                        </div>
+                        <p class="m-quote">"Una muestra ejemplar de uso público responsable en nuestros ríos y lagos. Cuidado absoluto de las especies nativas y vertientes de agua pura."</p>
+                    </div>
+
+                    <div class="modal-review-item">
+                        <div class="m-sponsor-header">
+                            <span class="m-sponsor-name"><i class="fa-solid fa-anchor"></i> Prefectura Naval Argentina</span>
+                            <span class="m-badge">Seguridad Náutica</span>
+                        </div>
+                        <p class="m-quote">"Despliegue de embarcaciones de apoyo y comunicación permanente a lo largo de los 20 km de travesía entre Lago Verde y Lago Futalaufquen."</p>
+                    </div>
+                </div>
+
+                <div class="modal-actions-bar">
+                    <a href="https://docs.google.com/document/d/19LmdzNiZezFDLwy8k-WqJpZpF3EknkVx/edit" target="_blank" rel="noopener noreferrer" class="btn-primary flex-1">
+                        <i class="fa-solid fa-file-signature"></i> Ver Reseñas en Google Docs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIGHTBOX MODAL FOR GALLERY PHOTOS -->
+    <div class="lightbox-modal" id="lightboxModal">
+        <button class="lightbox-close" id="closeLightboxBtn">&times;</button>
+        <div class="lightbox-content">
+            <img src="" alt="Lightbox View" id="lightboxImage">
+            <div class="lightbox-caption" id="lightboxCaption"></div>
+        </div>
+    </div>
+
+    <!-- JS script -->
+    <script src="app.js"></script>
+</body>
+</html>
