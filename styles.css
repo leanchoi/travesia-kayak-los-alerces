@@ -892,22 +892,77 @@ em { font-style: italic; }
    recuadro, su max-height:100% pasa a resolverse contra una altura que
    depende de él mismo, el navegador lo ignora y cada placa termina midiendo
    distinto. Fuera de flujo, manda el aspect-ratio y todas quedan parejas. */
+.cover__header-block {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+.cover__shield {
+  margin: 0;
+  flex-shrink: 0;
+  width: clamp(100px, 12vw, 140px);
+}
+.cover__shield-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.08));
+  opacity: 0.88;
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.cover__shield-img:hover {
+  opacity: 1;
+  transform: scale(1.04);
+}
+@media (max-width: 640px) {
+  .cover__header-block {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .75rem;
+  }
+  .cover__shield {
+    width: 90px;
+  }
+}
+
 .wall__tile {
-  --pad: clamp(12px, 1.5vw, 18px);
+  --pad: clamp(10px, 1.2vw, 16px);
   position: relative;
   aspect-ratio: 5 / 3;
-  background: #FCFBF7;
-  border: 1px solid var(--rule);
-  border-radius: 2px;
-  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+  background: transparent;
+  border: 1px solid var(--rule-soft);
+  border-radius: 3px;
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease), background-color var(--dur) var(--ease);
 }
-.wall__tile:hover { border-color: var(--lake); transform: translateY(-2px); }
+.wall__tile:hover {
+  border-color: var(--lake);
+  background: color-mix(in srgb, var(--lake) 5%, transparent);
+  transform: translateY(-2px);
+}
 .wall__tile img {
   position: absolute; inset: 0; margin: auto;
   width: auto; height: auto;
   max-width: calc(100% - var(--pad) * 2);
   max-height: calc(100% - var(--pad) * 2);
   object-fit: contain;
+  /* Monocromo fino negro para todos los logos de auspiciantes en el home */
+  filter: grayscale(100%) brightness(0) opacity(0.8);
+  transition: filter var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
+.wall__tile:hover img {
+  filter: grayscale(100%) brightness(0) opacity(1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cover__shield-img {
+    filter: invert(1) drop-shadow(0 4px 14px rgba(255, 255, 255, 0.12));
+  }
+  :root:not([data-theme="light"]) .wall__tile img {
+    filter: grayscale(100%) brightness(0) invert(1) opacity(0.8);
+  }
+  :root:not([data-theme="light"]) .wall__tile:hover img {
+    filter: grayscale(100%) brightness(0) invert(1) opacity(1);
+  }
 }
 
 .patrons__cta { text-align: center; margin-top: clamp(40px, 5vw, 64px); }
