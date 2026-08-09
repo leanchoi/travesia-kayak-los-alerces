@@ -476,9 +476,13 @@ em { font-style: italic; }
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-/* Sin JS el trazado se ve entero desde el arranque; con JS arranca oculto y
-   se dibuja al entrar en pantalla. */
-@keyframes drawRoute {
+/* Con JS el trazado arranca oculto y se dibuja animado en un bucle de 6 segundos. */
+.js .rm-route {
+  stroke-dasharray: var(--len, 1400);
+  stroke-dashoffset: var(--len, 1400);
+}
+
+@keyframes drawRouteLoop {
   0% {
     stroke-dashoffset: var(--len, 1400);
   }
@@ -494,7 +498,7 @@ em { font-style: italic; }
 }
 
 .js .routemap.is-drawn .rm-route {
-  animation: drawRoute 6s cubic-bezier(.35, 0, .12, 1) infinite;
+  animation: drawRouteLoop 6s cubic-bezier(.35, 0, .12, 1) infinite;
 }
 
 .rm-node circle { fill: var(--paper); stroke: var(--ember); stroke-width: 2; }
@@ -506,16 +510,34 @@ em { font-style: italic; }
 .rm-node--end text { fill: var(--paper); }
 
 .js .rm-nodes .rm-node { opacity: 0; transform-box: fill-box; transform-origin: center; }
-.js .routemap.is-drawn .rm-node { animation: nodePulse 6s var(--ease) infinite; }
-.js .routemap.is-drawn .rm-node:nth-child(1) { animation-delay: .35s; }
-.js .routemap.is-drawn .rm-node:nth-child(2) { animation-delay: .85s; }
-.js .routemap.is-drawn .rm-node:nth-child(3) { animation-delay: 1.4s; }
-.js .routemap.is-drawn .rm-node:nth-child(4) { animation-delay: 2.0s; }
+.js .routemap.is-drawn .rm-node:nth-child(1) { animation: nodePop1 6s var(--ease) infinite; }
+.js .routemap.is-drawn .rm-node:nth-child(2) { animation: nodePop2 6s var(--ease) infinite; }
+.js .routemap.is-drawn .rm-node:nth-child(3) { animation: nodePop3 6s var(--ease) infinite; }
+.js .routemap.is-drawn .rm-node:nth-child(4) { animation: nodePop4 6s var(--ease) infinite; }
 
-@keyframes nodePulse {
-  0%, 8% { opacity: 0; transform: scale(.5); }
-  18%, 88% { opacity: 1; transform: scale(1); }
-  96%, 100% { opacity: 0; transform: scale(.5); }
+/* Los hitos van apareciendo justo en el instante preciso en que la línea roja del trazado los alcanza */
+@keyframes nodePop1 {
+  0%, 1% { opacity: 0; transform: scale(.4); }
+  5%, 88% { opacity: 1; transform: scale(1); }
+  96%, 100% { opacity: 0; transform: scale(.4); }
+}
+
+@keyframes nodePop2 {
+  0%, 7% { opacity: 0; transform: scale(.4); }
+  13%, 88% { opacity: 1; transform: scale(1); }
+  96%, 100% { opacity: 0; transform: scale(.4); }
+}
+
+@keyframes nodePop3 {
+  0%, 22% { opacity: 0; transform: scale(.4); }
+  28%, 88% { opacity: 1; transform: scale(1); }
+  96%, 100% { opacity: 0; transform: scale(.4); }
+}
+
+@keyframes nodePop4 {
+  0%, 36% { opacity: 0; transform: scale(.4); }
+  42%, 88% { opacity: 1; transform: scale(1); }
+  96%, 100% { opacity: 0; transform: scale(.4); }
 }
 
 /* Resaltado cruzado con la lista de tramos */
