@@ -478,13 +478,23 @@ em { font-style: italic; }
 }
 /* Sin JS el trazado se ve entero desde el arranque; con JS arranca oculto y
    se dibuja al entrar en pantalla. */
-.js .rm-route {
-  stroke-dasharray: var(--len, 1400);
-  stroke-dashoffset: var(--len, 1400);
+@keyframes drawRoute {
+  0% {
+    stroke-dashoffset: var(--len, 1400);
+  }
+  38% {
+    stroke-dashoffset: 0;
+  }
+  88% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: var(--len, 1400);
+  }
 }
+
 .js .routemap.is-drawn .rm-route {
-  stroke-dashoffset: 0;
-  transition: stroke-dashoffset 2.4s cubic-bezier(.35, 0, .12, 1);
+  animation: drawRoute 6s cubic-bezier(.35, 0, .12, 1) infinite;
 }
 
 .rm-node circle { fill: var(--paper); stroke: var(--ember); stroke-width: 2; }
@@ -496,12 +506,17 @@ em { font-style: italic; }
 .rm-node--end text { fill: var(--paper); }
 
 .js .rm-nodes .rm-node { opacity: 0; transform-box: fill-box; transform-origin: center; }
-.js .routemap.is-drawn .rm-node { animation: nodeIn .5s var(--ease) forwards; }
+.js .routemap.is-drawn .rm-node { animation: nodePulse 6s var(--ease) infinite; }
 .js .routemap.is-drawn .rm-node:nth-child(1) { animation-delay: .35s; }
 .js .routemap.is-drawn .rm-node:nth-child(2) { animation-delay: .85s; }
-.js .routemap.is-drawn .rm-node:nth-child(3) { animation-delay: 1.7s; }
-.js .routemap.is-drawn .rm-node:nth-child(4) { animation-delay: 2.25s; }
-@keyframes nodeIn { from { opacity: 0; scale: .5; } to { opacity: 1; scale: 1; } }
+.js .routemap.is-drawn .rm-node:nth-child(3) { animation-delay: 1.4s; }
+.js .routemap.is-drawn .rm-node:nth-child(4) { animation-delay: 2.0s; }
+
+@keyframes nodePulse {
+  0%, 8% { opacity: 0; transform: scale(.5); }
+  18%, 88% { opacity: 1; transform: scale(1); }
+  96%, 100% { opacity: 0; transform: scale(.5); }
+}
 
 /* Resaltado cruzado con la lista de tramos */
 .rm-node.is-lit circle { fill: var(--ember); stroke: var(--ember); }
@@ -1039,12 +1054,16 @@ em { font-style: italic; }
 }
 .sub-cover__emblem {
   margin: 0;
-  background: #FCFBF7;
-  border: 1px solid var(--rule);
-  border-radius: 2px;
-  padding: 18px;
+  background: transparent;
+  border: none;
+  padding: 0;
 }
-.sub-cover__emblem img { width: 100%; height: auto; }
+.sub-cover__emblem img {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.08));
+}
 .sub-cover__title {
   font-size: clamp(2.4rem, 6vw, 4.2rem);
   font-weight: 400; letter-spacing: -.03em; line-height: 1;
