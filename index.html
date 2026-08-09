@@ -351,19 +351,31 @@
   <div class="shell">
     <header class="head">
       <p class="head__num">04</p>
-      <h2 class="head__title">Registro de la travesía</h2>
-      <p class="head__lede">Material de la edición de abril de 2026. El álbum completo está en Drive.</p>
+      <h2 class="head__title">Videoteca y Fototeca de la Travesía</h2>
+      <p class="head__lede">Registros audiovisuales de la edición 2026. Reviví el descenso por el Río Arrayanes, la largada en Lago Verde y la llegada a Bahía Rosales.</p>
     </header>
 
-    <div class="film" id="film" data-video="t5qNJe3UqBc">
-      <button class="film__btn" type="button" aria-label="Reproducir el video de la travesía">
-        <span class="film__ring"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg></span>
-        <span class="film__label">Ver el video de la bajada<em>YouTube · se carga al reproducir</em></span>
-      </button>
+    <!-- Selector de Videos / Videoteca -->
+    <div class="video-hub">
+      <div class="video-hub__tabs">
+        <button class="video-tab-btn active" type="button" data-video-src="t5qNJe3UqBc">
+          <svg class="ic" aria-hidden="true"><use href="#i-play"/></svg> Cortometraje Oficial (Resumen)
+        </button>
+        <a class="video-tab-btn" href="https://drive.google.com/drive/folders/1t2gUt2ecHjFj2KRR2Z2_L6Mwt_5ZMMUS?usp=sharing" target="_blank" rel="noopener noreferrer">
+          <svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg> Archivo de Videos Crudos en Google Drive
+        </a>
+      </div>
+
+      <div class="film" id="film" data-video="t5qNJe3UqBc">
+        <button class="film__btn" type="button" aria-label="Reproducir el video de la travesía">
+          <span class="film__ring"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg></span>
+          <span class="film__label">Ver el cortometraje de la bajada<em>Reproducción directa desde la nube sin ocupar espacio del servidor</em></span>
+        </button>
+      </div>
     </div>
 
     <div class="plates" id="plates">
-      <figure class="plate" data-full="assets/gallery-1.jpg" data-caption="Navegación sobre el Río Arrayanes, entre bosque nativo.">
+      <figure class="plate" data-full="assets/gallery-1.jpg" data-caption="Navegación sobre el Río Arrayanes, entre bosque nativo de alerces.">
         <img src="assets/gallery-1.jpg" alt="Kayaks navegando el Río Arrayanes" loading="lazy" decoding="async">
         <figcaption><b>Río Arrayanes</b><span>Tramo de corriente</span></figcaption>
       </figure>
@@ -371,19 +383,22 @@
         <img src="assets/gallery-2.jpg" alt="Amanecer sobre el Lago Verde" loading="lazy" decoding="async">
         <figcaption><b>Lago Verde</b><span>Largada</span></figcaption>
       </figure>
-      <figure class="plate" data-full="assets/gallery-3.jpg" data-caption="Desembarque en la playa de Bahía Rosales.">
+      <figure class="plate" data-full="assets/gallery-3.jpg" data-caption="Desembarque y descanso en la playa de Bahía Rosales.">
         <img src="assets/gallery-3.jpg" alt="Desembarque en Bahía Rosales" loading="lazy" decoding="async">
         <figcaption><b>Bahía Rosales</b><span>Llegada</span></figcaption>
       </figure>
-      <figure class="plate" data-full="assets/gallery-4.jpg" data-caption="La flotilla completa avanzando en formación.">
+      <figure class="plate" data-full="assets/gallery-4.jpg" data-caption="La flotilla universitaria completa advancing en formación.">
         <img src="assets/gallery-4.jpg" alt="Vista aérea de la flotilla de kayaks" loading="lazy" decoding="async">
         <figcaption><b>Flotilla</b><span>42 embarcaciones</span></figcaption>
       </figure>
     </div>
 
-    <a class="linkrow" href="https://drive.google.com/drive/folders/1t2gUt2ecHjFj2KRR2Z2_L6Mwt_5ZMMUS" target="_blank" rel="noopener noreferrer">
-      <svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg>
-      <span><b>Álbum completo en Google Drive</b><em>Fotografías en alta resolución de la edición 2026</em></span>
+    <a class="linkrow linkrow--highlight" href="https://drive.google.com/drive/folders/1t2gUt2ecHjFj2KRR2Z2_L6Mwt_5ZMMUS?usp=sharing" target="_blank" rel="noopener noreferrer">
+      <svg class="ic ic--lg" aria-hidden="true"><use href="#i-folder"/></svg>
+      <span>
+        <b>Fototeca y Videoteca completa en Google Drive (Acceso Libre)</b>
+        <em>Descargá las fotos originales en alta resolución y los videos sin comprimir de la travesía</em>
+      </span>
       <svg class="ic linkrow__go" aria-hidden="true"><use href="#i-external"/></svg>
     </a>
   </div>
