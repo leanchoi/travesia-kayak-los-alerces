@@ -1157,6 +1157,21 @@ em { font-style: italic; }
 .foot__inst { font-family: var(--serif); font-size: 1.14rem; margin: 0 0 .2rem; }
 .foot__univ { font-size: .88rem; color: var(--ink-2); margin: 0 0 .9rem; max-width: 46ch; }
 .foot__legal { font-size: .76rem; color: var(--ink-3); margin: 0; }
+.foot__collab {
+  display: inline-block;
+  margin-left: 0.45rem;
+  color: var(--ink-2);
+}
+.foot__collab a {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--dur) var(--ease);
+}
+.foot__collab a:hover {
+  color: var(--ember);
+}
 .foot__links { display: flex; flex-direction: column; gap: .55rem; }
 .foot__links a {
   display: inline-flex; align-items: center; gap: .5rem;
