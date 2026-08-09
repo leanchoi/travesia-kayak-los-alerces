@@ -162,61 +162,69 @@
 
     <!-- ══ CARTOGRAFÍA: pieza central, dibujada a mano en SVG ══ -->
     <figure class="chart" id="mapFigure">
-      <svg class="routemap" id="routemap" viewBox="0 0 560 760" role="img"
+      <svg class="routemap" id="routemap" viewBox="0 0 560 670" role="img"
            aria-labelledby="mapTitle mapDesc">
         <title id="mapTitle">Esquema del recorrido de la travesía</title>
-        <desc id="mapDesc">Croquis del trayecto: parte del Lago Verde, desciende por el Río Arrayanes, entra al Lago Futalaufquen y termina en Bahía Rosales, sumando veinte kilómetros.</desc>
+        <desc id="mapDesc">Croquis del trayecto. El Lago Verde recibe al Río Rivadavia desde el norte y al Lago Menéndez desde el oeste; de ahí nace el Río Arrayanes, que baja hacia el sur y desemboca en el Lago Futalaufquen. La travesía termina en Bahía Rosales, sobre la costa este del Futalaufquen.</desc>
 
-        <!-- curvas de nivel -->
+        <!-- curvas de nivel: cordón montañoso al este y al oeste del corredor -->
         <g class="rm-contours" aria-hidden="true">
-          <path d="M-20 250C60 200 120 232 168 196c48-36 92-30 140-70 48-40 130-46 190-14 60 32 96 20 130-6"/>
-          <path d="M-20 300C50 258 118 286 172 250c54-36 96-24 148-66 52-42 128-46 186-12 58 34 84 26 114 4"/>
-          <path d="M-20 356C46 320 112 344 170 306c58-38 100-16 156-58 56-42 122-42 178-8 56 34 76 30 96 12"/>
-          <path d="M-20 640c60-44 104-16 158-52 54-36 92-92 152-92s96 50 152 34c56-16 96-40 138-84"/>
-          <path d="M-20 700c56-40 108-22 164-58 56-36 88-84 148-84s102 44 158 28c56-16 82-34 130-72"/>
+          <path d="M300 84c58 20 108 60 144 114 36 54 62 114 74 178"/>
+          <path d="M348 44c60 24 112 68 150 126 34 52 56 110 62 166"/>
+          <path d="M266 250c48 12 88 40 116 78"/>
+          <path d="M560 430c-32 16-54 42-64 76"/>
+          <path d="M40 150c34 24 58 58 70 100"/>
         </g>
 
         <!-- masas de agua -->
         <g class="rm-water">
-          <path class="rm-lake" d="M96 92c34-26 96-30 132-8 36 22 54 16 76 34 22 18 14 48-14 62-28 14-52 6-84 18-32 12-72 10-96-10s-48-70-14-96Z"/>
-          <path class="rm-river" d="M224 180c10 30-16 44-10 74s26 40 18 70c-8 30-30 38-22 66 8 28 30 32 34 58"/>
-          <path class="rm-lake" d="M118 508c46-34 110-30 156-16 46 14 96 4 128 26 32 22 40 74 18 118-22 44-70 66-124 74-54 8-118 4-160-26s-64-142-18-176Z"/>
+          <!-- Lago Menéndez: entra por el oeste, sigue fuera de cuadro -->
+          <path class="rm-lake" d="M-60 4C-4-14 60-8 104 14c22 11 36 24 38 36 2 12-10 20-30 22-28 3-62-4-92-16C-14 46-58 24-60 4Z"/>
+          <!-- Lago Verde: chico, es el nudo donde confluye todo -->
+          <path class="rm-lake" d="M162 56c4-22 22-36 46-38 24-2 42 8 48 26 6 18-2 38-20 52-14 11-32 18-48 14-18-4-30-34-26-54Z"/>
+          <!-- Río Rivadavia desde el norte, Río Menéndez desde el oeste -->
+          <path class="rm-river rm-river--thin" d="M312-34c-10 26-24 42-38 54-10 8-20 16-26 24"/>
+          <path class="rm-river rm-river--thin" d="M140 52c9 4 16 8 24 10"/>
+          <!-- Río Arrayanes -->
+          <path class="rm-river" d="M220 116c4 24 6 40 0 56-6 18-18 26-24 40"/>
+          <!-- Lago Futalaufquen: brazo norte angosto y cuerpo alargado que
+               se corre al oeste hacia el Krüger, no un óvalo -->
+          <path class="rm-lake" d="M196 212C204 236 206 266 206 296C216 318 242 338 282 350C318 362 358 370 392 374C416 377 434 382 436 394C438 406 428 414 414 420C428 452 440 486 442 524C444 564 434 604 412 638C392 668 364 690 334 700C302 710 266 706 238 690C208 672 186 646 174 612C162 576 160 538 162 498C164 454 160 420 160 392C160 356 164 320 172 288C180 258 186 232 196 212Z"/>
         </g>
 
-        <!-- trazado -->
+        <!-- trazado: Lago Verde → Arrayanes → Futalaufquen → Bahía Rosales -->
         <path class="rm-route" id="rmRoute"
-              d="M158 118c26 22 48 38 66 62 10 30-16 44-10 74s26 40 18 70c-8 30-30 38-22 66 8 28 30 32 34 58 4 26 6 46-4 66-14 28-52 42-86 44"/>
+              d="M200 78c8 12 14 24 20 38 4 24 6 40 0 56-6 18-18 26-24 40 6 30 10 58 12 88 4 30 12 56 26 82 16 30 40 50 70 58 30 8 60 6 86-2 16-6 26-18 34-46"/>
 
         <!-- hitos -->
         <g class="rm-nodes">
-          <g class="rm-node" data-node="1"><circle cx="158" cy="118" r="9"/><text x="158" y="122">1</text></g>
-          <g class="rm-node" data-node="2"><circle cx="224" cy="180" r="9"/><text x="224" y="184">2</text></g>
-          <g class="rm-node" data-node="3"><circle cx="244" cy="448" r="9"/><text x="244" y="452">3</text></g>
-          <g class="rm-node rm-node--end" data-node="4"><circle cx="154" cy="558" r="11"/><text x="154" y="562">4</text></g>
+          <g class="rm-node" data-node="1"><circle cx="200" cy="78" r="9"/><text x="200" y="82">1</text></g>
+          <g class="rm-node" data-node="2"><circle cx="220" cy="116" r="9"/><text x="220" y="120">2</text></g>
+          <g class="rm-node" data-node="3"><circle cx="196" cy="212" r="9"/><text x="196" y="216">3</text></g>
+          <g class="rm-node rm-node--end" data-node="4"><circle cx="424" cy="392" r="11"/><text x="424" y="396">4</text></g>
         </g>
 
         <!-- rótulos -->
         <g class="rm-labels">
-          <text x="140" y="72" class="rm-label rm-label--water">Lago Verde</text>
-          <text x="286" y="300" class="rm-label rm-label--water">Río Arrayanes</text>
-          <text x="330" y="622" class="rm-label rm-label--water">Lago Futalaufquen</text>
-          <text x="60" y="600" class="rm-label rm-label--end">Bahía Rosales</text>
+          <text x="16" y="34" class="rm-label rm-label--soft">Lago Menéndez</text>
+          <text x="322" y="10" class="rm-label rm-label--soft">Río Rivadavia</text>
+          <text x="270" y="70" class="rm-label rm-label--water">Lago Verde</text>
+          <text x="242" y="180" class="rm-label rm-label--water">Río Arrayanes</text>
+          <text x="248" y="544" class="rm-label rm-label--water">Lago Futalaufquen</text>
+          <text x="444" y="396" class="rm-label rm-label--end">Bahía Rosales</text>
         </g>
 
-        <!-- rosa de los vientos + escala -->
-        <g class="rm-compass" transform="translate(486 70)" aria-hidden="true">
+        <!-- rosa de los vientos -->
+        <g class="rm-compass" transform="translate(510 74)" aria-hidden="true">
           <circle r="21" class="rm-compass-ring"/>
           <path d="M0-15 5 3 0-1-5 3Z" class="rm-compass-needle"/>
           <text y="-26" class="rm-compass-n">N</text>
         </g>
-        <g class="rm-scale" transform="translate(60 706)" aria-hidden="true">
-          <path d="M0 0h108"/><path d="M0-5v10M54-5v10M108-5v10"/>
-          <text x="0" y="24">0</text><text x="108" y="24">5 km</text>
-        </g>
       </svg>
 
       <figcaption class="chart__cap">
-        Croquis esquemático del trayecto. No es una carta náutica ni sirve para navegar.
+        Croquis basado en el mapa oficial de Parques Nacionales. Es un esquema:
+        no es una carta náutica ni sirve para navegar.
       </figcaption>
     </figure>
 
@@ -230,31 +238,32 @@
       <p class="head__num">01</p>
       <h2 class="head__title">El recorrido, tramo por tramo</h2>
       <p class="head__lede">
-        Se rema de norte a sur. El agua baja sola: el Arrayanes conecta el Lago Verde
-        con el Futalaufquen y hace buena parte del trabajo.
+        Se rema de norte a sur, siguiendo el agua. El Lago Verde es el nudo: recibe
+        al Río Rivadavia desde el norte y al Menéndez desde el oeste, y de ahí nace
+        el Arrayanes, que baja hasta el Futalaufquen.
       </p>
     </header>
 
     <ol class="stages">
       <li class="stage" data-node="1">
-        <p class="stage__km"><span class="num">0</span> km</p>
+        <p class="stage__no"><span class="num">01</span></p>
         <h3 class="stage__name">Lago Verde</h3>
         <p class="stage__text">Botadura y formación de la flotilla en aguas quietas. Última revisión de chalecos, cabos y bolsas estancas antes de tomar la corriente.</p>
       </li>
       <li class="stage" data-node="2">
-        <p class="stage__km"><span class="num">3</span> km</p>
+        <p class="stage__no"><span class="num">02</span></p>
         <h3 class="stage__name">Boca del Río Arrayanes</h3>
-        <p class="stage__text">La entrada al río, bajo el puente colgante. Cambia el ritmo: aparece corriente y el grupo pasa a navegar en fila, con botes de apoyo abriendo y cerrando.</p>
+        <p class="stage__text">La salida del lago, a la altura de la pasarela que cruza a Puerto Chucao. Cambia el ritmo: aparece corriente y el grupo pasa a navegar en fila, con botes de apoyo abriendo y cerrando.</p>
       </li>
       <li class="stage" data-node="3">
-        <p class="stage__km"><span class="num">14</span> km</p>
+        <p class="stage__no"><span class="num">03</span></p>
         <h3 class="stage__name">Desembocadura · Futalaufquen</h3>
-        <p class="stage__text">El río se abre al lago grande. Se recupera el agua plana y el viento pasa a ser el factor a leer, especialmente sobre el mediodía.</p>
+        <p class="stage__text">El río se abre en el brazo norte del lago grande. Se recupera el agua plana y el viento pasa a ser el factor a leer, especialmente sobre el mediodía.</p>
       </li>
       <li class="stage stage--end" data-node="4">
-        <p class="stage__km"><span class="num">20</span> km</p>
+        <p class="stage__no"><span class="num">04</span></p>
         <h3 class="stage__name">Bahía Rosales</h3>
-        <p class="stage__text">Desembarque en playa y campamento. Cierre de jornada, recuento de embarcaciones y fogón en el camping agreste.</p>
+        <p class="stage__text">Cruce hacia la costa este y desembarque en playa. Cierre de jornada, recuento de embarcaciones y campamento en Bahía Rosales.</p>
       </li>
     </ol>
 
