@@ -11,14 +11,16 @@ La bajada dejó de hacerse en 1997 y volvió al agua en abril de 2026.
 
 ## Qué es
 
-Un sitio estático: tres archivos y una carpeta de recursos. Sin build, sin
-dependencias, sin framework. Se sirve tal cual está.
+El frente es estático y sin build: no hay framework ni paso de compilación.
+Sobre eso corre un servidor Node/Express que agrega inscripciones y panel.
 
 ```
-index.html      Estructura y contenido
-styles.css      Sistema de diseño completo
-app.js          Comportamiento (sin librerías)
-assets/         Tipografías, ícono, portada social y fotos
+index.html          Página principal
+auspiciantes.html   Subpágina de auspiciantes, con la reseña de cada uno
+styles.css          Sistema de diseño, compartido por las dos páginas
+app.js              Comportamiento del frente (sin librerías)
+server.js           API de inscripciones y administración
+assets/             Tipografías, ícono, portada social, fotos y logos
 ```
 
 ## Decisiones de diseño
@@ -49,6 +51,23 @@ reproductor se inserta al hacer clic.
 
 **Íconos SVG propios**, en lugar de las 100 KB de FontAwesome que se usaban para
 una veintena de íconos.
+
+## Auspiciantes
+
+La sección del final de la portada separa dos cosas que no son lo mismo: el
+**apoyo institucional** (universidad, Parques Nacionales, Prefectura, Ejército,
+municipio, Chubut Deportes), que va tipográfico porque no tenemos sus marcas en
+archivo, y los **auspiciantes comerciales**, que sí tienen logo y van en un muro
+de placas de medida uniforme.
+
+`auspiciantes.html` es la subpágina dedicada: cada comercio con su logo, su
+rubro y la reseña que envió. Los logos y las reseñas salen del documento oficial
+de auspicios; están extraídos, recortados, normalizados a WebP y guardados en
+`assets/auspiciantes/`. En total pesan menos de 200 KB.
+
+Las marcas ajenas se muestran siempre sobre fondo claro, también en modo oscuro:
+un logo con tinta negra y fondo transparente desaparecería sobre el fondo
+nocturno del sitio.
 
 ## Accesibilidad
 

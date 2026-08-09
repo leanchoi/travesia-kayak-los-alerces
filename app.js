@@ -122,7 +122,7 @@
     ['.article__body', 0], ['.article__aside', 90],
     ['.film', 0], ['.plate', 55], ['.linkrow', 0],
     ['.person', 0], ['.commissions > div', 55],
-    ['.voice', 70], ['.patrons__list', 0]
+    ['.voice', 70], ['.patrons__inst', 0], ['.wall__tile', 40]
   ];
 
   if (!calm.matches && 'IntersectionObserver' in window) {
@@ -193,9 +193,6 @@
     dlg.addEventListener('close', () => lock(false));
   }
 
-  const patronsDialog = $('#patronsDialog');
-  wireDialog(patronsDialog);
-  $('#openPatrons')?.addEventListener('click', () => { lock(true); patronsDialog.showModal(); });
 
   /* ------------------------------------------------------------------------
      8 · VISOR DE FOTOGRAFÍAS
@@ -266,7 +263,14 @@
   const legal = $('.foot__legal');
   if (legal) {
     const year = new Date().getFullYear();
-    if (year > 2026) legal.textContent = legal.textContent.replace('© 2026', `© 2026–${year}`);
+    if (year > 2026) {
+      // Sólo el nodo de texto: reescribir todo el textContent se llevaría
+      // puesto el botón de acceso al panel que vive dentro de este párrafo.
+      const node = [...legal.childNodes].find(
+        (n) => n.nodeType === Node.TEXT_NODE && n.nodeValue.includes('© 2026')
+      );
+      if (node) node.nodeValue = node.nodeValue.replace('© 2026', `© 2026–${year}`);
+    }
   }
 
 })();

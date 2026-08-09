@@ -178,26 +178,16 @@
           <path d="M-20 680c60-44 104-16 158-52 54-36 92-92 152-92s96 50 152 34"/>
         </g>
 
-        <!-- masas de agua secundarias -->
-        <g class="rm-water rm-water--sub">
-          <!-- Lago Menéndez (noroeste) -->
-          <path class="rm-lake" d="M-20 100c30 0 70-14 104 6 34 20 56 60 48 88-8 28-36 40-70 34s-64-32-82-60z"/>
-          <!-- Río Menéndez -->
-          <path class="rm-river" d="M128 188c18 16 38 12 56 26"/>
-          <!-- Río Rivadavia (desde el norte) -->
-          <path class="rm-river" d="M214-20c2 40-8 80-2 116"/>
-        </g>
-
-        <!-- masas de agua principales -->
+        <!-- masas de agua -->
         <g class="rm-water">
           <!-- Lago Verde: nudo central -->
           <path class="rm-lake" d="M190 90c20-16 46-12 66 2 20 14 34 32 28 52-6 20-28 32-52 34-24 2-44-12-54-30s-8-42 12-58z"/>
           <!-- Río Arrayanes -->
           <path class="rm-river" d="M228 174c-4 28 18 48 14 76s-24 44-18 72c6 22 20 34 20 54"/>
-          <!-- Lago Futalaufquen -->
-          <path class="rm-lake" d="M228 372c18 10 32 30 38 52 10 38 4 82 12 122 8 40 28 78 30 118 2 40-22 76-54 94-32 18-74 14-104-4-30-18-48-52-54-88-8-48 6-96 2-144-4-48-26-92-16-138 8-36 38-66 74-56 36 10 54 24 72 44z"/>
-          <!-- Entrante de Bahía Rosales (costa este) -->
-          <path class="rm-lake" d="M296 460c22 4 44 14 54 32 10 18 4 40-12 50-16 10-38 6-56-8z"/>
+          <!-- Lago Futalaufquen: un solo espejo de agua. Bahía Rosales no es
+               otra laguna, es un entrante de la costa este de este mismo lago,
+               así que va dentro del mismo contorno. -->
+          <path class="rm-lake" d="M228 372c18 10 32 30 38 52 10 14 22 22 38 30 26 14 44 30 44 54 0 22-12 38-30 46-14 8-20 22-18 40 2 26 8 48 8 70 2 40-22 76-54 94-32 18-74 14-104-4-30-18-48-52-54-88-8-48 6-96 2-144-4-48-26-92-16-138 8-36 38-66 74-56 36 10 54 24 72 44z"/>
         </g>
 
         <!-- trazado a remo -->
@@ -214,8 +204,6 @@
 
         <!-- rótulos -->
         <g class="rm-labels">
-          <text x="50" y="150" class="rm-label rm-label--sub">L. Menéndez</text>
-          <text x="226" y="35" class="rm-label rm-label--sub">Río Rivadavia</text>
           <text x="274" y="115" class="rm-label rm-label--water">Lago Verde</text>
           <text x="290" y="270" class="rm-label rm-label--water">Río Arrayanes</text>
           <text x="120" y="540" class="rm-label rm-label--water">Lago Futalaufquen</text>
@@ -494,10 +482,20 @@
 </section>
 
 <!-- ══ 9 · AUSPICIANTES ══ -->
-<section class="patrons" aria-label="Instituciones y auspiciantes">
+<section class="patrons" id="auspiciantes" aria-labelledby="patronsHead">
   <div class="shell">
-    <p class="patrons__title">Instituciones y auspiciantes oficiales</p>
-    <ul class="patrons__list">
+
+    <header class="head head--center">
+      <p class="head__num">06</p>
+      <h2 class="head__title" id="patronsHead">Quienes hacen posible la travesía</h2>
+      <p class="head__lede">
+        Organismos que la sostienen institucionalmente y comercios de Esquel y la
+        Comarca que la acompañan edición tras edición.
+      </p>
+    </header>
+
+    <p class="patrons__label">Apoyo institucional</p>
+    <ul class="patrons__inst">
       <li>Facultad de Ciencias Económicas UNPSJB</li>
       <li>Administración de Parques Nacionales</li>
       <li>Chubut Deportes</li>
@@ -505,10 +503,30 @@
       <li>Prefectura Naval Argentina</li>
       <li>Ejército Argentino</li>
     </ul>
-    <button class="btn btn--ghost" type="button" id="openPatrons">
-      Reseñas institucionales
-      <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg>
-    </button>
+
+    <p class="patrons__label">Auspiciantes</p>
+    <ul class="wall">
+      <li class="wall__tile"><img src="assets/auspiciantes/financity.webp" alt="FinanCity S.A." width="187" height="122" loading="lazy" decoding="async"></li>
+      <li class="wall__tile"><img src="assets/auspiciantes/don-chiquino.webp" alt="Don Chiquino" width="318" height="223" loading="lazy" decoding="async"></li>
+      <li class="wall__tile"><img src="assets/auspiciantes/la-pulperia.webp" alt="La Pulpería de Don Chiquino" width="361" height="213" loading="lazy" decoding="async"></li>
+      <li class="wall__tile"><img src="assets/auspiciantes/esquel-outdoors.webp" alt="Esquel Outdoors" width="493" height="218" loading="lazy" decoding="async"></li>
+      <li class="wall__tile"><img src="assets/auspiciantes/grafica-alfa.webp" alt="Gráfica Alfa" width="444" height="320" loading="lazy" decoding="async"></li>
+      <li class="wall__tile"><img src="assets/auspiciantes/esquel-padel.webp" alt="Esquel Pádel" width="371" height="320" loading="lazy" decoding="async"></li>
+      <li class="wall__tile"><img src="assets/auspiciantes/acrear.webp" alt="ACREAR · Diseño y Producción Gráfica" width="620" height="174" loading="lazy" decoding="async"></li>
+      <li class="wall__tile"><img src="assets/auspiciantes/el-rastro.webp" alt="El Rastro · Mercado de Regalos" width="389" height="154" loading="lazy" decoding="async"></li>
+      <li class="wall__tile"><img src="assets/auspiciantes/sti-servicios.webp" alt="STI Servicios" width="533" height="320" loading="lazy" decoding="async"></li>
+      <li class="wall__tile"><img src="assets/auspiciantes/la-fiambreria.webp" alt="La Fiambrería de Esquel" width="620" height="237" loading="lazy" decoding="async"></li>
+      <li class="wall__tile"><img src="assets/auspiciantes/banco-patagonia.webp" alt="Banco Patagonia" width="277" height="105" loading="lazy" decoding="async"></li>
+      <li class="wall__tile"><img src="assets/auspiciantes/alerce-studio.webp" alt="Alerce Studio · Desarrollo de Software" width="361" height="320" loading="lazy" decoding="async"></li>
+    </ul>
+
+    <div class="patrons__cta">
+      <a class="btn btn--solid btn--lg" href="auspiciantes.html">
+        Conocé a cada auspiciante
+        <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+      </a>
+    </div>
+
   </div>
 </section>
 
@@ -526,6 +544,7 @@
       </p>
     </div>
     <nav class="foot__links" aria-label="Enlaces externos">
+      <a href="auspiciantes.html"><svg class="ic ic--sm" aria-hidden="true"><use href="#i-check"/></svg> Auspiciantes</a>
       <a href="https://drive.google.com/drive/folders/1t2gUt2ecHjFj2KRR2Z2_L6Mwt_5ZMMUS" target="_blank" rel="noopener noreferrer"><svg class="ic ic--sm" aria-hidden="true"><use href="#i-folder"/></svg> Fotografías</a>
       <a href="https://docs.google.com/document/d/19LmdzNiZezFDLwy8k-WqJpZpF3EknkVx/edit" target="_blank" rel="noopener noreferrer"><svg class="ic ic--sm" aria-hidden="true"><use href="#i-doc"/></svg> Reseñas</a>
       <a href="https://youtube.com/shorts/t5qNJe3UqBc" target="_blank" rel="noopener noreferrer"><svg class="ic ic--sm" aria-hidden="true"><use href="#i-play"/></svg> Video</a>
@@ -795,33 +814,7 @@
   <div class="dlg__body" id="readPostBody"></div>
 </dialog>
 
-<!-- ══ DIÁLOGO · RESEÑAS INSTITUCIONALES ══ -->
-<dialog class="dlg" id="patronsDialog" aria-labelledby="patronsTitle">
-  <div class="dlg__head">
-    <h2 id="patronsTitle">Reseñas institucionales</h2>
-    <button class="icon-btn" type="button" data-close aria-label="Cerrar">
-      <svg class="ic" aria-hidden="true"><use href="#i-close"/></svg>
-    </button>
-  </div>
-  <div class="dlg__body">
-    <div class="endorse">
-      <p class="endorse__who">FCE UNPSJB · Sede Esquel<span>Organizador principal</span></p>
-      <p class="endorse__text">Impulsar la bajada en kayak fortalece nuestro vínculo con el territorio, el turismo activo de la Comarca del Ande y la vida saludable universitaria.</p>
-    </div>
-    <div class="endorse">
-      <p class="endorse__who">Intendencia PN Los Alerces<span>Co-organización sustentable</span></p>
-      <p class="endorse__text">Una muestra de uso público responsable en nuestros ríos y lagos, con cuidado de las especies nativas y las vertientes de agua pura.</p>
-    </div>
-    <div class="endorse">
-      <p class="endorse__who">Prefectura Naval Argentina<span>Seguridad náutica</span></p>
-      <p class="endorse__text">Embarcaciones de apoyo y comunicación permanente a lo largo de los 20 km entre el Lago Verde y el Lago Futalaufquen.</p>
-    </div>
-    <a class="btn btn--solid btn--full" href="https://docs.google.com/document/d/19LmdzNiZezFDLwy8k-WqJpZpF3EknkVx/edit" target="_blank" rel="noopener noreferrer">
-      Ver documento completo
-      <svg class="ic" aria-hidden="true"><use href="#i-external"/></svg>
-    </a>
-  </div>
-</dialog>
+<!-- Las reseñas institucionales viven ahora en auspiciantes.html -->
 
 <!-- ══ DIÁLOGO · VISOR DE IMAGEN ══ -->
 <dialog class="viewer" id="viewer" aria-label="Visor de fotografías">
@@ -835,7 +828,7 @@
     <svg class="ic" aria-hidden="true"><use href="#i-next"/></svg>
   </button>
   <figure class="viewer__stage">
-    <img id="viewerImg" src="" alt="">
+    <img id="viewerImg" alt="">
     <figcaption id="viewerCap"></figcaption>
   </figure>
 </dialog>

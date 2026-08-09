@@ -843,23 +843,163 @@ em { font-style: italic; }
 /* --------------------------------------------------------------------------
    14 · AUSPICIANTES
    -------------------------------------------------------------------------- */
-.patrons { padding-block: clamp(48px, 6vw, 76px); border-bottom: 1px solid var(--rule); text-align: center; }
-.patrons__title {
-  font-size: .72rem; font-weight: 600; letter-spacing: .13em;
-  text-transform: uppercase; color: var(--ink-3); margin: 0 0 2rem;
+.patrons {
+  padding-block: var(--band-y);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper-2);
 }
-.patrons__list {
-  list-style: none; margin: 0 0 2.2rem; padding: 0;
-  display: flex; flex-wrap: wrap; justify-content: center;
-  gap: .6rem 0;
+
+/* Encabezado centrado: el numeral pasa arriba en vez de al margen. */
+.head--center { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+.head--center .head__num { border-top: 0; margin: 0 0 1rem; }
+.head--center .head__title,
+.head--center .head__lede { grid-column: 1; }
+.head--center .head__lede { margin-inline: auto; }
+
+.patrons__label {
+  font-size: .7rem; font-weight: 600; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--ink-3);
+  text-align: center; margin: 0 0 1.4rem;
+  padding-top: 1.3rem; border-top: 1px solid var(--rule);
 }
-.patrons__list li {
-  font-family: var(--serif); font-size: clamp(.94rem, 1.5vw, 1.1rem);
-  color: var(--ink-2); padding: 0 clamp(.9rem, 2vw, 1.7rem);
-  border-right: 1px solid var(--rule);
-  line-height: 1.25;
+.patrons__label:not(:first-of-type) { margin-top: clamp(44px, 6vw, 72px); }
+
+.patrons__inst {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem 0;
 }
-.patrons__list li:last-child { border-right: 0; }
+.patrons__inst li {
+  font-family: var(--serif); font-size: clamp(.92rem, 1.4vw, 1.06rem);
+  color: var(--ink-2); padding: 0 clamp(.8rem, 1.8vw, 1.5rem);
+  border-right: 1px solid var(--rule); line-height: 1.3;
+}
+.patrons__inst li:last-child { border-right: 0; }
+
+/* Muro de logos. Las marcas ajenas se muestran sobre fondo claro en los dos
+   modos: un logo con tinta oscura desaparecería sobre el fondo nocturno. */
+.wall {
+  list-style: none; margin: 0; padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
+  gap: clamp(10px, 1.2vw, 16px);
+  /* start, no stretch: con stretch la altura de la fila la fija el logo más
+     alto, el aspect-ratio del recuadro queda ignorado y las placas salen
+     desparejas. Con start manda el 5/3 y todas miden igual. */
+  align-items: start;
+}
+/* El logo va fuera del flujo a propósito: si contribuye a la altura del
+   recuadro, su max-height:100% pasa a resolverse contra una altura que
+   depende de él mismo, el navegador lo ignora y cada placa termina midiendo
+   distinto. Fuera de flujo, manda el aspect-ratio y todas quedan parejas. */
+.wall__tile {
+  --pad: clamp(12px, 1.5vw, 18px);
+  position: relative;
+  aspect-ratio: 5 / 3;
+  background: #FCFBF7;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.wall__tile:hover { border-color: var(--lake); transform: translateY(-2px); }
+.wall__tile img {
+  position: absolute; inset: 0; margin: auto;
+  width: auto; height: auto;
+  max-width: calc(100% - var(--pad) * 2);
+  max-height: calc(100% - var(--pad) * 2);
+  object-fit: contain;
+}
+
+.patrons__cta { text-align: center; margin-top: clamp(40px, 5vw, 64px); }
+
+/* --------------------------------------------------------------------------
+   14b · SUBPÁGINA DE AUSPICIANTES
+   -------------------------------------------------------------------------- */
+.backlink {
+  display: inline-flex; align-items: center; gap: .5em;
+  font-size: .88rem; font-weight: 500; color: var(--ink-2); text-decoration: none;
+}
+.backlink:hover { color: var(--ember); }
+.backlink .ic { transition: transform var(--dur) var(--ease); }
+.backlink:hover .ic { transform: translateX(-3px); }
+
+.sub-cover { padding-block: clamp(44px, 7vh, 88px) clamp(36px, 5vh, 64px); }
+.sub-cover__grid {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: clamp(28px, 5vw, 64px);
+  align-items: center;
+}
+.sub-cover__emblem {
+  margin: 0;
+  background: #FCFBF7;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 18px;
+}
+.sub-cover__emblem img { width: 100%; height: auto; }
+.sub-cover__title {
+  font-size: clamp(2.4rem, 6vw, 4.2rem);
+  font-weight: 400; letter-spacing: -.03em; line-height: 1;
+}
+.sub-cover__lede {
+  margin: clamp(18px, 2.4vw, 26px) 0 0;
+  font-size: clamp(1.02rem, 1.15vw, 1.14rem);
+  color: var(--ink-2); max-width: 58ch; text-wrap: pretty;
+}
+
+.sponsors { list-style: none; margin: 0; padding: 0; }
+.sponsor {
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+  gap: clamp(22px, 4vw, 56px);
+  align-items: start;
+  padding-block: clamp(30px, 4vw, 46px);
+  border-top: 1px solid var(--rule);
+}
+.sponsor:last-child { border-bottom: 1px solid var(--rule); }
+
+.sponsor__logo {
+  --pad: 20px;
+  position: relative;
+  aspect-ratio: 5 / 3;
+  margin: 0;
+  background: #FCFBF7;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+.sponsor__logo img {
+  position: absolute; inset: 0; margin: auto;
+  width: auto; height: auto;
+  max-width: calc(100% - var(--pad) * 2);
+  max-height: calc(100% - var(--pad) * 2);
+  object-fit: contain;
+}
+
+.sponsor__rubro {
+  font-size: .7rem; font-weight: 600; letter-spacing: .11em;
+  text-transform: uppercase; color: var(--ink-3); margin: 0 0 .45rem;
+}
+.sponsor__name { font-size: clamp(1.4rem, 2.4vw, 1.85rem); margin: 0 0 .7rem; }
+.sponsor__tag {
+  font-family: var(--serif); font-size: 1.12rem; line-height: 1.35;
+  color: var(--lake); font-style: italic;
+  margin: 0 0 .8rem; max-width: 46ch;
+}
+.sponsor__text { color: var(--ink-2); font-size: .98rem; max-width: 62ch; margin: 0; }
+.sponsor__meta {
+  margin: .9rem 0 0; padding-top: .75rem;
+  border-top: 1px solid var(--rule-soft);
+  font-family: var(--mono); font-size: .76rem; color: var(--ink-3);
+  display: flex; flex-wrap: wrap; gap: .4rem 1.2rem;
+}
+
+@media (max-width: 720px) {
+  .sub-cover__grid { grid-template-columns: 1fr; }
+  .sub-cover__emblem { max-width: 190px; }
+  .sponsor { grid-template-columns: 1fr; }
+  .sponsor__logo { max-width: 240px; }
+}
 
 /* --------------------------------------------------------------------------
    15 · PIE
@@ -994,8 +1134,9 @@ body.is-locked { overflow: hidden; }
 }
 
 @media (max-width: 560px) {
-  .patrons__list { flex-direction: column; }
-  .patrons__list li { border-right: 0; padding: .3rem 0; }
+  .patrons__inst { flex-direction: column; }
+  .patrons__inst li { border-right: 0; padding: .3rem 0; }
+  .wall { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cover__actions .btn { flex: 1 1 100%; justify-content: center; }
   .lead-para::first-letter { font-size: 3em; }
 }

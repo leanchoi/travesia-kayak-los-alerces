@@ -20,6 +20,22 @@ Ya incluidos en el repositorio:
 
 - `favicon.svg` — ícono de pestaña.
 - `og-cover.png` — portada para redes. Se puede reemplazar por una fotografía real.
+- `emblema-travesia.webp` — emblema de la VII Travesía 2026. Se usa en la
+  portada de `auspiciantes.html`.
+- `fonts/` — Fraunces e Instrument Sans, servidas desde el propio dominio.
+- `auspiciantes/` — logos de los comercios que acompañan la travesía.
+
+## Logos de auspiciantes
+
+Están en `assets/auspiciantes/`, en WebP, recortados al contenido y limitados a
+620 px de ancho. Salieron del documento oficial de auspicios; el conjunto pesa
+menos de 200 KB.
+
+Para **sumar un auspiciante**: guardar el logo con el mismo criterio (fondo
+recortado, ancho máximo 620 px, WebP) y agregar un bloque en dos lugares —
+la placa en el muro de `index.html` y la ficha con reseña en `auspiciantes.html`.
+El recuadro tiene proporción fija 5:3 y centra el logo, así que no hace falta
+que todos los archivos midan lo mismo.
 
 ## Recomendaciones
 
