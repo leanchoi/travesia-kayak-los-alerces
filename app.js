@@ -225,8 +225,8 @@
       lede: 'Última edición formal antes de la pausa. Material de archivo de quienes remaron en los noventa.',
       aged: true,
       shots: [
-        { src: 'assets/anios/1997-01.jpg', cap: 'Largada en el Lago Verde, edición 1997.' },
-        { src: 'assets/anios/1997-02.jpg', cap: 'Descenso del Río Arrayanes con equipamiento de la época.' }
+        { src: 'assets/anios/1997-01.jpg', cap: 'Largada en el Lago Verde, edición 1997 (recreación).' },
+        { src: 'assets/anios/1997-02.jpg', cap: 'Descenso del Río Arrayanes con equipamiento de la época (recreación).' }
       ]
     },
     '2026-04': {
@@ -234,8 +234,8 @@
       lede: 'Cuarenta y dos remeros devolvieron la travesía al agua después de veintinueve años.',
       aged: false,
       shots: [
-        { src: 'assets/anios/2026-04-01.jpg', cap: 'La flotilla completa sobre el Río Arrayanes.' },
-        { src: 'assets/anios/2026-04-02.jpg', cap: 'Llegada y campamento en Bahía Rosales.' }
+        { src: 'assets/anios/2026-04-01.jpg', cap: 'La flotilla completa sobre el Río Arrayanes (recreación).' },
+        { src: 'assets/anios/2026-04-02.jpg', cap: 'Llegada y campamento en Bahía Rosales (recreación).' }
       ]
     }
   };
