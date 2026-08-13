@@ -109,6 +109,7 @@
       <a href="#registro">Registro</a>
       <a href="#organizacion">Organización</a>
       <a href="#voces">Voces</a>
+      <a href="beneficios.html">Beneficios</a>
     </nav>
 
     <button class="btn btn--solid masthead__cta" id="openEnrollHeaderBtn" type="button">
@@ -154,7 +155,7 @@
       <dl class="datasheet">
         <div><dt>Distancia</dt><dd><span class="num">20</span> km</dd></div>
         <div><dt>Jornadas</dt><dd><span class="num">2</span> días</dd></div>
-        <div><dt>Remeros 2026</dt><dd><span class="num">42</span></dd></div>
+        <div><dt>Embarcaciones</dt><dd><span class="num">100</span></dd></div>
         <div><dt>Desde</dt><dd><span class="num">1997</span></dd></div>
       </dl>
 
@@ -267,9 +268,13 @@
 
     <aside class="note">
       <p>
-        <strong>Clínica previa obligatoria.</strong> Antes de la travesía se dictan prácticas
-        de remo y maniobras de autorrescate. Durante los dos días hay acompañamiento en el agua
-        de Prefectura Naval Argentina y del Ejército Argentino.
+        <strong>Práctica de nivelación previa.</strong> Antes de la travesía se dicta una
+        jornada de remo y maniobras de autorrescate, pensada para que todo el grupo llegue
+        con un piso común de técnica y confianza, sin importar de qué nivel venga cada uno.
+      </p>
+      <p>
+        En el agua acompaña el Ejército Argentino, y <strong>Prefectura Naval Argentina
+        se suma el segundo día</strong>, sobre el tramo del Lago Futalaufquen.
       </p>
     </aside>
   </div>
@@ -292,30 +297,51 @@
           en los años noventa.
         </p>
         <p>
-          Fueron cuarenta y dos remeros de edades y niveles distintos: estudiantes, docentes
-          y vecinos de la Comarca del Ande. La jornada de veinte kilómetros atravesó el
-          ecosistema protegido de alerzales milenarios, con apoyo técnico de Chubut Deportes,
-          la Municipalidad de Esquel y las fuerzas de seguridad nacionales.
+          Fueron cuarenta y dos remeros de edades y niveles distintos: estudiantes y docentes
+          de la Facultad, vecinos de Esquel, Trevelin y Cholila, y gente llegada desde
+          El Bolsón, Lago Puelo y la costa chubutense —Puerto Madryn, Trelew, Comodoro
+          Rivadavia—. La bajada nació universitaria y de la Comarca de los Andes, pero se
+          rema con visitantes de toda la provincia y de fuera de ella: es, también, una
+          excusa para venir a conocer el Parque.
+        </p>
+        <p>
+          La jornada de veinte kilómetros atravesó el ecosistema protegido de alerzales
+          milenarios con el apoyo técnico de organismos y entidades nacionales y
+          provinciales: Chubut Deportes, la Municipalidad de Esquel, la Administración de
+          Parques Nacionales y las fuerzas de seguridad.
         </p>
 
         <blockquote class="pull">
           <svg class="ic pull__mark" aria-hidden="true"><use href="#i-quote"/></svg>
-          <p>Esta bajada no es sólo un evento deportivo; es la reafirmación del compromiso universitario con la salud, la integración social y la preservación ambiental de nuestros Parques Nacionales.</p>
+          <p>Esta bajada no es sólo un evento deportivo; es la reafirmación del compromiso universitario con la salud, la economía regional, la integración social y la preservación ambiental de nuestros Parques Nacionales.</p>
           <footer>Suplemento regional <cite>SuperDépor</cite> / <cite>El Chubut</cite></footer>
         </blockquote>
 
         <p>
-          La referencia no es casual. Como la Travesía del Sella en Asturias o los descensos
-          patagónicos del Río Baker, la bajada combina exigencia técnica en aguas transparentes
-          con camaradería universitaria, clínicas preparatorias y campamento comunitario.
+          No es un formato aislado. Existen experiencias internacionales del mismo tipo: el
+          Descenso del Sella, en Asturias (España), y los descensos del Río Baker, en la
+          Patagonia chilena. Como ellas, la bajada combina exigencia técnica en aguas
+          transparentes con campamento y vida en grupo.
         </p>
       </div>
 
       <aside class="article__aside">
         <ol class="timeline">
-          <li><span class="timeline__year num">1997</span><span class="timeline__what">Última edición formal de la bajada histórica.</span></li>
+          <li>
+            <button class="timeline__btn" type="button" data-year="1997">
+              <span class="timeline__year num">1997</span>
+              <span class="timeline__what">Última edición formal de la bajada histórica.</span>
+              <svg class="ic ic--sm timeline__go" aria-hidden="true"><use href="#i-image"/></svg>
+            </button>
+          </li>
           <li class="timeline--gap"><span class="timeline__year">—</span><span class="timeline__what">Veintinueve años sin organización institucional.</span></li>
-          <li><span class="timeline__year num">2026</span><span class="timeline__what">Abril. La FCE reactiva la travesía: 42 remeros.</span></li>
+          <li>
+            <button class="timeline__btn" type="button" data-year="2026-04">
+              <span class="timeline__year num">2026</span>
+              <span class="timeline__what">Abril. La FCE reactiva la travesía: 42 remeros.</span>
+              <svg class="ic ic--sm timeline__go" aria-hidden="true"><use href="#i-image"/></svg>
+            </button>
+          </li>
           <li class="timeline--next"><span class="timeline__year num">2026</span><span class="timeline__what">12 y 13 de diciembre. Próxima edición.</span></li>
         </ol>
         <p class="unesco">
@@ -324,6 +350,22 @@
         </p>
       </aside>
     </div>
+
+    <!-- Prensa nacional. El logo cae a un tratamiento tipográfico si el archivo
+         todavía no está; ver assets/prensa/README. -->
+    <a class="press" href="https://weekend.perfil.com/noticias/aventura/despues-de-30-anos-vuelve-la-tradicional-travesia-en-kayak-a-esquel.phtml"
+       target="_blank" rel="noopener noreferrer">
+      <span class="press__brand">
+        <img src="assets/prensa/weekend.png" alt="Revista Weekend" width="280" height="86" loading="lazy" decoding="async">
+        <b class="press__fallback" aria-hidden="true">Weekend</b>
+      </span>
+      <span class="press__body">
+        <span class="press__kicker">Salió en prensa nacional</span>
+        <span class="press__title">«Después de 30 años, vuelve la tradicional travesía en kayak a Esquel»</span>
+        <span class="press__meta">Revista Weekend · Perfil — Sección Aventura</span>
+      </span>
+      <svg class="ic press__go" aria-hidden="true"><use href="#i-external"/></svg>
+    </a>
   </div>
 </section>
 
@@ -353,17 +395,19 @@
       <p class="head__lede">Registros audiovisuales de la edición 2026. Reviví el descenso por el Río Arrayanes, la largada en Lago Verde y la llegada a Bahía Rosales.</p>
     </header>
 
-    <!-- Selector de Videos / Videoteca -->
-    <div class="video-hub">
-      <div class="film" id="film" data-video="t5qNJe3UqBc">
-        <button class="film__btn" type="button" aria-label="Reproducir el video de la travesía">
+    <!-- El cortometraje es vertical: va en 9:16 y las fotos lo acompañan al
+         costado, en vez de forzarlo dentro de un marco apaisado. -->
+    <div class="reelhub">
+      <div class="film film--portrait" id="film" data-video="t5qNJe3UqBc">
+        <button class="film__btn" type="button" aria-label="Reproducir el cortometraje de la travesía">
           <span class="film__ring"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg></span>
-          <span class="film__label">Ver el cortometraje oficial de la bajada<em>Edición 2026 · Reproducción optimizada</em></span>
+          <span class="film__label">Cortometraje oficial<em>Vertical · se carga al reproducir</em></span>
         </button>
       </div>
-    </div>
 
-    <div class="plates" id="plates">
+      <div class="reelhub__side">
+        <p class="reelhub__label">Fototeca de la edición</p>
+        <div class="plates" id="plates">
       <figure class="plate" data-full="assets/gallery-1.jpg" data-caption="Navegación sobre el Río Arrayanes, entre bosque nativo de alerces.">
         <img src="assets/gallery-1.jpg" alt="Kayaks navegando el Río Arrayanes" loading="lazy" decoding="async">
         <figcaption><b>Río Arrayanes</b><span>Tramo de corriente</span></figcaption>
@@ -378,8 +422,10 @@
       </figure>
       <figure class="plate" data-full="assets/gallery-4.jpg" data-caption="La flotilla universitaria completa advancing en formación.">
         <img src="assets/gallery-4.jpg" alt="Vista aérea de la flotilla de kayaks" loading="lazy" decoding="async">
-        <figcaption><b>Flotilla</b><span>42 embarcaciones</span></figcaption>
+        <figcaption><b>Flotilla</b><span>La bajada completa</span></figcaption>
       </figure>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -398,15 +444,21 @@
       </figure>
       <div class="person__body">
         <p class="person__role">Delegado Académico · FCE UNPSJB Sede Esquel</p>
-        <h3 class="person__name">Cr./Lic. Adrián Cardacci</h3>
+        <h3 class="person__name">Cr. Adrián Cardacci</h3>
         <p>
-          Condujo el proyecto de recuperación institucional de la bajada en el Parque Nacional
-          Los Alerces. La articulación con organismos locales y provinciales permitió volver a
-          organizar, tras veintinueve años, un evento con clínicas previas y estándares
-          definidos de seguridad náutica.
+          Condujo el proyecto de recuperación institucional de la bajada. El trabajo central
+          no fue deportivo sino de articulación: sentar en una misma mesa a la Administración
+          de Parques Nacionales, Prefectura Naval, Pesca Continental de la Provincia, los
+          equipos de búsqueda y rescate, el municipio y los prestadores privados.
+        </p>
+        <p>
+          Ese encuadre es lo que vuelve posible el evento —permisos, protocolos y cobertura en
+          el agua— y a la vez lo que lo sostiene: cada edición deja una relación de trabajo
+          más aceitada entre los organismos, y esa retroalimentación es la que permitió pasar
+          de una idea a un calendario.
         </p>
         <blockquote class="person__quote">
-          <p>Lograr que 42 remeros universitarios y vecinos volvieran a navegar el Río Arrayanes de forma cuidada y organizada demuestra el potencial transformador de la universidad pública en nuestro territorio.</p>
+          <p>Que vuelvan a navegar el Río Arrayanes de forma cuidada y organizada estudiantes, vecinos y también viajeros que eligen venir hasta acá para remar, demuestra el potencial transformador de la universidad pública en nuestro territorio.</p>
         </blockquote>
         <p class="person__contact">
           Facultad de Ciencias Económicas UNPSJB ·
@@ -417,16 +469,24 @@
 
     <dl class="commissions">
       <div>
-        <dt>Comisión de Deportes FCE</dt>
-        <dd>Inscripciones, logística de transporte, clínicas de remo preparatorias y bienestar estudiantil.</dd>
-      </div>
-      <div>
         <dt>Comité de Seguridad Náutica</dt>
-        <dd>Coordinación operativa en el agua junto a Prefectura Naval Argentina y equipos de rescate del Ejército Argentino.</dd>
+        <dd>
+          Es la mesa que coordina el operativo en el agua. La integran
+          <b>Prefectura Naval Argentina</b>, que se suma el segundo día sobre el
+          Futalaufquen; <b>Pesca Continental de la Provincia</b>, que habilita y controla
+          la navegación; los equipos de <b>búsqueda y rescate</b>, y los
+          <b>prestadores privados</b> de kayak, que aportan embarcaciones de apoyo y
+          guías con conocimiento del río.
+        </dd>
       </div>
       <div>
         <dt>Intendencia PN Los Alerces</dt>
-        <dd>Protocolos de conservación, monitoreo de cuencas e impacto cero sobre flora y fauna nativas.</dd>
+        <dd>
+          Fija los protocolos de conservación, el monitoreo de cuencas y el impacto cero
+          sobre flora y fauna nativas. Además dicta una <b>charla informativa y de
+          sensibilización</b> antes de la largada: qué se puede y qué no dentro del área
+          protegida, y por qué.
+        </dd>
       </div>
     </dl>
   </div>
@@ -440,14 +500,34 @@
       <h2 class="head__title">Voces de la edición 2026</h2>
     </header>
 
+    <!-- ATENCIÓN · Chaparro y Rodríguez son personas reales. Los textos de abajo
+         son BORRADORES redactados para enviarles a aprobar, no declaraciones que
+         hayan hecho. Cuando cada uno confirme su cita: reemplazar el texto y
+         borrar la clase voice--draft y el <span class="voice__flag"> del footer. -->
     <div class="voices">
-      <blockquote class="voice">
-        <p>La organización fue impecable, desde la clínica en el Gimnasio Municipal hasta el desembarque en Bahía Rosales. Navegar el Arrayanes sin motores es un regalo.</p>
-        <footer><b>Martín González</b><span>Participante · Esquel</span></footer>
+      <blockquote class="voice voice--draft">
+        <p>El Arrayanes es una de esas aguas que un remero quiere tener en el cuaderno. Que exista una bajada organizada, con seguridad y con la universidad detrás, la pone en el mapa de cualquiera que rema en serio.</p>
+        <footer>
+          <b>Fernando Chaparro</b>
+          <span>Kayakista · referente internacional</span>
+          <span class="voice__flag">Cita en revisión</span>
+        </footer>
       </blockquote>
-      <blockquote class="voice">
-        <p>Celebramos recuperar este hito. Integra la academia, la salud, la economía regional y el turismo sustentable en Los Alerces.</p>
-        <footer><b>Equipo Académico FCE</b><span>UNPSJB Sede Esquel</span></footer>
+      <blockquote class="voice voice--draft">
+        <p>Un área protegida no se cuida cerrándola, se cuida enseñando a visitarla. Una travesía con protocolos claros y charla previa deja más conservación que un cartel.</p>
+        <footer>
+          <b>Ariel Rodríguez</b>
+          <span>Intendente · Parque Nacional Los Alerces</span>
+          <span class="voice__flag">Cita en revisión</span>
+        </footer>
+      </blockquote>
+      <blockquote class="voice voice--draft">
+        <p>Vinimos desde Puerto Madryn sólo por la bajada y nos quedamos cuatro días. Es una manera distinta de conocer el Parque: lo ves desde el agua, y el agua es transparente.</p>
+        <footer>
+          <b>Visitante de la edición 2026</b>
+          <span>Puerto Madryn, Chubut</span>
+          <span class="voice__flag">Cita en revisión</span>
+        </footer>
       </blockquote>
       <blockquote class="voice">
         <p>El acompañamiento de Prefectura y Ejército dio tranquilidad a los 42 remeros. Una travesía modelo para replicar en toda la Patagonia.</p>
@@ -525,6 +605,10 @@
         Conocé a cada auspiciante
         <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg>
       </a>
+      <a class="btn btn--ghost btn--lg" href="beneficios.html">
+        Beneficios para remeros
+        <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+      </a>
     </div>
 
   </div>
@@ -546,6 +630,7 @@
     </div>
     <nav class="foot__links" aria-label="Enlaces externos">
       <a href="auspiciantes.html"><svg class="ic ic--sm" aria-hidden="true"><use href="#i-check"/></svg> Auspiciantes</a>
+      <a href="beneficios.html"><svg class="ic ic--sm" aria-hidden="true"><use href="#i-check"/></svg> Beneficios para remeros</a>
       <a href="#registro"><svg class="ic ic--sm" aria-hidden="true"><use href="#i-image"/></svg> Registro Audiovisual</a>
       <a href="https://docs.google.com/document/d/19LmdzNiZezFDLwy8k-WqJpZpF3EknkVx/edit" target="_blank" rel="noopener noreferrer"><svg class="ic ic--sm" aria-hidden="true"><use href="#i-doc"/></svg> Reseñas</a>
       <a href="https://youtube.com/shorts/t5qNJe3UqBc" target="_blank" rel="noopener noreferrer"><svg class="ic ic--sm" aria-hidden="true"><use href="#i-play"/></svg> Video</a>
@@ -563,63 +648,110 @@
     </button>
   </div>
   <div class="dlg__body">
-    <p class="dlg__desc">Completa tus datos para reservar tu lugar en la travesía de 20 km (12 y 13 de diciembre de 2026).</p>
-    <form id="enrollmentForm" class="d-form-grid">
-      <div class="d-field">
-        <label for="regNombre">Nombre *</label>
-        <input type="text" id="regNombre" required placeholder="Ej: Juan">
-      </div>
-      <div class="d-field">
-        <label for="regApellido">Apellido *</label>
-        <input type="text" id="regApellido" required placeholder="Ej: Pérez">
-      </div>
-      <div class="d-field">
-        <label for="regDni">DNI / Pasaporte *</label>
-        <input type="text" id="regDni" required placeholder="Ej: 35123456">
-      </div>
-      <div class="d-field">
-        <label for="regEmail">Email *</label>
-        <input type="email" id="regEmail" required placeholder="correo@ejemplo.com">
-      </div>
-      <div class="d-field">
-        <label for="regTelefono">Teléfono / WhatsApp *</label>
-        <input type="tel" id="regTelefono" required placeholder="Ej: +54 2945 123456">
-      </div>
-      <div class="d-field">
-        <label for="regLocalidad">Localidad de Origen</label>
-        <input type="text" id="regLocalidad" placeholder="Ej: Esquel / Trelew">
-      </div>
-      <div class="d-field">
-        <label for="regTipoKayak">Tipo de Embarcación</label>
-        <select id="regTipoKayak">
-          <option value="Simple (Facilitado por FCE)">Kayak Simple (FCE)</option>
-          <option value="Doble (Facilitado por FCE)">Kayak Doble (FCE)</option>
-          <option value="Propio (Certificado)">Kayak Propio (Certificado por Prefectura)</option>
-        </select>
-      </div>
-      <div class="d-field">
-        <label for="regExperiencia">Nivel de Remo</label>
-        <select id="regExperiencia">
-          <option value="Principiante">Principiante (Asistirá a clínicas)</option>
-          <option value="Intermedio">Intermedio (Ríos y aguas calmas)</option>
-          <option value="Avanzado">Avanzado / Guía</option>
-        </select>
-      </div>
-      <div class="d-field d-full">
-        <label for="regContactoEmergencia">Contacto de Emergencia (Nombre y Teléfono) *</label>
-        <input type="text" id="regContactoEmergencia" required placeholder="Ej: María Pérez (+54 2945 654321)">
-      </div>
-      <div class="d-field d-full">
-        <label for="regObservaciones">Observaciones / Alergias / Ficha médica</label>
-        <textarea id="regObservaciones" rows="3" placeholder="Requerimientos médicos o de transporte..."></textarea>
-      </div>
+    <p class="dlg__desc">Dos jornadas, veinte kilómetros, 12 y 13 de diciembre de 2026. Te tomamos los datos y seguimos por mail.</p>
+    <form id="enrollmentForm" novalidate>
 
-      <div class="d-full">
-        <button class="btn btn--solid btn--lg w-100" id="submitEnrollBtn" type="submit">
-          Enviar Pre-Inscripción
-          <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg>
-        </button>
-      </div>
+      <fieldset class="d-group">
+        <legend class="d-legend"><span class="d-legend__n">1</span> Quién sos</legend>
+        <div class="d-form-grid">
+          <div class="d-field">
+            <label for="regNombre">Nombre</label>
+            <input type="text" id="regNombre" required autocomplete="given-name" placeholder="Juan">
+          </div>
+          <div class="d-field">
+            <label for="regApellido">Apellido</label>
+            <input type="text" id="regApellido" required autocomplete="family-name" placeholder="Pérez">
+          </div>
+          <div class="d-field">
+            <label for="regDni">DNI o pasaporte</label>
+            <input type="text" id="regDni" required inputmode="numeric" placeholder="35123456">
+          </div>
+          <div class="d-field">
+            <label for="regLocalidad">¿Desde dónde venís?</label>
+            <input type="text" id="regLocalidad" autocomplete="address-level2" placeholder="Esquel, Puerto Madryn, Buenos Aires…">
+          </div>
+          <div class="d-field">
+            <label for="regEmail">Email</label>
+            <input type="email" id="regEmail" required autocomplete="email" placeholder="correo@ejemplo.com">
+          </div>
+          <div class="d-field">
+            <label for="regTelefono">Teléfono o WhatsApp</label>
+            <input type="tel" id="regTelefono" required autocomplete="tel" placeholder="+54 2945 123456">
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="d-group">
+        <legend class="d-legend"><span class="d-legend__n">2</span> Con qué remás</legend>
+        <div class="d-form-grid">
+          <div class="d-field">
+            <label for="regTipoKayak">Tipo de kayak</label>
+            <select id="regTipoKayak">
+              <option value="K1">K1 — individual</option>
+              <option value="K2">K2 — doble</option>
+              <option value="K3">K3 — triple</option>
+              <option value="K4">K4 — cuádruple</option>
+              <option value="Sit on top individual">Sit on top — individual</option>
+              <option value="Sit on top doble">Sit on top — doble</option>
+              <option value="Necesito alquilar">Todavía no tengo, necesito alquilar</option>
+            </select>
+          </div>
+          <div class="d-field">
+            <label for="regExperiencia">Tu experiencia remando</label>
+            <select id="regExperiencia">
+              <option value="Principiante">Primera vez o casi</option>
+              <option value="Intermedio">Remo seguido, aguas calmas y río</option>
+              <option value="Avanzado">Avanzado o guía</option>
+            </select>
+          </div>
+        </div>
+        <p class="d-hint">
+          Antes de la travesía hay una jornada de nivelación: no importa de qué nivel
+          vengas, salimos todos con el mismo piso de técnica.
+        </p>
+      </fieldset>
+
+      <fieldset class="d-group">
+        <legend class="d-legend"><span class="d-legend__n">3</span> Salud y emergencia</legend>
+        <div class="d-form-grid">
+          <div class="d-field d-full">
+            <label for="regContactoEmergencia">Contacto de emergencia — nombre y teléfono</label>
+            <input type="text" id="regContactoEmergencia" required placeholder="María Pérez · +54 2945 654321">
+          </div>
+          <div class="d-field d-full">
+            <label for="regObservaciones">Algo que debamos saber</label>
+            <textarea id="regObservaciones" rows="3" placeholder="Alergias, medicación, lesiones, requerimientos de transporte…"></textarea>
+          </div>
+        </div>
+
+        <label class="d-check d-check--strong" for="regDeclaracionSalud">
+          <input type="checkbox" id="regDeclaracionSalud" required>
+          <span>
+            <b>Declaración de salud</b>
+            Declaro que me encuentro en condiciones físicas de afrontar una travesía
+            de 20 km en kayak, que la información médica que cargué es veraz y que
+            avisaré a la organización si algo cambia antes de la fecha.
+          </span>
+        </label>
+      </fieldset>
+
+      <fieldset class="d-group">
+        <legend class="d-legend"><span class="d-legend__n">4</span> Comprobante de pago</legend>
+        <div class="d-drop" id="regComprobanteDrop">
+          <input type="file" id="regComprobante" accept="image/*,application/pdf" class="d-drop__input">
+          <span class="d-drop__face">
+            <svg class="ic" aria-hidden="true"><use href="#i-image"/></svg>
+            <b id="regComprobanteName">Adjuntar foto del comprobante</b>
+            <em>JPG, PNG o PDF. También sirve una captura de la transferencia.</em>
+          </span>
+        </div>
+        <p class="d-hint">Si todavía no pagaste, podés enviarlo después por mail. La inscripción queda igual registrada.</p>
+      </fieldset>
+
+      <button class="btn btn--solid btn--lg w-100" id="submitEnrollBtn" type="submit">
+        Enviar pre-inscripción
+        <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+      </button>
     </form>
 
     <div id="enrollSuccessBox" class="success-alert" style="display: none;">
@@ -676,6 +808,7 @@
   <nav class="dash-tabs">
     <button class="dash-tab-btn active" data-dash-tab="inscripciones">Inscripciones (<span id="countInscripciones">0</span>)</button>
     <button class="dash-tab-btn" data-dash-tab="blog">Blog & Novedades</button>
+    <button class="dash-tab-btn" data-dash-tab="beneficios">Beneficios (<span id="countBeneficios">0</span>)</button>
     <button class="dash-tab-btn" data-dash-tab="usuarios">Usuarios Admin</button>
   </nav>
 
@@ -733,6 +866,31 @@
     </div>
 
     <!-- TAB 3: USUARIOS -->
+    <!-- TAB: BENEFICIOS -->
+    <div class="dash-content" id="dashTabBeneficios">
+      <div class="dash-toolbar">
+        <h3>Beneficios y promociones</h3>
+        <button class="btn btn--solid btn--sm" id="openNewBenefitBtn" type="button">+ Nuevo beneficio</button>
+      </div>
+      <div class="table-wrap">
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>Orden</th>
+              <th>Prestador</th>
+              <th>Rubro</th>
+              <th>Oferta</th>
+              <th>Código</th>
+              <th>Vigencia</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="adminBeneficiosTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="dash-content" id="dashTabUsuarios">
       <div class="dash-toolbar">
         <h3>Usuarios Administradores</h3>
@@ -805,6 +963,74 @@
 </dialog>
 
 <!-- ══ DIÁLOGO · LECTOR DE NOTICIA ══ -->
+<!-- ══ DIÁLOGO · EDITOR DE BENEFICIOS ══ -->
+<dialog class="dlg dlg--wide" id="benefitEditorDialog" aria-labelledby="benefitEditorTitle">
+  <div class="dlg__head">
+    <h2 id="benefitEditorTitle">Nuevo beneficio</h2>
+    <button class="icon-btn" type="button" data-close aria-label="Cerrar">
+      <svg class="ic" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
+  </div>
+  <div class="dlg__body">
+    <form id="benefitForm">
+      <input type="hidden" id="benId">
+      <div class="d-form-grid">
+        <div class="d-field">
+          <label for="benPrestador">Prestador</label>
+          <input type="text" id="benPrestador" required placeholder="Esquel Outdoors">
+        </div>
+        <div class="d-field">
+          <label for="benRubro">Rubro</label>
+          <input type="text" id="benRubro" placeholder="Equipamiento outdoor">
+        </div>
+        <div class="d-field d-full">
+          <label for="benDescripcion">Qué hace el prestador</label>
+          <textarea id="benDescripcion" rows="2" placeholder="Descripción breve del comercio o servicio."></textarea>
+        </div>
+        <div class="d-field d-full">
+          <label for="benOferta">La promoción</label>
+          <input type="text" id="benOferta" required placeholder="20% OFF en alquiler de kayaks">
+        </div>
+        <div class="d-field d-full">
+          <label for="benDetalle">Letra chica</label>
+          <textarea id="benDetalle" rows="2" placeholder="Condiciones, días válidos, tope de personas…"></textarea>
+        </div>
+        <div class="d-field">
+          <label for="benCodigo">Código</label>
+          <input type="text" id="benCodigo" placeholder="TRAVESIA26">
+        </div>
+        <div class="d-field">
+          <label for="benVigencia">Vigencia</label>
+          <input type="text" id="benVigencia" placeholder="Hasta el 13/12/2026">
+        </div>
+        <div class="d-field">
+          <label for="benLogo">Ruta del logo</label>
+          <input type="text" id="benLogo" placeholder="assets/auspiciantes/nombre.webp">
+        </div>
+        <div class="d-field">
+          <label for="benEnlace">Enlace (opcional)</label>
+          <input type="url" id="benEnlace" placeholder="https://…">
+        </div>
+        <div class="d-field">
+          <label for="benOrden">Orden</label>
+          <input type="number" id="benOrden" value="0" min="0">
+        </div>
+        <div class="d-field">
+          <label for="benActivo">Estado</label>
+          <select id="benActivo">
+            <option value="1">Visible en el sitio</option>
+            <option value="0">Oculto</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn--solid btn--lg w-100" type="submit" style="margin-top:1.4rem">
+        Guardar beneficio
+        <svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>
+      </button>
+    </form>
+  </div>
+</dialog>
+
 <dialog class="dlg" id="postReaderDialog" aria-label="Noticia">
   <div class="dlg__head">
     <h2 id="readPostCategoryTitle">Noticia</h2>
@@ -818,6 +1044,30 @@
 <!-- Las reseñas institucionales viven ahora en auspiciantes.html -->
 
 <!-- ══ DIÁLOGO · VISOR DE IMAGEN ══ -->
+<!-- ══ DIÁLOGO · CARRUSEL POR AÑO ══ -->
+<dialog class="dlg dlg--wide" id="yearDialog" aria-labelledby="yearTitle">
+  <div class="dlg__head">
+    <h2 id="yearTitle">Archivo</h2>
+    <button class="icon-btn" type="button" data-close aria-label="Cerrar">
+      <svg class="ic" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
+  </div>
+  <div class="dlg__body">
+    <p class="dlg__desc" id="yearLede"></p>
+
+    <div class="reel">
+      <div class="reel__track" id="yearTrack" tabindex="0" aria-live="polite"></div>
+      <button class="icon-btn reel__nav reel__nav--prev" type="button" data-reel="-1" aria-label="Foto anterior">
+        <svg class="ic" aria-hidden="true"><use href="#i-prev"/></svg>
+      </button>
+      <button class="icon-btn reel__nav reel__nav--next" type="button" data-reel="1" aria-label="Foto siguiente">
+        <svg class="ic" aria-hidden="true"><use href="#i-next"/></svg>
+      </button>
+    </div>
+    <div class="reel__dots" id="yearDots"></div>
+  </div>
+</dialog>
+
 <dialog class="viewer" id="viewer" aria-label="Visor de fotografías">
   <button class="icon-btn viewer__close" type="button" data-close aria-label="Cerrar visor">
     <svg class="ic" aria-hidden="true"><use href="#i-close"/></svg>

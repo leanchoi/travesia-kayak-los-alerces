@@ -888,6 +888,194 @@ em { font-style: italic; }
 .voice span { font-size: .8rem; color: var(--ink-3); }
 
 /* --------------------------------------------------------------------------
+   LÍNEA DE TIEMPO CLICKEABLE
+   -------------------------------------------------------------------------- */
+.timeline__btn {
+  display: grid;
+  grid-template-columns: 4.6rem 1fr auto;
+  gap: 1rem;
+  align-items: baseline;
+  width: 100%;
+  padding: 0; margin: 0;
+  background: none; border: 0;
+  font: inherit; color: inherit; text-align: left;
+  cursor: pointer;
+}
+.timeline__btn:hover .timeline__year,
+.timeline__btn:hover .timeline__what { color: var(--ember); }
+.timeline__go { color: var(--ink-3); align-self: center; transition: color var(--dur) var(--ease); }
+.timeline__btn:hover .timeline__go { color: var(--ember); }
+.timeline li:has(.timeline__btn) { padding: 0; }
+.timeline li:has(.timeline__btn) .timeline__btn { padding: .95rem 0; }
+
+/* --------------------------------------------------------------------------
+   CARRUSEL DEL DIÁLOGO POR AÑO
+   -------------------------------------------------------------------------- */
+.reel { position: relative; }
+.reel__track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 100%;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  border-radius: 2px;
+}
+.reel__track::-webkit-scrollbar { display: none; }
+.reel__shot {
+  scroll-snap-align: center;
+  position: relative;
+  aspect-ratio: 4 / 3;
+  margin: 0;
+  overflow: hidden;
+  background: var(--paper-3);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+.reel__shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Las tomas de los noventa se muestran viradas, para que se lean como archivo. */
+.reel__shot--aged img { filter: grayscale(1) sepia(.28) contrast(.92) brightness(1.04); }
+.reel__shot figcaption {
+  position: absolute; inset: auto 0 0 0;
+  padding: 1.6rem .9rem .8rem;
+  color: #fff; font-size: .85rem;
+  background: linear-gradient(to top, rgba(10,20,18,.85), transparent);
+}
+.reel__shot.is-empty img { display: none; }
+.reel__shot.is-empty::before {
+  --m: color-mix(in oklab, var(--lake) 34%, transparent);
+  content: ""; position: absolute; inset: 0;
+  background:
+    linear-gradient(var(--m) 0 0) 12px 12px / 15px 1px no-repeat,
+    linear-gradient(var(--m) 0 0) 12px 12px / 1px 15px no-repeat,
+    linear-gradient(var(--m) 0 0) calc(100% - 12px) calc(100% - 12px) / 15px 1px no-repeat,
+    linear-gradient(var(--m) 0 0) calc(100% - 12px) calc(100% - 12px) / 1px 15px no-repeat,
+    repeating-linear-gradient(45deg, transparent 0 9px, color-mix(in oklab, var(--lake) 7%, transparent) 9px 10px),
+    var(--lake-wash);
+}
+.reel__shot.is-empty figcaption {
+  position: relative; z-index: 1;
+  height: 100%; display: flex; flex-direction: column; justify-content: flex-end;
+  color: var(--ink); background: none; padding: 1.4rem;
+}
+.reel__shot.is-empty::after {
+  content: "Imagen pendiente";
+  position: absolute; top: 1.3rem; left: 1.4rem; z-index: 1;
+  font-family: var(--mono); font-size: .62rem; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--lake);
+}
+
+.reel__nav {
+  position: absolute; top: 50%; translate: 0 -50%;
+  background: color-mix(in oklab, var(--paper) 86%, transparent);
+  backdrop-filter: blur(6px);
+}
+.reel__nav--prev { left: .6rem; }
+.reel__nav--next { right: .6rem; }
+.reel__dots { display: flex; justify-content: center; gap: .4rem; margin-top: .9rem; }
+.reel__dot {
+  width: 7px; height: 7px; padding: 0;
+  border: 0; border-radius: 50%;
+  background: var(--rule); cursor: pointer;
+  transition: background var(--dur) var(--ease), width var(--dur) var(--ease);
+}
+.reel__dot.is-on { background: var(--ember); width: 20px; border-radius: 100px; }
+
+/* --------------------------------------------------------------------------
+   DESTACADO DE PRENSA
+   -------------------------------------------------------------------------- */
+.press {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr) auto;
+  gap: clamp(18px, 3vw, 36px);
+  align-items: center;
+  margin-top: clamp(40px, 5vw, 64px);
+  padding: clamp(20px, 2.6vw, 30px);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--ember);
+  border-radius: 2px;
+  background: var(--paper);
+  color: var(--ink); text-decoration: none;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.press:hover { background: var(--ember-wash); color: var(--ink); }
+.press__brand {
+  display: grid; place-items: center;
+  min-height: 58px;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 12px;
+}
+.press__brand img { max-width: 100%; max-height: 46px; width: auto; height: auto; }
+/* Si todavía no está el archivo del logo, queda el nombre compuesto. */
+.press__fallback {
+  display: none;
+  font-family: var(--serif); font-weight: 600; font-size: 1.5rem;
+  letter-spacing: -.02em; color: #E0A800;
+}
+.press.is-nologo .press__brand img { display: none; }
+.press.is-nologo .press__fallback { display: block; }
+
+.press__body { display: flex; flex-direction: column; gap: .3rem; }
+.press__kicker {
+  font-size: .68rem; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ember);
+}
+.press__title {
+  font-family: var(--serif); font-size: clamp(1.08rem, 1.7vw, 1.32rem);
+  line-height: 1.3; letter-spacing: -.01em;
+}
+.press__meta { font-size: .83rem; color: var(--ink-3); }
+.press__go { color: var(--ink-3); transition: transform var(--dur) var(--ease); }
+.press:hover .press__go { transform: translate(2px, -2px); color: var(--ember); }
+
+@media (max-width: 760px) {
+  .press { grid-template-columns: 1fr auto; }
+  .press__brand { grid-column: 1 / -1; justify-self: start; min-width: 160px; }
+}
+
+/* --------------------------------------------------------------------------
+   VIDEO VERTICAL + FOTOTECA AL COSTADO
+   -------------------------------------------------------------------------- */
+.reelhub {
+  display: grid;
+  grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+  gap: clamp(20px, 3vw, 42px);
+  align-items: start;
+}
+.film--portrait { aspect-ratio: 9 / 16; margin-bottom: 0; }
+.film--portrait .film__ring { width: 58px; height: 58px; }
+.reelhub__side { display: flex; flex-direction: column; }
+.reelhub__label {
+  font-size: .68rem; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ink-3);
+  margin: 0 0 .9rem; padding-bottom: .7rem;
+  border-bottom: 1px solid var(--rule);
+}
+.reelhub .plates { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+@media (max-width: 860px) {
+  .reelhub { grid-template-columns: 1fr; }
+  .film--portrait { max-width: 300px; margin-inline: auto; }
+}
+
+/* Borrador: la cita todavía no fue aprobada por la persona a la que se le
+   atribuye. Se marca a la vista para que nadie la tome por declaración
+   confirmada. Al aprobarla, quitar la clase y el span. */
+.voice--draft { border-top-color: var(--ember); }
+.voice__flag {
+  align-self: start;
+  margin-top: .5rem;
+  font-family: var(--mono); font-size: .62rem;
+  letter-spacing: .09em; text-transform: uppercase;
+  color: var(--ember);
+  border: 1px solid color-mix(in oklab, var(--ember) 40%, transparent);
+  border-radius: 2px; padding: .2em .5em;
+}
+
+/* --------------------------------------------------------------------------
    13 · INSCRIPCIÓN
    -------------------------------------------------------------------------- */
 .enroll { background: var(--deep); color: var(--on-deep); padding-block: clamp(64px, 9vw, 108px); }
@@ -1232,7 +1420,13 @@ dialog::backdrop { background: color-mix(in srgb, #0A1412 74%, transparent); bac
 .viewer__nav--prev { left: 1.1rem; }
 .viewer__nav--next { right: 1.1rem; }
 
-body.is-locked { overflow: hidden; }
+/* El top negativo lo pone el JS con la posición guardada; sin position:fixed
+   el navegador no conserva dónde estaba leyendo el visitante. */
+body.is-locked {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+}
 
 /* --------------------------------------------------------------------------
    17 · APARICIONES
@@ -1453,6 +1647,178 @@ body.is-locked { overflow: hidden; }
 .d-field textarea:focus {
   outline: none;
   border-color: var(--lake);
+}
+
+/* --------------------------------------------------------------------------
+   FORMULARIO DE INSCRIPCIÓN · agrupado por pasos
+   -------------------------------------------------------------------------- */
+.dlg--wide { max-width: 720px; }
+
+.d-group { border: 0; margin: 0 0 1.9rem; padding: 0; }
+.d-group:last-of-type { margin-bottom: 1.4rem; }
+.d-legend {
+  display: flex; align-items: center; gap: .6rem;
+  width: 100%; padding: 0 0 .8rem; margin-bottom: 1.1rem;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--serif); font-size: 1.08rem; font-weight: 500;
+  color: var(--ink);
+}
+.d-legend__n {
+  display: grid; place-items: center;
+  width: 1.5rem; height: 1.5rem; flex: none;
+  border-radius: 50%;
+  background: var(--ink); color: var(--paper);
+  font-family: var(--mono); font-size: .7rem; font-weight: 600;
+}
+
+/* Campos más generosos y con foco visible, en vez de la caja mínima. */
+.d-field input,
+.d-field select,
+.d-field textarea {
+  padding: .78rem .9rem;
+  border-radius: 8px;
+  font-size: .93rem;
+  transition: border-color .2s var(--ease), box-shadow .2s var(--ease), background .2s var(--ease);
+}
+.d-field input::placeholder,
+.d-field textarea::placeholder { color: color-mix(in oklab, var(--ink-3) 75%, transparent); }
+.d-field input:hover,
+.d-field select:hover,
+.d-field textarea:hover { border-color: color-mix(in oklab, var(--ink) 28%, transparent); }
+.d-field input:focus,
+.d-field select:focus,
+.d-field textarea:focus {
+  border-color: var(--lake);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--lake) 18%, transparent);
+}
+.d-field select { appearance: none; cursor: pointer; padding-right: 2.2rem;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-3) 50%),
+                    linear-gradient(135deg, var(--ink-3) 50%, transparent 50%);
+  background-position: calc(100% - 17px) 52%, calc(100% - 12px) 52%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+.d-hint { margin: .85rem 0 0; font-size: .83rem; color: var(--ink-3); line-height: 1.5; }
+
+/* Declaración de salud */
+.d-check {
+  display: grid; grid-template-columns: auto 1fr; gap: .75rem;
+  margin-top: 1.1rem; padding: 1rem 1.1rem;
+  border: 1px solid var(--rule); border-radius: 8px;
+  background: color-mix(in oklab, var(--lake) 4%, transparent);
+  cursor: pointer;
+  transition: border-color .2s var(--ease);
+}
+.d-check:hover { border-color: var(--lake); }
+.d-check:has(:focus-visible) { border-color: var(--lake); box-shadow: 0 0 0 3px color-mix(in oklab, var(--lake) 18%, transparent); }
+.d-check input { width: 1.05rem; height: 1.05rem; margin-top: .15rem; accent-color: var(--lake); }
+.d-check span { font-size: .85rem; color: var(--ink-2); line-height: 1.5; }
+.d-check b { display: block; font-size: .88rem; color: var(--ink); margin-bottom: .2rem; }
+.d-check--strong:has(:checked) { background: var(--lake-wash); border-color: var(--lake); }
+
+/* Adjuntar comprobante */
+.d-drop { position: relative; }
+.d-drop__input {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  opacity: 0; cursor: pointer;
+}
+.d-drop__face {
+  display: flex; flex-direction: column; align-items: center; gap: .35rem;
+  padding: 1.6rem 1rem;
+  border: 1px dashed var(--rule); border-radius: 8px;
+  text-align: center; color: var(--ink-2);
+  transition: border-color .2s var(--ease), background .2s var(--ease);
+}
+.d-drop__face .ic { width: 1.5rem; height: 1.5rem; color: var(--lake); }
+.d-drop__face b { font-size: .9rem; color: var(--ink); font-weight: 600; }
+.d-drop__face em { font-style: normal; font-size: .78rem; color: var(--ink-3); }
+.d-drop__input:hover + .d-drop__face,
+.d-drop__input:focus-visible + .d-drop__face { border-color: var(--lake); background: color-mix(in oklab, var(--lake) 5%, transparent); }
+.d-drop.is-loaded .d-drop__face { border-style: solid; border-color: var(--lake); background: var(--lake-wash); }
+
+@media (max-width: 620px) {
+  .d-form-grid { grid-template-columns: 1fr; }
+}
+
+/* --------------------------------------------------------------------------
+   BENEFICIOS · tarjetas de prestadores
+   La promoción va en otra jerarquía que la descripción: es lo que la persona
+   vino a buscar, así que se lee antes que el texto institucional.
+   -------------------------------------------------------------------------- */
+.perks {
+  display: grid;
+  /* min() para que en pantallas de 320 px la columna no exija más ancho del
+     que hay y saque la página de cuadro. */
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  gap: clamp(16px, 2vw, 24px);
+}
+.perks__loading { grid-column: 1 / -1; padding: 2rem 0; color: var(--ink-3); text-align: center; }
+
+.perk {
+  display: flex; flex-direction: column;
+  padding: clamp(20px, 2.4vw, 28px);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.perk:hover { border-color: var(--lake); transform: translateY(-2px); }
+
+.perk__head { display: flex; align-items: center; gap: .9rem; margin-bottom: 1rem; }
+.perk__logo {
+  position: relative;
+  width: 62px; height: 62px; flex: none; margin: 0;
+  display: grid; place-items: center;
+  background: #FCFBF7;
+  border: 1px solid var(--rule); border-radius: 3px;
+  overflow: hidden;
+}
+.perk__logo img { max-width: calc(100% - 12px); max-height: calc(100% - 12px); width: auto; height: auto; object-fit: contain; }
+.perk__initials {
+  display: none;
+  font-family: var(--serif); font-size: 1.6rem; font-weight: 500; color: var(--lake);
+}
+.perk__logo.is-empty img { display: none; }
+.perk__logo.is-empty { background: var(--lake-wash); }
+.perk__logo.is-empty .perk__initials { display: block; }
+
+.perk__rubro {
+  font-size: .66rem; font-weight: 600; letter-spacing: .11em;
+  text-transform: uppercase; color: var(--ink-3); margin: 0 0 .2rem;
+}
+.perk__name { font-size: 1.16rem; margin: 0; }
+.perk__desc { font-size: .9rem; color: var(--ink-2); margin: 0 0 1.2rem; }
+
+.perk__offer {
+  position: relative;
+  margin-top: auto;
+  padding: 1rem 1.1rem 1.1rem 2.6rem;
+  background: var(--ember-wash);
+  border-left: 2px solid var(--ember);
+  border-radius: 0 3px 3px 0;
+}
+.perk__tag { position: absolute; top: 1.05rem; left: .95rem; color: var(--ember); }
+.perk__deal {
+  font-family: var(--serif); font-size: 1.14rem; line-height: 1.25;
+  letter-spacing: -.01em; color: var(--ink); margin: 0;
+}
+.perk__fine { margin: .5rem 0 0; font-size: .8rem; color: var(--ink-2); line-height: 1.45; }
+
+.perk__foot {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem;
+  margin-top: 1rem; padding-top: .85rem;
+  border-top: 1px solid var(--rule-soft);
+}
+.perk__code {
+  font-family: var(--mono); font-size: .72rem; letter-spacing: .08em;
+  color: var(--lake); background: var(--lake-wash);
+  border: 1px dashed color-mix(in oklab, var(--lake) 45%, transparent);
+  border-radius: 3px; padding: .28em .6em;
+}
+.perk__valid { font-size: .76rem; color: var(--ink-3); }
+.perk__link {
+  margin-left: auto; display: inline-flex; align-items: center; gap: .35rem;
+  font-size: .82rem; font-weight: 500; text-decoration: none;
 }
 
 .check-label {

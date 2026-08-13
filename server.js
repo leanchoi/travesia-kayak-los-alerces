@@ -17,8 +17,11 @@ const JWT_SECRET = process.env.JWT_SECRET || 'unpsjb_fce_travesia_los_alerces_ke
 
 // Middleware
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// 8 MB: el comprobante de pago viaja como data URL dentro del JSON. El cliente
+// ya reduce las fotos antes de mandarlas, pero un PDF puede pesar más que el
+// límite de 100 kb que trae express por defecto.
+app.use(express.json({ limit: '8mb' }));
+app.use(express.urlencoded({ extended: true, limit: '8mb' }));
 
 // Ensure database directory exists
 const dbDir = path.join(__dirname, 'data');
@@ -63,6 +66,34 @@ db.serialize(() => {
         )
     `);
 
+    // Columnas agregadas después de la primera versión. Se aplican sobre bases
+    // ya creadas; si la columna existe, SQLite devuelve error y se ignora.
+    [
+        "ALTER TABLE enrollments ADD COLUMN declaracion_salud INTEGER DEFAULT 0",
+        "ALTER TABLE enrollments ADD COLUMN comprobante TEXT",
+        "ALTER TABLE enrollments ADD COLUMN comprobante_nombre TEXT"
+    ].forEach(sql => db.run(sql, () => {}));
+
+    // Beneficios / promociones de prestadores
+    db.run(`
+        CREATE TABLE IF NOT EXISTS benefits (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            prestador TEXT NOT NULL,
+            rubro TEXT NOT NULL,
+            descripcion TEXT NOT NULL,
+            oferta TEXT NOT NULL,
+            detalle TEXT,
+            codigo TEXT,
+            vigencia TEXT,
+            logo_url TEXT,
+            enlace TEXT,
+            orden INTEGER DEFAULT 0,
+            activo INTEGER DEFAULT 1,
+            creado_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            actualizado_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
     // Blog / Noticias table
     db.run(`
         CREATE TABLE IF NOT EXISTS posts (
@@ -89,6 +120,50 @@ db.serialize(() => {
                 adminEmail, hashed, 'Cr. Adrián Cardacci (Admin)', 'ADMIN'
             ]);
             console.log('👤 Usuario Admin inicial creado: admin@economicasunp.edu.ar / admin123');
+        }
+    });
+
+    // Seed de beneficios de ejemplo
+    db.get("SELECT COUNT(*) as count FROM benefits", (err, row) => {
+        if (!err && row && row.count === 0) {
+            const seed = [
+                ['Esquel Outdoors', 'Equipamiento outdoor',
+                 'Todo para la travesía en un solo lugar: kayaks, chalecos, bolsas estancas, camping y pesca.',
+                 '20% OFF en alquiler de kayaks',
+                 'Válido sobre el alquiler de K1, K2 y sit on top durante los días de la travesía. Reservá con 48 h de anticipación.',
+                 'TRAVESIA26', 'Hasta el 13/12/2026', 'assets/auspiciantes/esquel-outdoors.webp', '', 1],
+                ['Don Chiquino', 'Restaurante · Pastas',
+                 'Pastas artesanales, carnes, postres y vinos en pleno centro de Esquel.',
+                 'Postre y café de cortesía',
+                 'Presentando el código de inscripción, por persona, en el menú de la noche.',
+                 'REMEROS26', 'Diciembre 2026', 'assets/auspiciantes/don-chiquino.webp', '', 2],
+                ['La Pulpería de Don Chiquino', 'Parrilla',
+                 'Parrilla argentina con opciones veganas y ambiente acogedor.',
+                 '2x1 en entradas',
+                 'De domingo a jueves, para grupos de hasta seis personas. No acumulable con otras promociones.',
+                 'PULPERIA2X1', 'Diciembre 2026', 'assets/auspiciantes/la-pulperia.webp', '', 3],
+                ['La Fiambrería de Esquel', 'Fiambrería · Vinoteca',
+                 'Fiambres, quesos y vinoteca para armar la picada del campamento.',
+                 '15% OFF en picadas armadas',
+                 'Sobre picadas para dos o más personas. Ideal para la noche de Bahía Rosales.',
+                 'PICADA15', 'Hasta el 13/12/2026', 'assets/auspiciantes/la-fiambreria.webp', '', 4],
+                ['Esquel Pádel', 'Complejo deportivo',
+                 'Canchas de pádel, alquiler de paletas y clases para todos los niveles.',
+                 'Primer turno de cancha sin cargo',
+                 'Un turno de 90 minutos por inscripción, sujeto a disponibilidad. Para los días previos a la travesía.',
+                 'PADEL1', 'Diciembre 2026', 'assets/auspiciantes/esquel-padel.webp', '', 5],
+                ['El Rastro · Mercado de Regalos', 'Regalería',
+                 'Mates, termos y regalería para llevarse algo de la Comarca.',
+                 '10% OFF en mates y termos',
+                 'Presentando el código de inscripción en el local. No acumulable con liquidaciones.',
+                 'RASTRO10', 'Hasta el 31/12/2026', 'assets/auspiciantes/el-rastro.webp', '', 6]
+            ];
+            const stmt = db.prepare(`INSERT INTO benefits
+                (prestador, rubro, descripcion, oferta, detalle, codigo, vigencia, logo_url, enlace, orden, activo)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`);
+            seed.forEach(r => stmt.run(r));
+            stmt.finalize();
+            console.log('🎟️  Beneficios de ejemplo creados.');
         }
     });
 
@@ -136,20 +211,25 @@ function authenticateToken(req, res, next) {
 
 // 1. Submit Registration (Formulario de Inscripción)
 app.post('/api/inscribirse', (req, res) => {
-    const { nombre, apellido, dni, email, telefono, localidad, tipoKayak, experiencia, contactoEmergencia, observaciones } = req.body;
+    const { nombre, apellido, dni, email, telefono, localidad, tipoKayak, experiencia,
+            contactoEmergencia, observaciones, declaracionSalud, comprobante, comprobanteNombre } = req.body;
 
     if (!nombre || !apellido || !dni || !email || !telefono) {
         return res.status(400).json({ error: 'Nombre, Apellido, DNI, Email y Teléfono son campos obligatorios.' });
     }
 
+    if (!declaracionSalud) {
+        return res.status(400).json({ error: 'Falta aceptar la declaración de salud.' });
+    }
+
     const code = 'KA-' + Math.floor(100000 + Math.random() * 900000);
 
     const query = `
-        INSERT INTO enrollments (code, nombre, apellido, dni, email, telefono, localidad, tipo_kayak, experiencia, contacto_emergencia, observaciones, estado)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDIENTE')
+        INSERT INTO enrollments (code, nombre, apellido, dni, email, telefono, localidad, tipo_kayak, experiencia, contacto_emergencia, observaciones, declaracion_salud, comprobante, comprobante_nombre, estado)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDIENTE')
     `;
 
-    db.run(query, [code, nombre, apellido, dni, email, telefono, localidad || 'Esquel', tipoKayak || 'Simple', experiencia || 'Principiante', contactoEmergencia || 'N/D', observaciones || ''], function(err) {
+    db.run(query, [code, nombre, apellido, dni, email, telefono, localidad || 'Esquel', tipoKayak || 'K1', experiencia || 'Principiante', contactoEmergencia || 'N/D', observaciones || '', 1, comprobante || '', comprobanteNombre || ''], function(err) {
         if (err) {
             console.error('Error insertando inscripción:', err);
             return res.status(500).json({ error: 'Error al registrar la inscripción. Intente nuevamente.' });
@@ -177,6 +257,14 @@ app.get('/api/blog/:slug', (req, res) => {
     db.get("SELECT * FROM posts WHERE slug = ? AND publicado = 1", [req.params.slug], (err, row) => {
         if (err || !row) return res.status(404).json({ error: 'Artículo no encontrado' });
         res.json(row);
+    });
+});
+
+// 4. Beneficios públicos (sólo los activos)
+app.get('/api/beneficios', (req, res) => {
+    db.all("SELECT id, prestador, rubro, descripcion, oferta, detalle, codigo, vigencia, logo_url, enlace FROM benefits WHERE activo = 1 ORDER BY orden ASC, id ASC", [], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Error consultando beneficios' });
+        res.json(rows || []);
     });
 });
 
@@ -298,6 +386,49 @@ app.delete('/api/admin/posts/:id', authenticateToken, (req, res) => {
     db.run("DELETE FROM posts WHERE id = ?", [req.params.id], function(err) {
         if (err) return res.status(500).json({ error: 'Error eliminando artículo' });
         res.json({ message: 'Artículo eliminado', id: req.params.id });
+    });
+});
+
+// ── Beneficios · ABM completo ───────────────────────────────────────────────
+app.get('/api/admin/beneficios', authenticateToken, (req, res) => {
+    db.all("SELECT * FROM benefits ORDER BY orden ASC, id ASC", [], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Error consultando beneficios' });
+        res.json(rows || []);
+    });
+});
+
+app.post('/api/admin/beneficios', authenticateToken, (req, res) => {
+    const { prestador, rubro, descripcion, oferta, detalle, codigo, vigencia, logoUrl, enlace, orden, activo } = req.body;
+    if (!prestador || !oferta) return res.status(400).json({ error: 'Prestador y oferta son requeridos' });
+
+    db.run(`INSERT INTO benefits (prestador, rubro, descripcion, oferta, detalle, codigo, vigencia, logo_url, enlace, orden, activo)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [prestador, rubro || '', descripcion || '', oferta, detalle || '', codigo || '', vigencia || '',
+         logoUrl || '', enlace || '', Number(orden) || 0, activo ? 1 : 0],
+        function(err) {
+            if (err) return res.status(500).json({ error: 'Error creando beneficio' });
+            res.status(201).json({ message: 'Beneficio creado', id: this.lastID });
+        });
+});
+
+app.put('/api/admin/beneficios/:id', authenticateToken, (req, res) => {
+    const { prestador, rubro, descripcion, oferta, detalle, codigo, vigencia, logoUrl, enlace, orden, activo } = req.body;
+
+    db.run(`UPDATE benefits SET prestador = ?, rubro = ?, descripcion = ?, oferta = ?, detalle = ?,
+            codigo = ?, vigencia = ?, logo_url = ?, enlace = ?, orden = ?, activo = ?,
+            actualizado_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [prestador, rubro || '', descripcion || '', oferta, detalle || '', codigo || '', vigencia || '',
+         logoUrl || '', enlace || '', Number(orden) || 0, activo ? 1 : 0, req.params.id],
+        function(err) {
+            if (err) return res.status(500).json({ error: 'Error actualizando beneficio' });
+            res.json({ message: 'Beneficio actualizado', id: req.params.id });
+        });
+});
+
+app.delete('/api/admin/beneficios/:id', authenticateToken, (req, res) => {
+    db.run("DELETE FROM benefits WHERE id = ?", [req.params.id], function(err) {
+        if (err) return res.status(500).json({ error: 'Error eliminando beneficio' });
+        res.json({ message: 'Beneficio eliminado', id: req.params.id });
     });
 });
 

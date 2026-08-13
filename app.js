@@ -173,13 +173,154 @@
   /* ------------------------------------------------------------------------
      7 · DIÁLOGOS NATIVOS (<dialog>)
      ------------------------------------------------------------------------ */
-  const lock = (on) => document.body.classList.toggle('is-locked', on);
+  /* Bloqueo de scroll que NO pierde la posición de lectura.
+     Con sólo overflow:hidden en el body el navegador descarta el desplazamiento
+     y al abrir cualquier diálogo la página aparecía arriba de todo. Acá se
+     guarda la posición, se fija el body con un top negativo y al cerrar se
+     devuelve exactamente donde estaba. El contador es porque hay diálogos que
+     se abren encima de otros (el editor de noticias sobre el tablero): sin él,
+     cerrar el de arriba desbloquearía con el de abajo todavía abierto. */
+  let lockCount = 0;
+  let lockedAt = 0;
+
+  const lock = (on) => {
+    const body = document.body;
+    if (on) {
+      if (lockCount === 0) {
+        lockedAt = window.scrollY || document.documentElement.scrollTop || 0;
+        body.style.top = `-${lockedAt}px`;
+        body.classList.add('is-locked');
+      }
+      lockCount++;
+    } else {
+      lockCount = Math.max(0, lockCount - 1);
+      if (lockCount === 0) {
+        body.classList.remove('is-locked');
+        body.style.top = '';
+        // behavior instant: el html tiene scroll-behavior smooth, y sin esto
+        // el regreso a la posición se anima —se ve como un salto y cualquier
+        // gesto del usuario lo interrumpe a mitad de camino.
+        window.scrollTo({ top: lockedAt, left: 0, behavior: 'instant' });
+      }
+    }
+  };
 
   function wireDialog(dlg) {
     if (!dlg) return;
     $$('[data-close]', dlg).forEach((b) => b.addEventListener('click', () => dlg.close()));
     dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
     dlg.addEventListener('close', () => lock(false));
+  }
+
+  /* ------------------------------------------------------------------------
+     7b · ARCHIVO POR AÑO
+     Cada año de la línea de tiempo abre un carrusel. Las imágenes todavía no
+     están: cada lámina cae al estado vacío diseñado y se muestra sola cuando
+     el archivo aparezca. Las de los noventa se viran a blanco y negro por CSS
+     para que se lean como material de época.
+     ------------------------------------------------------------------------ */
+  const ARCHIVO = {
+    '1997': {
+      titulo: 'La bajada histórica · 1997',
+      lede: 'Última edición formal antes de la pausa. Material de archivo de quienes remaron en los noventa.',
+      aged: true,
+      shots: [
+        { src: 'assets/anios/1997-01.jpg', cap: 'Largada en el Lago Verde, edición 1997.' },
+        { src: 'assets/anios/1997-02.jpg', cap: 'Descenso del Río Arrayanes con equipamiento de la época.' }
+      ]
+    },
+    '2026-04': {
+      titulo: 'El regreso · abril de 2026',
+      lede: 'Cuarenta y dos remeros devolvieron la travesía al agua después de veintinueve años.',
+      aged: false,
+      shots: [
+        { src: 'assets/anios/2026-04-01.jpg', cap: 'La flotilla completa sobre el Río Arrayanes.' },
+        { src: 'assets/anios/2026-04-02.jpg', cap: 'Llegada y campamento en Bahía Rosales.' }
+      ]
+    }
+  };
+
+  const yearDialog = $('#yearDialog');
+  if (yearDialog) {
+    const track = $('#yearTrack');
+    const dots  = $('#yearDots');
+
+    const goTo = (i) => {
+      const shot = track.children[i];
+      if (shot) track.scrollTo({ left: shot.offsetLeft - track.offsetLeft, behavior: calm.matches ? 'auto' : 'smooth' });
+    };
+
+    const currentIndex = () =>
+      Math.round(track.scrollLeft / (track.clientWidth + 10));
+
+    const paintDots = () => {
+      const at = currentIndex();
+      $$('.reel__dot', dots).forEach((d, i) => d.classList.toggle('is-on', i === at));
+    };
+
+    track.addEventListener('scroll', paintDots, { passive: true });
+
+    $$('[data-reel]', yearDialog).forEach((b) => {
+      b.addEventListener('click', () => {
+        const n = track.children.length;
+        goTo((currentIndex() + Number(b.dataset.reel) + n) % n);
+      });
+    });
+
+    const build = (key) => {
+      const data = ARCHIVO[key];
+      if (!data) return;
+      $('#yearTitle').textContent = data.titulo;
+      $('#yearLede').textContent = data.lede;
+
+      track.innerHTML = '';
+      dots.innerHTML = '';
+
+      data.shots.forEach((s, i) => {
+        const fig = document.createElement('figure');
+        fig.className = 'reel__shot' + (data.aged ? ' reel__shot--aged' : '');
+        const img = document.createElement('img');
+        img.src = s.src;
+        img.alt = s.cap;
+        img.loading = 'lazy';
+        img.addEventListener('error', () => fig.classList.add('is-empty'));
+        if (img.complete && img.naturalWidth === 0) fig.classList.add('is-empty');
+        const cap = document.createElement('figcaption');
+        cap.textContent = s.cap;
+        fig.append(img, cap);
+        track.appendChild(fig);
+
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'reel__dot' + (i === 0 ? ' is-on' : '');
+        dot.setAttribute('aria-label', `Ir a la imagen ${i + 1}`);
+        dot.addEventListener('click', () => goTo(i));
+        dots.appendChild(dot);
+      });
+
+      track.scrollLeft = 0;
+    };
+
+    wireDialog(yearDialog);
+    $$('.timeline__btn').forEach((b) => {
+      b.addEventListener('click', () => {
+        build(b.dataset.year);
+        lock(true);
+        yearDialog.showModal();
+      });
+    });
+  }
+
+  /* ------------------------------------------------------------------------
+     7c · LOGO DE PRENSA
+     Si assets/prensa/weekend.png no está, queda el nombre compuesto.
+     ------------------------------------------------------------------------ */
+  const press = $('.press');
+  if (press) {
+    const logo = $('img', press);
+    const fail = () => press.classList.add('is-nologo');
+    logo?.addEventListener('error', fail);
+    if (logo?.complete && logo.naturalWidth === 0) fail();
   }
 
   const patronsDialog = $('#patronsDialog');
@@ -316,12 +457,53 @@
 
   function openEnrollmentModal() {
     if (!enrollDialog) return;
-    enrollmentForm.style.display = 'grid';
+    enrollmentForm.style.display = 'block';
     enrollSuccessBox.style.display = 'none';
     enrollmentForm.reset();
+    comprobante = null;
+    $('#regComprobanteDrop')?.classList.remove('is-loaded');
+    const nameTag = $('#regComprobanteName');
+    if (nameTag) nameTag.textContent = 'Adjuntar foto del comprobante';
     lock(true);
     enrollDialog.showModal();
   }
+
+  /* Comprobante de pago: se reduce en el navegador antes de subirlo. Una foto
+     de celular sin tocar puede pesar varios MB; así viaja liviana y el body
+     JSON no se dispara. Los PDF se mandan tal cual. */
+  let comprobante = null;
+
+  const comprobanteInput = $('#regComprobante');
+  comprobanteInput?.addEventListener('change', () => {
+    const file = comprobanteInput.files?.[0];
+    const drop = $('#regComprobanteDrop');
+    const nameTag = $('#regComprobanteName');
+    if (!file) { comprobante = null; drop?.classList.remove('is-loaded'); return; }
+
+    const done = (dataUrl) => {
+      comprobante = { nombre: file.name, tipo: file.type, data: dataUrl };
+      drop?.classList.add('is-loaded');
+      if (nameTag) nameTag.textContent = file.name;
+    };
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (!file.type.startsWith('image/')) return done(reader.result);
+      const img = new Image();
+      img.onload = () => {
+        const max = 1400;
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const cv = document.createElement('canvas');
+        cv.width = Math.round(img.width * scale);
+        cv.height = Math.round(img.height * scale);
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        done(cv.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = () => done(reader.result);
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
 
   [openEnrollHeaderBtn, openEnrollHeroBtn, openEnrollFormBtn].forEach(btn => {
     btn?.addEventListener('click', openEnrollmentModal);
@@ -330,6 +512,16 @@
   if (enrollmentForm) {
     enrollmentForm.addEventListener('submit', (e) => {
       e.preventDefault();
+
+      // novalidate en el form: validamos acá para poder mostrar el mensaje
+      // nativo sin que el navegador salte a un campo escondido.
+      if (!enrollmentForm.checkValidity()) {
+        const first = enrollmentForm.querySelector(':invalid');
+        first?.reportValidity();
+        first?.focus({ preventScroll: true });
+        return;
+      }
+
       const submitBtn = $('#submitEnrollBtn');
       submitBtn.disabled = true;
       submitBtn.textContent = 'Enviando...';
@@ -344,7 +536,10 @@
         tipoKayak: $('#regTipoKayak').value,
         experiencia: $('#regExperiencia').value,
         contactoEmergencia: $('#regContactoEmergencia').value.trim(),
-        observaciones: $('#regObservaciones').value.trim()
+        observaciones: $('#regObservaciones').value.trim(),
+        declaracionSalud: $('#regDeclaracionSalud').checked ? 1 : 0,
+        comprobanteNombre: comprobante?.nombre || '',
+        comprobante: comprobante?.data || ''
       };
 
       fetch(`${API_BASE}/api/inscribirse`, {
@@ -489,11 +684,140 @@
       } else if (tab === 'blog') {
         $('#dashTabBlog').classList.add('active');
         loadAdminBlogPosts();
+      } else if (tab === 'beneficios') {
+        $('#dashTabBeneficios').classList.add('active');
+        loadAdminBeneficios();
       } else if (tab === 'usuarios') {
         $('#dashTabUsuarios').classList.add('active');
         loadAdminUsers();
       }
     });
+  });
+
+  /* ------------------------------------------------------------------------
+     11b · BENEFICIOS · alta, baja y modificación
+     ------------------------------------------------------------------------ */
+  const benefitDialog = $('#benefitEditorDialog');
+  const benefitForm = $('#benefitForm');
+  const beneficiosTbody = $('#adminBeneficiosTbody');
+  wireDialog(benefitDialog);
+
+  const benFields = {
+    id: '#benId', prestador: '#benPrestador', rubro: '#benRubro',
+    descripcion: '#benDescripcion', oferta: '#benOferta', detalle: '#benDetalle',
+    codigo: '#benCodigo', vigencia: '#benVigencia', logoUrl: '#benLogo',
+    enlace: '#benEnlace', orden: '#benOrden', activo: '#benActivo'
+  };
+
+  function openBenefitEditor(b) {
+    if (!benefitDialog) return;
+    $('#benefitEditorTitle').textContent = b ? 'Editar beneficio' : 'Nuevo beneficio';
+    $(benFields.id).value        = b?.id ?? '';
+    $(benFields.prestador).value = b?.prestador ?? '';
+    $(benFields.rubro).value     = b?.rubro ?? '';
+    $(benFields.descripcion).value = b?.descripcion ?? '';
+    $(benFields.oferta).value    = b?.oferta ?? '';
+    $(benFields.detalle).value   = b?.detalle ?? '';
+    $(benFields.codigo).value    = b?.codigo ?? '';
+    $(benFields.vigencia).value  = b?.vigencia ?? '';
+    $(benFields.logoUrl).value   = b?.logo_url ?? '';
+    $(benFields.enlace).value    = b?.enlace ?? '';
+    $(benFields.orden).value     = b?.orden ?? 0;
+    $(benFields.activo).value    = String(b?.activo ?? 1);
+    lock(true);
+    benefitDialog.showModal();
+  }
+
+  $('#openNewBenefitBtn')?.addEventListener('click', () => openBenefitEditor(null));
+
+  function loadAdminBeneficios() {
+    if (!authToken || !beneficiosTbody) return;
+    fetch(`${API_BASE}/api/admin/beneficios`, { headers: { 'Authorization': `Bearer ${authToken}` } })
+      .then(res => res.json())
+      .then(rows => {
+        const list = Array.isArray(rows) ? rows : [];
+        const count = $('#countBeneficios');
+        if (count) count.textContent = list.length;
+
+        if (!list.length) {
+          beneficiosTbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px 0;color:var(--ink-3)">Todavía no hay beneficios cargados.</td></tr>';
+          return;
+        }
+
+        beneficiosTbody.innerHTML = '';
+        list.forEach(b => {
+          const tr = document.createElement('tr');
+          const cells = [b.orden, b.prestador, b.rubro || '—', b.oferta, b.codigo || '—', b.vigencia || '—'];
+          cells.forEach(v => {
+            const td = document.createElement('td');
+            td.textContent = v;
+            tr.appendChild(td);
+          });
+
+          const tdEstado = document.createElement('td');
+          const tag = document.createElement('span');
+          tag.className = 'status-pill ' + (b.activo ? 'pill-confirmada' : 'pill-pendiente');
+          tag.textContent = b.activo ? 'Visible' : 'Oculto';
+          tdEstado.appendChild(tag);
+          tr.appendChild(tdEstado);
+
+          const tdAcc = document.createElement('td');
+          const edit = document.createElement('button');
+          edit.className = 'btn btn--ghost btn--sm';
+          edit.type = 'button';
+          edit.textContent = 'Editar';
+          edit.addEventListener('click', () => openBenefitEditor(b));
+
+          const del = document.createElement('button');
+          del.className = 'btn btn--ghost btn--sm btn--danger';
+          del.type = 'button';
+          del.textContent = 'Eliminar';
+          del.addEventListener('click', () => {
+            if (!confirm(`¿Eliminar el beneficio de ${b.prestador}?`)) return;
+            fetch(`${API_BASE}/api/admin/beneficios/${b.id}`, {
+              method: 'DELETE',
+              headers: { 'Authorization': `Bearer ${authToken}` }
+            }).then(() => loadAdminBeneficios());
+          });
+
+          tdAcc.append(edit, del);
+          tr.appendChild(tdAcc);
+          beneficiosTbody.appendChild(tr);
+        });
+      })
+      .catch(() => {
+        beneficiosTbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px 0;color:var(--ember)">No se pudieron cargar los beneficios.</td></tr>';
+      });
+  }
+
+  benefitForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = $(benFields.id).value;
+    const payload = {
+      prestador: $(benFields.prestador).value.trim(),
+      rubro: $(benFields.rubro).value.trim(),
+      descripcion: $(benFields.descripcion).value.trim(),
+      oferta: $(benFields.oferta).value.trim(),
+      detalle: $(benFields.detalle).value.trim(),
+      codigo: $(benFields.codigo).value.trim(),
+      vigencia: $(benFields.vigencia).value.trim(),
+      logoUrl: $(benFields.logoUrl).value.trim(),
+      enlace: $(benFields.enlace).value.trim(),
+      orden: Number($(benFields.orden).value) || 0,
+      activo: $(benFields.activo).value === '1'
+    };
+
+    fetch(`${API_BASE}/api/admin/beneficios${id ? '/' + id : ''}`, {
+      method: id ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      body: JSON.stringify(payload)
+    })
+      .then(res => res.json())
+      .then(() => {
+        benefitDialog.close();
+        loadAdminBeneficios();
+      })
+      .catch(() => alert('No se pudo guardar el beneficio.'));
   });
 
   function loadAdminInscripciones() {
