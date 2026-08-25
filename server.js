@@ -170,15 +170,15 @@ db.serialize(() => {
     // Seed initial blog posts if none exist
     db.get("SELECT COUNT(*) as count FROM posts", (err, row) => {
         if (!err && row && row.count === 0) {
-            const post1Slug = 'confirmada-proxima-edicion-diciembre-2026';
-            const post1Title = 'Confirmada la próxima Bajada de Kayak: 12 y 13 de Diciembre de 2026';
-            const post1Resumen = 'Tras el rotundo éxito de abril, la Facultad de Ciencias Económicas de la UNPSJB abre las pre-inscripciones para la travesía de verano en Los Alerces.';
-            const post1Contenido = 'La Facultad de Ciencias Económicas de la Universidad Nacional de la Patagonia San Juan Bosco (UNPSJB) Sede Esquel se complace en anunciar oficialmente la fecha de la próxima edición de la Travesía y Bajada de Kayak en el Parque Nacional Los Alerces. El evento se llevará a cabo los días 12 y 13 de Diciembre de 2026.\n\nContaremos con clínicas previas de remo, acompañamiento de seguridad con Prefectura Naval Argentina y logística integral desde Lago Verde hasta Bahía Rosales.';
-            
-            const post2Slug = 'balance-historico-edicion-abril-2026';
-            const post2Title = 'Balance de la 7ª Edición: 42 remeros recuperaron una tradición histórica';
-            const post2Resumen = 'Resumen completo de la jornada de 20 km entre el Lago Verde y el Lago Futalaufquen organizada por la FCE UNPSJB.';
-            const post2Contenido = 'Con la participación de 42 remeros y remeras universitarios y vecinos de la Comarca del Ande, se llevó a cabo exitosamente el retorno formal de la Bajada de Kayak en el Parque Nacional Los Alerces. El trayecto se desarrolló en condiciones de agua cristalina y bajo estrictos protocolos de impacto ambiental cero.';
+            const post1Title = 'Confirmada la VIII Edición de la Bajada en Kayaks PNLA: 12 y 13 de Diciembre de 2026';
+            const post1Slug = 'confirmada-viii-edicion-bajada-kayaks-pnla-2026';
+            const post1Resumen = 'De acuerdo con lo previsto en la edición realizada en abril, y a pedido de los propios participantes, anunciamos la VIII Edición de la Travesía para el 12 y 13 de diciembre de 2026.';
+            const post1Contenido = 'De acuerdo con lo previsto en la edición realizada en abril, y a pedido de los propios participantes, nos complace anunciar que la próxima Bajada en Kayaks del Parque Nacional Los Alerces se llevará a cabo los días 12 y 13 de diciembre de 2026.\n\nEl rotundo éxito alcanzado en la última edición —por su organización, seguridad, atención y el entusiasmo compartido— nos impulsa a consolidar esta actividad año tras año, transformándola en una tradición que fortalece la identidad institucional y comunitaria.\n\nNuestra intención es seguir promoviendo la pertenencia, empatía, atracción, admiración, compromiso y orgullo hacia nuestra Comarca Andina, destacando su belleza natural y el espíritu colaborativo que caracteriza a quienes la habitan y la disfrutan.\n\nLa Facultad de Ciencias Económicas de la UNPSJB – Sede Esquel reafirma así su compromiso con el desarrollo de actividades que integran deporte, naturaleza y comunidad, generando espacios de encuentro que trascienden lo académico y fortalecen los lazos sociales y territoriales.';
+
+            const post2Title = 'Balance de la VII Edición: 42 remeros y 33 embarcaciones recorrieron el PNLA';
+            const post2Slug = 'balance-vii-edicion-42-remeros-33-embarcaciones-pnla';
+            const post2Resumen = 'Resumen completo de la jornada de 20 km entre el Lago Verde, el Río Arrayanes, la playa de Hostería Cumehué y el Camping Agreste Bahía Rosales.';
+            const post2Contenido = 'Organizada por la Facultad de Ciencias Económicas de la Universidad Nacional de la Patagonia San Juan Bosco (UNPSJB), la séptima edición de la Travesía en Kayaks del Parque Nacional Los Alerces fue una experiencia inolvidable que reunió a 42 remeros y 33 embarcaciones en un recorrido único por los paisajes más emblemáticos de la cordillera.\n\nEl recorrido constó de cuatro hitos centrales:\n• Inicio en el Lago Verde, rodeado de aguas cristalinas.\n• Descenso por el majestuoso Río Arrayanes, un verdadero espectáculo natural.\n• Paso por la playa de la Hostería Cumehué, donde la camaradería se hizo sentir.\n• Llegada al Camping Agreste Bahía Rosales, coronando una jornada de aventura y emoción.\n\nAventura, placer, naturaleza, atención y seguridad se combinaron para dar forma a un evento que dejó huella en cada participante.';
 
             db.run(`INSERT INTO posts (titulo, slug, resumen, contenido, imagen_url, categoria, publicado) VALUES (?, ?, ?, ?, ?, ?, 1)`, [
                 post1Title, post1Slug, post1Resumen, post1Contenido, 'assets/gallery-2.jpg', 'Oficial'
@@ -219,7 +219,11 @@ app.post('/api/inscribirse', (req, res) => {
     }
 
     if (!declaracionSalud) {
-        return res.status(400).json({ error: 'Falta aceptar la declaración de salud.' });
+        return res.status(400).json({ error: 'Falta aceptar la declaración de aptitud física y salud.' });
+    }
+
+    if (!comprobante) {
+        return res.status(400).json({ error: 'El adjunto del comprobante de transferencia es obligatorio.' });
     }
 
     const code = 'KA-' + Math.floor(100000 + Math.random() * 900000);

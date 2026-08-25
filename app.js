@@ -538,6 +538,7 @@
         contactoEmergencia: $('#regContactoEmergencia').value.trim(),
         observaciones: $('#regObservaciones').value.trim(),
         declaracionSalud: $('#regDeclaracionSalud').checked ? 1 : 0,
+        declaracionImagen: $('#regDeclaracionImagen')?.checked ? 1 : 0,
         comprobanteNombre: comprobante?.nombre || '',
         comprobante: comprobante?.data || ''
       };
