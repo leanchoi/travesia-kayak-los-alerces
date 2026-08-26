@@ -808,7 +808,7 @@ em { font-style: italic; }
 }
 .person__plate {
   position: relative; margin: 0;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   border: 1px solid var(--rule);
   border-radius: 4px;
@@ -818,7 +818,7 @@ em { font-style: italic; }
 .person__plate img {
   width: 100%; height: 100%;
   object-fit: cover;
-  object-position: center 30%;
+  object-position: center 25%;
   transition: transform .4s var(--ease);
 }
 .person__plate:hover img {
