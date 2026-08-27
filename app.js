@@ -159,11 +159,16 @@
   if (film) {
     const btn = $('.film__btn', film);
     btn?.addEventListener('click', () => {
-      const id = film.dataset.video;
+      const driveId = film.dataset.driveId;
+      const ytId = film.dataset.video;
       const frame = document.createElement('iframe');
-      frame.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+      if (driveId) {
+        frame.src = `https://drive.google.com/file/d/${driveId}/preview`;
+      } else {
+        frame.src = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+      }
       frame.title = 'Video de la Travesía de Kayak en el Parque Nacional Los Alerces';
-      frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      frame.allow = 'autoplay; encrypted-media; picture-in-picture';
       frame.allowFullscreen = true;
       film.appendChild(frame);
       btn.remove();
