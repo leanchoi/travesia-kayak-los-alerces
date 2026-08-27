@@ -404,7 +404,10 @@
         }
         publicBlogGrid.innerHTML = posts.map(p => `
           <article class="news-card">
-            ${p.imagen_url ? `<img src="${p.imagen_url}" alt="${p.titulo}" class="news-card__img" loading="lazy">` : ''}
+            ${p.imagen_url ? `
+              <div class="news-card__img-container">
+                <img src="${p.imagen_url}" alt="${p.titulo}" class="news-card__img" loading="lazy">
+              </div>` : ''}
             <div class="news-card__body">
               <div class="news-card__meta">
                 <span class="news-card__tag">${p.categoria}</span>
@@ -430,10 +433,12 @@
       .then(post => {
         readPostCategoryTitle.textContent = `${post.categoria} · ${new Date(post.creado_at).toLocaleDateString('es-AR')}`;
         readPostBody.innerHTML = `
-          <h2 style="font-family: var(--serif); font-size: 1.6rem; margin-bottom: 1rem;">${post.titulo}</h2>
-          ${post.imagen_url ? `<img src="${post.imagen_url}" alt="${post.titulo}" style="width:100%; max-height:300px; object-fit:cover; border-radius:4px; margin-bottom:1rem;">` : ''}
-          <p style="font-weight:600; color: var(--lake); margin-bottom:1rem;">${post.resumen}</p>
-          <div style="color: var(--ink-2); font-size: .95rem; line-height: 1.7; white-space: pre-line;">${post.contenido}</div>
+          <h2 style="font-family: var(--serif); font-size: 1.65rem; line-height: 1.3; margin-bottom: 1.2rem; color: var(--ink);">${post.titulo}</h2>
+          ${post.imagen_url ? `
+            <div style="width:100%; max-height:520px; background:var(--paper-3); display:flex; justify-content:center; align-items:center; border-radius:4px; overflow:hidden; margin-bottom:1.4rem; border:1px solid var(--rule-soft); padding:0.4rem;">
+              <img src="${post.imagen_url}" alt="${post.titulo}" style="max-width:100%; max-height:480px; width:auto; height:auto; object-fit:contain; display:block; border-radius:2px;">
+            </div>` : ''}
+          <div style="color: var(--ink-2); font-size: 1rem; line-height: 1.7; white-space: pre-line;">${post.contenido}</div>
         `;
         lock(true);
         postReaderDialog.showModal();
