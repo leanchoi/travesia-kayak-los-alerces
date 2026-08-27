@@ -170,9 +170,9 @@ db.serialize(() => {
     // Seed initial blog posts if none exist
     db.get("SELECT COUNT(*) as count FROM posts", (err, row) => {
         if (!err && row && row.count === 0) {
-            const post1Title = 'Confirmada la VIII Edición de la Bajada en Kayaks PNLA: 12 y 13 de Diciembre de 2026';
-            const post1Slug = 'confirmada-viii-edicion-bajada-kayaks-pnla-2026';
-            const post1Resumen = 'De acuerdo con lo previsto en la edición realizada en abril, y a pedido de los propios participantes, anunciamos la VIII Edición de la Travesía para el 12 y 13 de diciembre de 2026.';
+            const post1Title = 'Reseña – Próxima Bajada en Kayaks PNLA 2026';
+            const post1Slug = 'resena-proxima-bajada-en-kayaks-pnla-2026';
+            const post1Resumen = 'De acuerdo con lo previsto en la edición realizada en abril, y a pedido de los propios participantes, nos complace anunciar que la próxima Bajada en Kayaks del Parque Nacional Los Alerces se llevará a cabo los días 12 y 13 de diciembre de 2026.';
             const post1Contenido = 'De acuerdo con lo previsto en la edición realizada en abril, y a pedido de los propios participantes, nos complace anunciar que la próxima Bajada en Kayaks del Parque Nacional Los Alerces se llevará a cabo los días 12 y 13 de diciembre de 2026.\n\nEl rotundo éxito alcanzado en la última edición —por su organización, seguridad, atención y el entusiasmo compartido— nos impulsa a consolidar esta actividad año tras año, transformándola en una tradición que fortalece la identidad institucional y comunitaria.\n\nNuestra intención es seguir promoviendo la pertenencia, empatía, atracción, admiración, compromiso y orgullo hacia nuestra Comarca Andina, destacando su belleza natural y el espíritu colaborativo que caracteriza a quienes la habitan y la disfrutan.\n\nLa Facultad de Ciencias Económicas de la UNPSJB – Sede Esquel reafirma así su compromiso con el desarrollo de actividades que integran deporte, naturaleza y comunidad, generando espacios de encuentro que trascienden lo académico y fortalecen los lazos sociales y territoriales.';
 
             const post2Title = 'Balance de la VII Edición: 42 remeros y 33 embarcaciones recorrieron el PNLA';
