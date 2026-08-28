@@ -153,44 +153,21 @@
   $$('.plate img, .person__plate img').forEach(watchImage);
 
   /* ------------------------------------------------------------------------
-     6 · VIDEO CON AUTOPLAY EN SCROLL (GOOGLE DRIVE EMBED)
+     6 · VIDEO CON AUTOPLAY EN SCROLL (INTERSECTION OBSERVER)
      ------------------------------------------------------------------------ */
-  const film = $('#film');
-  if (film) {
-    const driveId = film.dataset.driveId;
-    const ytId = film.dataset.video;
-    
-    let loaded = false;
-    const loadVideo = () => {
-      if (loaded) return;
-      loaded = true;
-      const frame = document.createElement('iframe');
-      if (driveId) {
-        frame.src = `https://drive.google.com/file/d/${driveId}/preview?autoplay=1`;
-      } else {
-        frame.src = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
-      }
-      frame.title = 'Video de la Travesía de Kayak en el Parque Nacional Los Alerces';
-      frame.allow = 'autoplay; encrypted-media; picture-in-picture';
-      frame.allowFullscreen = true;
-      film.appendChild(frame);
-      const btn = $('.film__btn', film);
-      btn?.remove();
-    };
-
+  const filmVideo = $('#film video');
+  if (filmVideo) {
     if ('IntersectionObserver' in window) {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            loadVideo();
-            observer.disconnect();
+            filmVideo.play().catch(() => {});
+          } else {
+            filmVideo.pause();
           }
         });
       }, { threshold: 0.2 });
-      observer.observe(film);
-    } else {
-      const btn = $('.film__btn', film);
-      btn?.addEventListener('click', loadVideo, { once: true });
+      observer.observe(filmVideo);
     }
   }
 

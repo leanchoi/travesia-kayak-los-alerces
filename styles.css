@@ -689,7 +689,8 @@ em { font-style: italic; }
 .film__btn:hover .film__ring { background: var(--ember); border-color: var(--ember); color: #fff; transform: scale(1.06); }
 .film__label { display: flex; flex-direction: column; gap: .2rem; font-size: 1rem; font-weight: 500; text-align: center; }
 .film__label em { font-style: normal; font-size: .8rem; color: var(--ink-3); }
-.film iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; z-index: 2; }
+.film iframe,
+.film video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border: 0; z-index: 2; border-radius: 2px; }
 
 .plates {
   display: grid;
