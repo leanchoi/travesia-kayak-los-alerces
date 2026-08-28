@@ -557,7 +557,7 @@
       .then(res => res.json())
       .then(data => {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Enviar Pre-Inscripción';
+        submitBtn.textContent = 'Enviar Inscripción';
 
         if (data.code) {
           enrollmentForm.style.display = 'none';
@@ -569,7 +569,7 @@
       })
       .catch(() => {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Enviar Pre-Inscripción';
+        submitBtn.textContent = 'Enviar Inscripción';
         alert('Error de red. Intente nuevamente.');
       });
     });
