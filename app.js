@@ -153,17 +153,20 @@
   $$('.plate img, .person__plate img').forEach(watchImage);
 
   /* ------------------------------------------------------------------------
-     6 · VIDEO YOUTUBE
+     6 · VIDEO CON AUTOPLAY EN SCROLL (GOOGLE DRIVE EMBED)
      ------------------------------------------------------------------------ */
   const film = $('#film');
   if (film) {
-    const btn = $('.film__btn', film);
-    btn?.addEventListener('click', () => {
-      const driveId = film.dataset.driveId;
-      const ytId = film.dataset.video;
+    const driveId = film.dataset.driveId;
+    const ytId = film.dataset.video;
+    
+    let loaded = false;
+    const loadVideo = () => {
+      if (loaded) return;
+      loaded = true;
       const frame = document.createElement('iframe');
       if (driveId) {
-        frame.src = `https://drive.google.com/file/d/${driveId}/preview`;
+        frame.src = `https://drive.google.com/file/d/${driveId}/preview?autoplay=1`;
       } else {
         frame.src = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
       }
@@ -171,8 +174,24 @@
       frame.allow = 'autoplay; encrypted-media; picture-in-picture';
       frame.allowFullscreen = true;
       film.appendChild(frame);
-      btn.remove();
-    }, { once: true });
+      const btn = $('.film__btn', film);
+      btn?.remove();
+    };
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            loadVideo();
+            observer.disconnect();
+          }
+        });
+      }, { threshold: 0.2 });
+      observer.observe(film);
+    } else {
+      const btn = $('.film__btn', film);
+      btn?.addEventListener('click', loadVideo, { once: true });
+    }
   }
 
   /* ------------------------------------------------------------------------

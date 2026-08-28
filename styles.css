@@ -1045,7 +1045,13 @@ em { font-style: italic; }
   gap: clamp(20px, 3vw, 42px);
   align-items: start;
 }
-.film--portrait { aspect-ratio: 9 / 16; margin-bottom: 0; }
+.film--portrait {
+  position: sticky;
+  top: 100px;
+  aspect-ratio: 9 / 16;
+  margin-bottom: 0;
+  z-index: 5;
+}
 .film--portrait .film__ring { width: 58px; height: 58px; }
 .reelhub__side { display: flex; flex-direction: column; }
 .reelhub__label {
@@ -1058,7 +1064,7 @@ em { font-style: italic; }
 
 @media (max-width: 860px) {
   .reelhub { grid-template-columns: 1fr; }
-  .film--portrait { max-width: 300px; margin-inline: auto; }
+  .film--portrait { position: static; max-width: 300px; margin-inline: auto; }
 }
 
 /* Borrador: la cita todavía no fue aprobada por la persona a la que se le
