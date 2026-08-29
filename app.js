@@ -121,21 +121,24 @@
   }
 
   /* ------------------------------------------------------------------------
-     4 · VIDEO COMPONENT: Autoplay on scroll & Sticky Behavior
+     4 · VIDEO COMPONENT: Autoplay on scroll & Sticky Behavior (Desktop only)
      ------------------------------------------------------------------------ */
   const galleryVideo = $('#galleryVideo');
   if (galleryVideo && 'IntersectionObserver' in window) {
-    const videoObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          galleryVideo.play().catch(() => {});
-        } else {
-          galleryVideo.pause();
-        }
-      });
-    }, { threshold: 0.25 });
+    const isMobile = window.innerWidth <= 768;
+    if (!isMobile) {
+      const videoObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            galleryVideo.play().catch(() => {});
+          } else {
+            galleryVideo.pause();
+          }
+        });
+      }, { threshold: 0.35 });
 
-    videoObserver.observe(galleryVideo);
+      videoObserver.observe(galleryVideo);
+    }
   }
 
   /* ------------------------------------------------------------------------
