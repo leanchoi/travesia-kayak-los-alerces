@@ -1,0 +1,34 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Evitar problemas de autorización en cabeceras HTTP de Apache
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redireccionar todas las llamadas /api/* hacia api/index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^api/(.*)$ api/index.php [QSA,L]
+</IfModule>
+
+# Proteger archivos de datos y base de datos local SQLite
+<FilesMatch "\.(db|sqlite|log|env)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Habilitar compresión Gzip para mejorar velocidad de carga
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Cache de archivos estáticos en navegador
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+</IfModule>
