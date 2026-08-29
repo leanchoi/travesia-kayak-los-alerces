@@ -225,7 +225,7 @@
     }
   };
 
-  fetch('/api/beneficios')
+  fetch('api/beneficios')
     .then((r) => { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
     .then((items) => {
       allBenefits = Array.isArray(items) ? items : [];

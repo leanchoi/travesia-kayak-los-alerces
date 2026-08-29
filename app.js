@@ -298,14 +298,14 @@
   wireDialog(postReaderDialog);
 
   function loadPublicBlogPosts() {
-    const newsGrid = $('#newsGrid');
+    const newsGrid = $('#publicBlogGrid') || $('#newsGrid');
     if (!newsGrid) return;
 
     fetch(`${API_BASE}/api/blog`)
       .then(res => res.json())
       .then(posts => {
-        if (!posts || posts.length === 0) {
-          newsGrid.innerHTML = '<p class="text-muted">Próximamente publicaremos novedades oficiales de la VIII edición.</p>';
+        if (!Array.isArray(posts) || posts.length === 0) {
+          newsGrid.innerHTML = '<div style="grid-column: 1/-1; padding: 28px 0; text-align: center; color: var(--ink-3);">Próximamente publicaremos novedades oficiales de la VIII edición.</div>';
           return;
         }
 
@@ -330,7 +330,7 @@
         });
       })
       .catch(() => {
-        newsGrid.innerHTML = '<p class="text-muted">No se pudieron cargar las noticias en este momento.</p>';
+        newsGrid.innerHTML = '<div style="grid-column: 1/-1; padding: 28px 0; text-align: center; color: var(--ember);">No se pudieron cargar las noticias en este momento.</div>';
       });
   }
 
