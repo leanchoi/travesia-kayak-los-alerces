@@ -26,7 +26,7 @@
 <link rel="preload" href="assets/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/instrument-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
 
-<link rel="stylesheet" href="styles.css?v=20260829_06">
+<link rel="stylesheet" href="styles.css?v=20260829_07">
 <script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
@@ -143,7 +143,7 @@
       grid.innerHTML = items.map((b) => `
         <article class="perk">
           <div class="perk__head">
-            <figure class="perk__logo">
+            <figure class="perk__logo ${b.logo_url ? '' : 'is-empty'}">
               ${b.logo_url ? `<img src="${esc(b.logo_url)}" alt="${esc(b.prestador)}" loading="lazy" decoding="async">` : ''}
               <b class="perk__initials">${esc((b.prestador || '?').trim().charAt(0))}</b>
             </figure>

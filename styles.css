@@ -1363,25 +1363,49 @@ html.dark .wordmark__img {
   color: var(--ink-2); max-width: 58ch; text-wrap: pretty;
 }
 
+.backlink {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  padding: .45rem .95rem;
+  background: color-mix(in oklab, var(--paper-2) 80%, transparent);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  transition: all .2s var(--ease);
+}
+.backlink:hover {
+  background: var(--lake-wash);
+  color: var(--lake);
+  border-color: var(--lake);
+}
+
 .sponsors { list-style: none; margin: 0; padding: 0; }
 .sponsor {
   display: grid;
   grid-template-columns: 230px minmax(0, 1fr);
   gap: clamp(22px, 4vw, 56px);
   align-items: start;
-  padding-block: clamp(30px, 4vw, 46px);
-  border-top: 1px solid var(--rule);
+  padding: clamp(24px, 3.5vw, 36px);
+  background: #FFFFFF;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
 }
-.sponsor:last-child { border-bottom: 1px solid var(--rule); }
 
 .sponsor__logo {
-  --pad: 20px;
+  --pad: 16px;
   position: relative;
   aspect-ratio: 5 / 3;
   margin: 0;
-  background: #FCFBF7;
-  border: 1px solid var(--rule);
-  border-radius: 2px;
+  background: var(--paper-2);
+  border: 1px solid var(--rule-soft);
+  border-radius: 8px;
+  overflow: hidden;
 }
 .sponsor__logo img {
   position: absolute; inset: 0; margin: auto;
@@ -1395,7 +1419,7 @@ html.dark .wordmark__img {
   font-size: .7rem; font-weight: 600; letter-spacing: .11em;
   text-transform: uppercase; color: var(--ink-3); margin: 0 0 .45rem;
 }
-.sponsor__name { font-size: clamp(1.4rem, 2.4vw, 1.85rem); margin: 0 0 .7rem; }
+.sponsor__name { font-family: var(--serif); font-size: clamp(1.35rem, 2.2vw, 1.8rem); margin: 0 0 .6rem; color: var(--ink); }
 .sponsor__tag {
   font-family: var(--serif); font-size: 1.12rem; line-height: 1.35;
   color: var(--lake); font-style: italic;
@@ -1411,9 +1435,16 @@ html.dark .wordmark__img {
 
 @media (max-width: 720px) {
   .sub-cover__grid { grid-template-columns: 1fr; }
-  .sub-cover__emblem { max-width: 190px; }
-  .sponsor { grid-template-columns: 1fr; }
-  .sponsor__logo { max-width: 240px; }
+  .sub-cover__emblem { max-width: 190px; margin: 0 auto 1rem; }
+  .sponsor {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 1.3rem;
+  }
+  .sponsor__logo {
+    max-width: 220px;
+    height: 90px;
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -1539,6 +1570,18 @@ body.is-locked {
   }
   .masthead__inner {
     padding: .7rem var(--gutter);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .6rem;
+  }
+  .wordmark__text i {
+    display: none;
+  }
+  .backlink {
+    font-size: .82rem;
+    padding: .38rem .75rem;
+    white-space: nowrap;
   }
   .nav {
     position: fixed;
@@ -2233,78 +2276,154 @@ body.is-locked {
    -------------------------------------------------------------------------- */
 .perks {
   display: grid;
-  /* min() para que en pantallas de 320 px la columna no exija más ancho del
-     que hay y saque la página de cuadro. */
   grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
-  gap: clamp(16px, 2vw, 24px);
+  gap: clamp(16px, 2.5vw, 24px);
 }
 .perks__loading { grid-column: 1 / -1; padding: 2rem 0; color: var(--ink-3); text-align: center; }
 
 .perk {
-  display: flex; flex-direction: column;
-  padding: clamp(20px, 2.4vw, 28px);
-  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  padding: 1.4rem;
+  background: #FFFFFF;
   border: 1px solid var(--rule);
-  border-radius: 3px;
-  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+  border-radius: 12px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
 }
-.perk:hover { border-color: var(--lake); transform: translateY(-2px); }
+.perk:hover {
+  border-color: var(--lake);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
 
-.perk__head { display: flex; align-items: center; gap: .9rem; margin-bottom: 1rem; }
+.perk__head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
 .perk__logo {
   position: relative;
-  width: 62px; height: 62px; flex: none; margin: 0;
-  display: grid; place-items: center;
-  background: #FCFBF7;
-  border: 1px solid var(--rule); border-radius: 3px;
+  width: 68px;
+  height: 68px;
+  min-width: 68px;
+  max-width: 68px;
+  flex: none;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper-2);
+  border: 1px solid var(--rule-soft);
+  border-radius: 8px;
   overflow: hidden;
+  padding: 6px;
 }
-.perk__logo img { max-width: calc(100% - 12px); max-height: calc(100% - 12px); width: auto; height: auto; object-fit: contain; }
+.perk__logo img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
 .perk__initials {
   display: none;
-  font-family: var(--serif); font-size: 1.6rem; font-weight: 500; color: var(--lake);
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--lake);
 }
 .perk__logo.is-empty img { display: none; }
-.perk__logo.is-empty { background: var(--lake-wash); }
 .perk__logo.is-empty .perk__initials { display: block; }
 
 .perk__rubro {
-  font-size: .66rem; font-weight: 600; letter-spacing: .11em;
-  text-transform: uppercase; color: var(--ink-3); margin: 0 0 .2rem;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--lake);
+  margin: 0 0 .2rem;
 }
-.perk__name { font-size: 1.16rem; margin: 0; }
-.perk__desc { font-size: .9rem; color: var(--ink-2); margin: 0 0 1.2rem; }
+.perk__name {
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  line-height: 1.2;
+  margin: 0;
+  color: var(--ink);
+}
+.perk__desc {
+  font-size: .92rem;
+  color: var(--ink-2);
+  line-height: 1.48;
+  margin: 0 0 1.2rem;
+}
 
 .perk__offer {
   position: relative;
   margin-top: auto;
-  padding: 1rem 1.1rem 1.1rem 2.6rem;
+  padding: 1.1rem 1.2rem 1.1rem 2.8rem;
   background: var(--ember-wash);
-  border-left: 2px solid var(--ember);
-  border-radius: 0 3px 3px 0;
+  border-left: 3px solid var(--ember);
+  border-radius: 0 8px 8px 0;
+  margin-bottom: .9rem;
 }
-.perk__tag { position: absolute; top: 1.05rem; left: .95rem; color: var(--ember); }
+.perk__tag {
+  position: absolute;
+  top: 1.15rem;
+  left: 1rem;
+  color: var(--ember);
+  width: 18px;
+  height: 18px;
+}
 .perk__deal {
-  font-family: var(--serif); font-size: 1.14rem; line-height: 1.25;
-  letter-spacing: -.01em; color: var(--ink); margin: 0;
+  font-family: var(--serif);
+  font-size: 1.16rem;
+  font-weight: 600;
+  line-height: 1.28;
+  color: var(--ink);
+  margin: 0;
 }
-.perk__fine { margin: .5rem 0 0; font-size: .8rem; color: var(--ink-2); line-height: 1.45; }
+.perk__fine {
+  margin: .4rem 0 0;
+  font-size: .82rem;
+  color: var(--ink-2);
+  line-height: 1.42;
+}
 
 .perk__foot {
-  display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem;
-  margin-top: 1rem; padding-top: .85rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .6rem;
+  padding-top: .9rem;
   border-top: 1px solid var(--rule-soft);
 }
 .perk__code {
-  font-family: var(--mono); font-size: .72rem; letter-spacing: .08em;
-  color: var(--lake); background: var(--lake-wash);
-  border: 1px dashed color-mix(in oklab, var(--lake) 45%, transparent);
-  border-radius: 3px; padding: .28em .6em;
+  font-family: var(--mono);
+  font-size: .82rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: var(--lake);
+  background: var(--lake-wash);
+  border: 1.5px dashed color-mix(in oklab, var(--lake) 50%, transparent);
+  border-radius: 4px;
+  padding: .35em .75em;
 }
-.perk__valid { font-size: .76rem; color: var(--ink-3); }
+.perk__valid {
+  font-size: .78rem;
+  color: var(--ink-3);
+}
 .perk__link {
-  margin-left: auto; display: inline-flex; align-items: center; gap: .35rem;
-  font-size: .82rem; font-weight: 500; text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--lake);
+  text-decoration: none;
 }
 
 .check-label {
