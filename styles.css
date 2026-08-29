@@ -1082,11 +1082,12 @@ html.dark .wordmark__img {
   align-items: start;
 }
 .film--portrait {
-  position: sticky;
-  top: 100px;
+  position: relative;
   aspect-ratio: 9 / 16;
   margin-bottom: 0;
-  z-index: 5;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 }
 .film--portrait .film__ring { width: 58px; height: 58px; }
 .reelhub__side { display: flex; flex-direction: column; }
@@ -1104,12 +1105,14 @@ html.dark .wordmark__img {
     gap: 20px;
   }
   .film--portrait {
-    position: static;
-    max-width: 220px;
+    position: relative !important;
+    top: auto !important;
+    max-width: 240px;
+    width: 100%;
     margin-inline: auto;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   }
 }
 
@@ -1888,6 +1891,12 @@ body.is-locked {
   color: var(--ink);
   font-weight: 600;
 }
+.d-check {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  padding: .8rem .95rem;
+  border: 1px solid var(--rule);
   border-radius: 8px;
   background: color-mix(in oklab, var(--lake) 4%, transparent);
   cursor: pointer;
