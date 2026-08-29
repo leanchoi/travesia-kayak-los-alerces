@@ -29,7 +29,7 @@
 <link rel="preload" href="assets/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/instrument-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
 
-<link rel="stylesheet" href="styles.css?v=20260829_15">
+<link rel="stylesheet" href="styles.css?v=20260829_17">
 
 <!-- Marca que hay JS antes de pintar. -->
 <script>document.documentElement.classList.add('js')</script>
@@ -1118,9 +1118,21 @@
           <option value="Prensa">Prensa</option>
         </select>
       </div>
-      <div class="d-field">
-        <label for="postImagenUrl">Path de Imagen</label>
-        <input type="text" id="postImagenUrl" placeholder="assets/gallery-1.jpg">
+      <div class="d-field d-full">
+        <label>Imagen de Portada de la Noticia</label>
+        <div class="img-upload-box" id="postImgBox">
+          <div class="img-upload-preview" id="postImgPreviewWrap" style="display:none;">
+            <img id="postImgPreview" src="" alt="Vista previa de imagen" />
+            <button type="button" class="btn-remove-img" id="postRemoveImgBtn" title="Eliminar imagen">✕ Quitar imagen</button>
+          </div>
+          <div class="img-upload-actions">
+            <label class="btn btn--solid btn--sm img-upload-btn" for="postImageFile">
+              📁 Subir Imagen
+              <input type="file" id="postImageFile" accept="image/*" style="display:none;">
+            </label>
+            <input type="text" id="postImagenUrl" placeholder="o pegar enlace web / ruta..." style="flex:1; min-width:180px;">
+          </div>
+        </div>
       </div>
       <div class="d-field d-full">
         <label for="postResumen">Resumen Corto *</label>
@@ -1183,9 +1195,21 @@
           <label for="benVigencia">Vigencia</label>
           <input type="text" id="benVigencia" placeholder="Hasta el 13/12/2026">
         </div>
-        <div class="d-field">
-          <label for="benLogo">Ruta del logo</label>
-          <input type="text" id="benLogo" placeholder="assets/auspiciantes/nombre.webp">
+        <div class="d-field d-full">
+          <label>Logo o Imagen del Prestador</label>
+          <div class="img-upload-box" id="benLogoBox">
+            <div class="img-upload-preview" id="benLogoPreviewWrap" style="display:none;">
+              <img id="benLogoPreview" src="" alt="Vista previa del logo" />
+              <button type="button" class="btn-remove-img" id="benRemoveLogoBtn" title="Eliminar logo">✕ Quitar logo</button>
+            </div>
+            <div class="img-upload-actions">
+              <label class="btn btn--solid btn--sm img-upload-btn" for="benLogoFile">
+                📁 Subir Logo
+                <input type="file" id="benLogoFile" accept="image/*" style="display:none;">
+              </label>
+              <input type="text" id="benLogo" placeholder="o pegar enlace web / ruta..." style="flex:1; min-width:180px;">
+            </div>
+          </div>
         </div>
         <div class="d-field">
           <label for="benEnlace">Enlace (opcional)</label>
@@ -1345,6 +1369,6 @@
   </figure>
 </dialog>
 
-<script src="app.js?v=20260829_16" defer></script>
+<script src="app.js?v=20260829_17" defer></script>
 </body>
 </html>

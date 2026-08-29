@@ -826,6 +826,41 @@
     enlace: '#benEnlace', orden: '#benOrden', activo: '#benActivo'
   };
 
+  const benLogoFile = $('#benLogoFile');
+  const benLogoPreviewWrap = $('#benLogoPreviewWrap');
+  const benLogoPreview = $('#benLogoPreview');
+  const benRemoveLogoBtn = $('#benRemoveLogoBtn');
+  const benLogoInput = $('#benLogo');
+
+  benLogoFile?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      if (benLogoInput) benLogoInput.value = evt.target.result;
+      if (benLogoPreview) benLogoPreview.src = evt.target.result;
+      if (benLogoPreviewWrap) benLogoPreviewWrap.style.display = 'flex';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  benRemoveLogoBtn?.addEventListener('click', () => {
+    if (benLogoInput) benLogoInput.value = '';
+    if (benLogoFile) benLogoFile.value = '';
+    if (benLogoPreview) benLogoPreview.src = '';
+    if (benLogoPreviewWrap) benLogoPreviewWrap.style.display = 'none';
+  });
+
+  benLogoInput?.addEventListener('input', () => {
+    const val = benLogoInput.value.trim();
+    if (val) {
+      if (benLogoPreview) benLogoPreview.src = val;
+      if (benLogoPreviewWrap) benLogoPreviewWrap.style.display = 'flex';
+    } else {
+      if (benLogoPreviewWrap) benLogoPreviewWrap.style.display = 'none';
+    }
+  });
+
   function openBenefitEditor(b) {
     if (!benefitDialog) return;
     $('#benefitEditorTitle').textContent = b ? 'Editar beneficio' : 'Nuevo beneficio';
@@ -841,6 +876,15 @@
     $(benFields.enlace).value    = b?.enlace ?? '';
     $(benFields.orden).value     = b?.orden ?? 0;
     $(benFields.activo).value    = String(b?.activo ?? 1);
+
+    if (b?.logo_url) {
+      if (benLogoPreview) benLogoPreview.src = b.logo_url;
+      if (benLogoPreviewWrap) benLogoPreviewWrap.style.display = 'flex';
+    } else {
+      if (benLogoPreviewWrap) benLogoPreviewWrap.style.display = 'none';
+      if (benLogoFile) benLogoFile.value = '';
+    }
+
     lock(true);
     benefitDialog.showModal();
   }
@@ -946,6 +990,41 @@
   const openNewPostModalBtn = $('#openNewPostModalBtn');
   const postForm = $('#postForm');
 
+  const postImageFile = $('#postImageFile');
+  const postImgPreviewWrap = $('#postImgPreviewWrap');
+  const postImgPreview = $('#postImgPreview');
+  const postRemoveImgBtn = $('#postRemoveImgBtn');
+  const postImagenUrl = $('#postImagenUrl');
+
+  postImageFile?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      if (postImagenUrl) postImagenUrl.value = evt.target.result;
+      if (postImgPreview) postImgPreview.src = evt.target.result;
+      if (postImgPreviewWrap) postImgPreviewWrap.style.display = 'flex';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  postRemoveImgBtn?.addEventListener('click', () => {
+    if (postImagenUrl) postImagenUrl.value = '';
+    if (postImageFile) postImageFile.value = '';
+    if (postImgPreview) postImgPreview.src = '';
+    if (postImgPreviewWrap) postImgPreviewWrap.style.display = 'none';
+  });
+
+  postImagenUrl?.addEventListener('input', () => {
+    const val = postImagenUrl.value.trim();
+    if (val) {
+      if (postImgPreview) postImgPreview.src = val;
+      if (postImgPreviewWrap) postImgPreviewWrap.style.display = 'flex';
+    } else {
+      if (postImgPreviewWrap) postImgPreviewWrap.style.display = 'none';
+    }
+  });
+
   function loadAdminBlogPosts() {
     if (!authToken || !adminBlogTbody) return;
     adminFetch(`${API_BASE}/api/admin/posts`)
@@ -971,6 +1050,9 @@
     $('#postEditorTitle').textContent = 'Nueva Publicación';
     postForm.reset();
     $('#postId').value = '';
+    if (postImgPreview) postImgPreview.src = '';
+    if (postImgPreviewWrap) postImgPreviewWrap.style.display = 'none';
+    if (postImageFile) postImageFile.value = '';
     lock(true);
     postEditorDialog.showModal();
   });
@@ -982,7 +1064,7 @@
       const payload = {
         titulo: $('#postTitulo').value.trim(),
         categoria: $('#postCategoria').value,
-        imagenUrl: $('#postImagenUrl').value.trim(),
+        imagenUrl: (postImagenUrl ? postImagenUrl.value.trim() : '') || 'assets/gallery-1.jpg',
         resumen: $('#postResumen').value.trim(),
         contenido: $('#postContenido').value.trim(),
         publicado: $('#postPublicado').checked
@@ -1014,11 +1096,20 @@
       $('#postId').value = p.id;
       $('#postTitulo').value = p.titulo;
       $('#postCategoria').value = p.categoria;
-      $('#postImagenUrl').value = p.imagen_url || '';
+      if (postImagenUrl) postImagenUrl.value = p.imagen_url || '';
       $('#postResumen').value = p.resumen;
       $('#postContenido').value = p.contenido;
       $('#postPublicado').checked = !!p.publicado;
       $('#postEditorTitle').textContent = 'Editar Noticia';
+
+      if (p.imagen_url) {
+        if (postImgPreview) postImgPreview.src = p.imagen_url;
+        if (postImgPreviewWrap) postImgPreviewWrap.style.display = 'flex';
+      } else {
+        if (postImgPreviewWrap) postImgPreviewWrap.style.display = 'none';
+        if (postImageFile) postImageFile.value = '';
+      }
+
       lock(true);
       postEditorDialog.showModal();
     });
