@@ -417,6 +417,36 @@ em { font-style: italic; }
   letter-spacing: -.03em;
   line-height: .96;
 }
+.cover__header-block {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(16px, 3vw, 32px);
+}
+.cover__shield {
+  margin: 0;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cover__shield-img {
+  height: clamp(85px, 10vw, 135px);
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  opacity: 0.95;
+  filter: contrast(1.15) brightness(0.9);
+  transition: opacity .2s var(--ease), transform .2s var(--ease);
+}
+.cover__shield-img:hover {
+  opacity: 1;
+  transform: scale(1.03);
+}
+html.dark .cover__shield-img {
+  filter: invert(1) brightness(1.2);
+}
+
 .cover__title::after {
   content: ""; display: block;
   width: 92px; height: 1px; margin-top: clamp(24px, 3vw, 36px);
@@ -1678,6 +1708,20 @@ body.is-locked {
   /* Portada móvil */
   .cover {
     padding-block: clamp(24px, 5vh, 48px) clamp(36px, 6vh, 64px);
+  }
+  .cover__header-block {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .cover__shield {
+    margin: 0;
+    flex: none;
+  }
+  .cover__shield-img {
+    height: clamp(64px, 17vw, 92px);
+    width: auto;
   }
   .cover__title {
     font-size: clamp(2.3rem, 7.6vw, 3.4rem);
