@@ -26,7 +26,7 @@
 <link rel="preload" href="assets/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/instrument-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
 
-<link rel="stylesheet" href="styles.css?v=20260829_09">
+<link rel="stylesheet" href="styles.css?v=20260829_10">
 <script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
@@ -86,6 +86,16 @@
       </p>
     </header>
 
+    <div class="perks-filter-bar">
+      <div class="perks-search-wrap">
+        <svg class="ic perks-search-icon" aria-hidden="true"><use href="#i-tag"/></svg>
+        <input type="text" id="perkSearchInput" class="perks-search-input" placeholder="Buscar por prestador, rubro o descuento...">
+      </div>
+      <div class="perks-cats" id="perksCategoryPills">
+        <button type="button" class="perk-cat-pill active" data-cat="TODOS">Todos</button>
+      </div>
+    </div>
+
     <div class="perks" id="perksGrid">
       <p class="perks__loading">Cargando beneficios…</p>
     </div>
@@ -127,55 +137,120 @@
 </footer>
 
 <script>
-/* Los beneficios se administran desde el panel; acá sólo se leen. */
+/* Los beneficios se administran desde el panel; acá se renderizan con filtro y búsqueda. */
 (() => {
   const grid = document.getElementById('perksGrid');
+  const searchInput = document.getElementById('perkSearchInput');
+  const catContainer = document.getElementById('perksCategoryPills');
+
+  let allBenefits = [];
+  let currentCat = 'TODOS';
+
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function renderBenefits() {
+    const q = (searchInput?.value || '').toLowerCase().trim();
+    const filtered = allBenefits.filter((b) => {
+      const matchCat = currentCat === 'TODOS' || (b.rubro || '').toLowerCase() === currentCat.toLowerCase();
+      const matchText = !q || (b.prestador || '').toLowerCase().includes(q) ||
+                              (b.rubro || '').toLowerCase().includes(q) ||
+                              (b.oferta || '').toLowerCase().includes(q) ||
+                              (b.descripcion || '').toLowerCase().includes(q);
+      return matchCat && matchText;
+    });
+
+    if (!filtered.length) {
+      grid.innerHTML = '<p class="perks__loading">No se encontraron beneficios con ese criterio.</p>';
+      return;
+    }
+
+    grid.innerHTML = filtered.map((b) => `
+      <article class="perk">
+        <div class="perk__head">
+          <figure class="perk__logo ${b.logo_url ? '' : 'is-empty'}">
+            ${b.logo_url ? `<img src="${esc(b.logo_url)}" alt="${esc(b.prestador)}" loading="lazy" decoding="async">` : ''}
+            <b class="perk__initials">${esc((b.prestador || '?').trim().charAt(0))}</b>
+          </figure>
+          <div>
+            ${b.rubro ? `<p class="perk__rubro">${esc(b.rubro)}</p>` : ''}
+            <h3 class="perk__name">${esc(b.prestador)}</h3>
+          </div>
+        </div>
+
+        ${b.descripcion ? `<p class="perk__desc">${esc(b.descripcion)}</p>` : ''}
+
+        <div class="perk__offer">
+          <svg class="ic perk__tag" aria-hidden="true"><use href="#i-tag"/></svg>
+          <p class="perk__deal">${esc(b.oferta)}</p>
+          ${b.detalle ? `<p class="perk__fine">${esc(b.detalle)}</p>` : ''}
+        </div>
+
+        <footer class="perk__foot">
+          ${b.codigo ? `
+            <button type="button" class="perk__code-btn" onclick="copyCode(this, '${esc(b.codigo)}')" title="Clic para copiar código">
+              🎟️ ${esc(b.codigo)}
+            </button>
+          ` : ''}
+          ${b.vigencia ? `<span class="perk__valid">Vence: ${esc(b.vigencia)}</span>` : ''}
+          ${b.enlace ? `<a class="perk__link" href="${esc(b.enlace)}" target="_blank" rel="noopener noreferrer">Ver más <svg class="ic ic--sm" aria-hidden="true"><use href="#i-external"/></svg></a>` : ''}
+        </footer>
+      </article>
+    `).join('');
+
+    // Fallback si la imagen no carga
+    grid.querySelectorAll('.perk__logo img').forEach((img) => {
+      const fail = () => img.closest('.perk__logo').classList.add('is-empty');
+      img.addEventListener('error', fail);
+      if (img.complete && img.naturalWidth === 0) fail();
+    });
+  }
+
+  window.copyCode = function(btn, code) {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(code).then(() => {
+        const originalText = btn.innerHTML;
+        btn.textContent = '¡Copiado! ✓';
+        btn.style.background = 'var(--lake)';
+        btn.style.color = '#fff';
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.style.background = '';
+          btn.style.color = '';
+        }, 1500);
+      });
+    }
+  };
 
   fetch('/api/beneficios')
     .then((r) => { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
     .then((items) => {
-      if (!items.length) {
+      allBenefits = Array.isArray(items) ? items : [];
+      if (!allBenefits.length) {
         grid.innerHTML = '<p class="perks__loading">Todavía no hay beneficios cargados.</p>';
         return;
       }
-      grid.innerHTML = items.map((b) => `
-        <article class="perk">
-          <div class="perk__head">
-            <figure class="perk__logo ${b.logo_url ? '' : 'is-empty'}">
-              ${b.logo_url ? `<img src="${esc(b.logo_url)}" alt="${esc(b.prestador)}" loading="lazy" decoding="async">` : ''}
-              <b class="perk__initials">${esc((b.prestador || '?').trim().charAt(0))}</b>
-            </figure>
-            <div>
-              ${b.rubro ? `<p class="perk__rubro">${esc(b.rubro)}</p>` : ''}
-              <h3 class="perk__name">${esc(b.prestador)}</h3>
-            </div>
-          </div>
 
-          ${b.descripcion ? `<p class="perk__desc">${esc(b.descripcion)}</p>` : ''}
+      // Extraer categorías únicas
+      const rubros = Array.from(new Set(allBenefits.map(b => (b.rubro || '').trim()).filter(Boolean)));
+      if (catContainer && rubros.length > 0) {
+        catContainer.innerHTML = `
+          <button type="button" class="perk-cat-pill active" data-cat="TODOS">Todos (${allBenefits.length})</button>
+          ${rubros.map(r => `<button type="button" class="perk-cat-pill" data-cat="${esc(r)}">${esc(r)}</button>`).join('')}
+        `;
 
-          <div class="perk__offer">
-            <svg class="ic perk__tag" aria-hidden="true"><use href="#i-tag"/></svg>
-            <p class="perk__deal">${esc(b.oferta)}</p>
-            ${b.detalle ? `<p class="perk__fine">${esc(b.detalle)}</p>` : ''}
-          </div>
+        catContainer.querySelectorAll('.perk-cat-pill').forEach(btn => {
+          btn.addEventListener('click', () => {
+            catContainer.querySelectorAll('.perk-cat-pill').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentCat = btn.dataset.cat;
+            renderBenefits();
+          });
+        });
+      }
 
-          <footer class="perk__foot">
-            ${b.codigo ? `<span class="perk__code">${esc(b.codigo)}</span>` : ''}
-            ${b.vigencia ? `<span class="perk__valid">${esc(b.vigencia)}</span>` : ''}
-            ${b.enlace ? `<a class="perk__link" href="${esc(b.enlace)}" target="_blank" rel="noopener noreferrer">Ver más <svg class="ic ic--sm" aria-hidden="true"><use href="#i-external"/></svg></a>` : ''}
-          </footer>
-        </article>
-      `).join('');
-
-      // Logo roto o vacío: queda la inicial del prestador.
-      grid.querySelectorAll('.perk__logo img').forEach((img) => {
-        const fail = () => img.closest('.perk__logo').classList.add('is-empty');
-        img.addEventListener('error', fail);
-        if (img.complete && img.naturalWidth === 0) fail();
-      });
-      grid.querySelectorAll('.perk__logo:not(:has(img))').forEach((f) => f.classList.add('is-empty'));
+      searchInput?.addEventListener('input', renderBenefits);
+      renderBenefits();
     })
     .catch(() => {
       grid.innerHTML = '<p class="perks__loading">No pudimos cargar los beneficios. Probá recargar la página.</p>';

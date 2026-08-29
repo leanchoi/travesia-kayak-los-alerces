@@ -2149,15 +2149,6 @@ body.is-locked {
 }
 .d-hint { margin: .85rem 0 0; font-size: .83rem; color: var(--ink-3); line-height: 1.5; }
 
-/* Declaración de salud */
-.d-check {
-  display: flex;
-  align-items: flex-start;
-  gap: .8rem;
-  margin-top: 1.1rem;
-  padding: .9rem 1.1rem;
-  border: 1px solid var(--rule);
-
 /* Cuadro destacado de precio de inscripción */
 .price-notice-box {
   background: color-mix(in oklab, var(--lake) 8%, var(--paper));
@@ -2286,6 +2277,70 @@ body.is-locked {
    La promoción va en otra jerarquía que la descripción: es lo que la persona
    vino a buscar, así que se lee antes que el texto institucional.
    -------------------------------------------------------------------------- */
+/* Filtros de beneficios */
+.perks-filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  margin-bottom: 2rem;
+}
+.perks-search-wrap {
+  position: relative;
+  max-width: 460px;
+}
+.perks-search-input {
+  width: 100%;
+  padding: .75rem 1rem .75rem 2.6rem;
+  background: #FFFFFF;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  font-size: .92rem;
+  color: var(--ink);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .03);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.perks-search-input:focus {
+  outline: none;
+  border-color: var(--lake);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--lake) 18%, transparent);
+}
+.perks-search-icon {
+  position: absolute;
+  left: .9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-3);
+  width: 17px;
+  height: 17px;
+  pointer-events: none;
+}
+.perks-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+.perk-cat-pill {
+  background: #FFFFFF;
+  border: 1px solid var(--rule);
+  border-radius: 100px;
+  padding: .4rem .9rem;
+  font-size: .84rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.perk-cat-pill:hover {
+  background: var(--paper-3);
+  color: var(--ink);
+}
+.perk-cat-pill.active {
+  background: var(--lake);
+  color: #FFFFFF;
+  border-color: var(--lake);
+  box-shadow: 0 2px 8px color-mix(in oklab, var(--lake) 30%, transparent);
+}
+
 .perks {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
@@ -2413,7 +2468,7 @@ body.is-locked {
   padding-top: .9rem;
   border-top: 1px solid var(--rule-soft);
 }
-.perk__code {
+.perk__code-btn {
   font-family: var(--mono);
   font-size: .82rem;
   font-weight: 700;
@@ -2423,6 +2478,15 @@ body.is-locked {
   border: 1.5px dashed color-mix(in oklab, var(--lake) 50%, transparent);
   border-radius: 4px;
   padding: .35em .75em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  transition: all .15s ease;
+}
+.perk__code-btn:hover {
+  background: var(--lake);
+  color: #FFFFFF;
 }
 .perk__valid {
   font-size: .78rem;
