@@ -29,7 +29,7 @@
 <link rel="preload" href="assets/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/instrument-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
 
-<link rel="stylesheet" href="styles.css?v=20260829_11">
+<link rel="stylesheet" href="styles.css?v=20260829_12">
 
 <!-- Marca que hay JS antes de pintar. -->
 <script>document.documentElement.classList.add('js')</script>
@@ -668,7 +668,17 @@
     </button>
   </div>
   <div class="dlg__body">
-    <p class="dlg__desc">Dos jornadas, veinte kilómetros, 12 y 13 de diciembre de 2026. Te tomamos los datos y seguimos por mail.</p>
+    <div id="enrollClosedBanner" class="enroll-closed-card" style="display: none;">
+      <div class="enroll-closed-icon">🚫</div>
+      <h3 id="enrollClosedTitle">Convocatoria Cerrada / Cupos Completos</h3>
+      <p id="enrollClosedMessage">Muchas gracias por el enorme interés. Se ha completado el cupo máximo para la Travesía en Kayak Los Alerces 2026.</p>
+      <div class="margin-top-sm" style="font-size: 0.85rem; color: var(--ink-2);">
+        Para consultas sobre lista de espera o próximas ediciones, escribinos a: <br>
+        <a href="mailto:eventosesquelfce@gmail.com" class="text-lake" style="font-weight: 600;">eventosesquelfce@gmail.com</a>
+      </div>
+    </div>
+
+    <p class="dlg__desc" id="enrollOpenDesc">Dos jornadas, veinte kilómetros, 12 y 13 de diciembre de 2026. Te tomamos los datos y seguimos por mail.</p>
     <form id="enrollmentForm" novalidate>
 
       <fieldset class="d-group">
@@ -844,10 +854,10 @@
 
   <nav class="dash-tabs">
     <button class="dash-tab-btn active" data-dash-tab="inscripciones" id="tabBtnInscripciones">Inscripciones (<span id="countInscripciones">0</span>)</button>
+    <button class="dash-tab-btn" data-dash-tab="config" id="tabBtnConfig">💰 Precios, Cupos & Promos</button>
     <button class="dash-tab-btn" data-dash-tab="blog" id="tabBtnBlog">Blog & Novedades</button>
     <button class="dash-tab-btn" data-dash-tab="beneficios" id="tabBtnBeneficios">Beneficios (<span id="countBeneficios">0</span>)</button>
     <button class="dash-tab-btn" data-dash-tab="usuarios" id="tabBtnUsuarios">Usuarios & Permisos</button>
-    <button class="dash-tab-btn" data-dash-tab="config" id="tabBtnConfig">⚙️ Configuración</button>
   </nav>
 
   <div class="dash-body">
@@ -861,6 +871,9 @@
           <option value="APROBADO">Aprobado</option>
           <option value="RECHAZADO">Rechazado</option>
         </select>
+        <button class="btn btn--ghost btn--sm" id="btnQuickGoToConfig" type="button" style="border-color: var(--lake); color: var(--lake); white-space: nowrap;">
+          ⚙️ Modificar Precio & Cupo
+        </button>
       </div>
       <p class="table-scroll-hint">👉 Deslizá horizontalmente para ver todas las columnas</p>
       <div class="table-wrap">
@@ -956,30 +969,124 @@
       </div>
     </div>
 
-    <!-- TAB 5: CONFIGURACIÓN -->
+    <!-- TAB: PRECIOS, CUPOS & CONVOCATORIA -->
     <div class="dash-content" id="dashTabConfig">
       <div class="dash-toolbar">
-        <h3>⚙️ Configuración del Valor de Inscripción y Leyendas</h3>
+        <div>
+          <h3>💰 Precios, Cupos & Convocatoria</h3>
+          <p class="text-muted" style="font-size: 0.85rem; margin-top: 0.2rem;">
+            Controlá en vivo el arancel de inscripción, promociones especiales, el límite de cupo de remeros y la apertura/pausa del formulario.
+          </p>
+        </div>
       </div>
-      <form id="adminConfigForm" style="max-width: 680px; margin-top: 1rem;">
-        <div class="d-form-grid">
-          <div class="d-field">
-            <label for="cfgPrecioMonto">Valor de Inscripción ($)</label>
-            <input type="text" id="cfgPrecioMonto" required placeholder="100.000">
+
+      <!-- Métricas rápidas de Cupo -->
+      <div class="cfg-metrics-grid">
+        <div class="cfg-metric-card">
+          <span class="cfg-metric-label">Inscriptos Registrados</span>
+          <b class="cfg-metric-val" id="cfgMetricInscriptos">0</b>
+          <span class="cfg-metric-sub" id="cfgMetricDetalle">0 aprobados · 0 pendientes</span>
+        </div>
+        <div class="cfg-metric-card">
+          <span class="cfg-metric-label">Cupo Máximo</span>
+          <b class="cfg-metric-val" id="cfgMetricCupo">100</b>
+          <span class="cfg-metric-sub">embarcaciones / participantes</span>
+        </div>
+        <div class="cfg-metric-card">
+          <span class="cfg-metric-label">Vacantes Disponibles</span>
+          <b class="cfg-metric-val" id="cfgMetricDisponibles" style="color: var(--lake);">100</b>
+          <span class="cfg-metric-sub">lugares libres</span>
+        </div>
+      </div>
+
+      <form id="adminConfigForm" class="cfg-form" style="max-width: 820px; margin-top: 1.2rem;">
+        
+        <!-- Tarjeta 1: Estado y Cupos -->
+        <div class="cfg-card">
+          <div class="cfg-card__head">
+            <h4>1. Estado de la Convocatoria & Cupos</h4>
+            <p>Habilitá o pausá las inscripciones al instante en el sitio público.</p>
           </div>
-          <div class="d-field">
-            <label for="cfgPrecioTexto">Valor en Letras</label>
-            <input type="text" id="cfgPrecioTexto" required placeholder="Cien mil pesos">
+
+          <div class="cfg-toggle-row">
+            <div>
+              <strong>Recepción de Inscripciones en la Web</strong>
+              <p class="text-muted" style="font-size: 0.82rem; margin-top: 0.15rem;">
+                Si se desactiva, el botón público mostrará "Inscripciones Pausadas / Cerradas" y el formulario se bloqueará.
+              </p>
+            </div>
+            <label class="switch-toggle" for="cfgInscripcionesHabilitadas">
+              <input type="checkbox" id="cfgInscripcionesHabilitadas" checked>
+              <span class="switch-slider"></span>
+            </label>
           </div>
-          <div class="d-field d-full">
-            <label for="cfgPrecioInstrucciones">Instrucciones y detalles de pago para el usuario</label>
-            <textarea id="cfgPrecioInstrucciones" rows="3" required placeholder="El costo de inscripción para la Travesía en Kayaks 2026 es de $100.000 (Cien mil pesos)..."></textarea>
+
+          <div id="cfgToggleStatusTag" class="status-tag status-tag--open" style="margin-bottom: 1.2rem;">
+            🟢 Inscripciones HABILITADAS y recibiendo postulaciones en la web
+          </div>
+
+          <div class="d-form-grid">
+            <div class="d-field">
+              <label for="cfgCupoMaximo">Límite de Cupo Máximo (Participantes)</label>
+              <input type="number" id="cfgCupoMaximo" min="1" max="5000" required placeholder="100">
+              <p class="d-hint">Cuando los inscriptos alcancen este número, el sitio se frena automáticamente indicando cupos agotados.</p>
+            </div>
+            <div class="d-field d-full">
+              <label for="cfgMensajeCierre">Mensaje público cuando el cupo esté lleno o pausado</label>
+              <textarea id="cfgMensajeCierre" rows="2" placeholder="Cupos completos para la edición 2026. Muchas gracias a todos los remeros..."></textarea>
+            </div>
           </div>
         </div>
-        <div id="configSuccessAlert" class="success-alert margin-top-sm" style="display:none; padding:.75rem 1rem;">✅ Configuración de precios guardada con éxito.</div>
-        <div class="margin-top-md">
+
+        <!-- Tarjeta 2: Aranceles y Promociones -->
+        <div class="cfg-card margin-top-md">
+          <div class="cfg-card__head">
+            <h4>2. Valor de Inscripción, Promociones y Datos de Pago</h4>
+            <p>Modificá el precio para aplicar promociones de lanzamiento (Early Bird) o actualizar el costo.</p>
+          </div>
+
+          <div class="d-form-grid">
+            <div class="d-field">
+              <label for="cfgPrecioMonto">Valor de Inscripción / Promo ($)</label>
+              <input type="text" id="cfgPrecioMonto" required placeholder="100.000">
+            </div>
+            <div class="d-field">
+              <label for="cfgPrecioTexto">Valor en Letras / Detalle de Promo</label>
+              <input type="text" id="cfgPrecioTexto" required placeholder="Cien mil pesos">
+            </div>
+            <div class="d-field d-full">
+              <label for="cfgPrecioInstrucciones">Instrucciones y Datos Bancarios (CBU / Alias / Banco)</label>
+              <textarea id="cfgPrecioInstrucciones" rows="3" required placeholder="El costo de inscripción para la Travesía en Kayaks 2026 es de $100.000..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta 3: Vista Previa en Vivo -->
+        <div class="cfg-card margin-top-md">
+          <div class="cfg-card__head">
+            <h4>3. Vista Previa en Vivo</h4>
+            <p>Así ven el cuadro de pago los participantes al abrir el formulario:</p>
+          </div>
+
+          <div class="price-notice-box" style="margin: 0;">
+            <div class="price-notice-box__badge">Valor de Inscripción 2026</div>
+            <div class="price-notice-box__amount">
+              <span id="previewPrecioMonto">$100.000</span>
+              <em id="previewPrecioTexto">(Cien mil pesos)</em>
+            </div>
+            <p id="previewPrecioInstrucciones" class="price-notice-box__hint">
+              El costo de inscripción para la Travesía en Kayaks 2026 es de $100.000 (Cien mil pesos)...
+            </p>
+          </div>
+        </div>
+
+        <div id="configSuccessAlert" class="success-alert margin-top-md" style="display:none; padding:.85rem 1.2rem;">
+          ✅ Configuración de precios, cupos y convocatoria guardada y aplicada con éxito.
+        </div>
+
+        <div class="margin-top-md" style="display: flex; gap: 0.8rem;">
           <button class="btn btn--solid btn--lg" type="submit">
-            Guardar Configuración
+            💾 Guardar y Aplicar Cambios
           </button>
         </div>
       </form>
@@ -1238,6 +1345,6 @@
   </figure>
 </dialog>
 
-<script src="app.js?v=20260829_03" defer></script>
+<script src="app.js?v=20260829_12" defer></script>
 </body>
 </html>

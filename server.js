@@ -119,11 +119,14 @@ db.serialize(() => {
         )
     `);
 
-    // Seed Config de Precio por defecto
+    // Seed Config de Precio, Cupos y Estado de Convocatoria por defecto
     const defaultConfigs = [
         ['precio_monto', '100.000'],
         ['precio_texto', 'Cien mil pesos'],
-        ['precio_instrucciones', 'El costo de inscripción para la Travesía en Kayaks 2026 es de $100.000 (Cien mil pesos). Adjuntá la foto o captura legible del comprobante de transferencia bancaria de la reserva o pago completo.']
+        ['precio_instrucciones', 'El costo de inscripción para la Travesía en Kayaks 2026 es de $100.000 (Cien mil pesos). Adjuntá la foto o captura legible del comprobante de transferencia bancaria de la reserva o pago completo.'],
+        ['cupo_maximo', '100'],
+        ['inscripciones_habilitadas', '1'],
+        ['mensaje_cierre', 'Cupos completos para la edición 2026. Muchas gracias a todos los remeros por sumarse. Seguinos en nuestras redes oficiales para novedades o lista de espera.']
     ];
 
     defaultConfigs.forEach(([key, val]) => {
@@ -256,16 +259,37 @@ function checkPermission(requiredPermission) {
 // PUBLIC REST API ENDPOINTS
 // --------------------------------------------------------------------------
 
-// Public Price & Instructions Endpoint
+// Public Price, Cupos & Convocatoria Endpoint
 app.get('/api/config/precio', (req, res) => {
-    db.all("SELECT key, value FROM config WHERE key IN ('precio_monto', 'precio_texto', 'precio_instrucciones')", [], (err, rows) => {
-        if (err) return res.status(500).json({ error: 'Error leyendo precio de inscripción' });
+    db.all("SELECT key, value FROM config", [], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Error leyendo configuración' });
         const configMap = {};
         (rows || []).forEach(r => configMap[r.key] = r.value);
-        res.json({
-            monto: configMap.precio_monto || '100.000',
-            texto: configMap.precio_texto || 'Cien mil pesos',
-            instrucciones: configMap.precio_instrucciones || 'El costo de inscripción para la Travesía en Kayaks 2026 es de $100.000 (Cien mil pesos). Adjuntá el comprobante de transferencia bancaria.'
+
+        const cupoMaximo = parseInt(configMap.cupo_maximo || '100', 10);
+        const habilitadasManual = (configMap.inscripciones_habilitadas !== '0');
+
+        db.get("SELECT COUNT(*) as totalInscriptos, SUM(CASE WHEN estado = 'APROBADO' THEN 1 ELSE 0 END) as aprobados FROM enrollments WHERE estado != 'RECHAZADO'", (countErr, countRow) => {
+            const totalInscriptos = countRow ? countRow.totalInscriptos : 0;
+            const cuposDisponibles = Math.max(0, cupoMaximo - totalInscriptos);
+            const cupoLleno = totalInscriptos >= cupoMaximo;
+
+            const habilitadas = habilitadasManual && !cupoLleno;
+            let motivoCierre = null;
+            if (!habilitadasManual) motivoCierre = 'manual';
+            else if (cupoLleno) motivoCierre = 'cupo_completo';
+
+            res.json({
+                monto: configMap.precio_monto || '100.000',
+                texto: configMap.precio_texto || 'Cien mil pesos',
+                instrucciones: configMap.precio_instrucciones || 'El costo de inscripción para la Travesía en Kayaks 2026 es de $100.000 (Cien mil pesos). Adjuntá el comprobante de transferencia bancaria.',
+                cupoMaximo,
+                totalInscriptos,
+                cuposDisponibles,
+                habilitadas,
+                motivoCierre,
+                mensajeCierre: configMap.mensaje_cierre || 'Cupos completos para la edición 2026. Muchas gracias por el interés.'
+            });
         });
     });
 });
@@ -287,24 +311,43 @@ app.post('/api/inscribirse', (req, res) => {
         return res.status(400).json({ error: 'El adjunto del comprobante de transferencia es obligatorio.' });
     }
 
-    const code = 'KA-' + Math.floor(100000 + Math.random() * 900000);
+    // Validar estado de la convocatoria y cupo máximo en base de datos
+    db.all("SELECT key, value FROM config", [], (cfgErr, cfgRows) => {
+        const configMap = {};
+        (cfgRows || []).forEach(r => configMap[r.key] = r.value);
 
-    const query = `
-        INSERT INTO enrollments (code, nombre, apellido, dni, email, telefono, localidad, tipo_kayak, experiencia, contacto_emergencia, observaciones, declaracion_salud, comprobante, comprobante_nombre, estado)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDIENTE')
-    `;
-
-    db.run(query, [code, nombre, apellido, dni, email, telefono, localidad || 'Esquel', tipoKayak || 'K1', experiencia || 'Principiante', contactoEmergencia || 'N/D', observaciones || '', 1, comprobante || '', comprobanteNombre || ''], function(err) {
-        if (err) {
-            console.error('Error insertando inscripción:', err);
-            return res.status(500).json({ error: 'Error al registrar la inscripción. Intente nuevamente.' });
+        if (configMap.inscripciones_habilitadas === '0') {
+            return res.status(403).json({ error: configMap.mensaje_cierre || 'Las inscripciones se encuentran temporalmente cerradas o en pausa.' });
         }
-        res.status(201).json({
-            message: 'Inscripción registrada con éxito',
-            code,
-            id: this.lastID,
-            nombre: `${nombre} ${apellido}`,
-            estado: 'PENDIENTE'
+
+        const cupoMax = parseInt(configMap.cupo_maximo || '100', 10);
+
+        db.get("SELECT COUNT(*) as count FROM enrollments WHERE estado != 'RECHAZADO'", (err, row) => {
+            const currentCount = row ? row.count : 0;
+            if (currentCount >= cupoMax) {
+                return res.status(403).json({ error: `Se ha completado el cupo máximo de inscripciones (${cupoMax} participantes). ¡Muchas gracias por el interés!` });
+            }
+
+            const code = 'KA-' + Math.floor(100000 + Math.random() * 900000);
+
+            const query = `
+                INSERT INTO enrollments (code, nombre, apellido, dni, email, telefono, localidad, tipo_kayak, experiencia, contacto_emergencia, observaciones, declaracion_salud, comprobante, comprobante_nombre, estado)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDIENTE')
+            `;
+
+            db.run(query, [code, nombre, apellido, dni, email, telefono, localidad || 'Esquel', tipoKayak || 'K1', experiencia || 'Principiante', contactoEmergencia || 'N/D', observaciones || '', 1, comprobante || '', comprobanteNombre || ''], function(insertErr) {
+                if (insertErr) {
+                    console.error('Error insertando inscripción:', insertErr);
+                    return res.status(500).json({ error: 'Error al registrar la inscripción. Intente nuevamente.' });
+                }
+                res.status(201).json({
+                    message: 'Inscripción registrada con éxito',
+                    code,
+                    id: this.lastID,
+                    nombre: `${nombre} ${apellido}`,
+                    estado: 'PENDIENTE'
+                });
+            });
         });
     });
 });
@@ -499,23 +542,39 @@ app.get(['/api/admin/inscriptos/export-excel', '/api/admin/inscripciones/export-
     });
 });
 
-// ── Dynamic Config (Precios & Promociones) ──────────────────────────────────
+// ── Dynamic Config (Precios, Cupos, Promociones & Estado de Convocatoria) ────
 app.get('/api/admin/config', authenticateToken, (req, res) => {
     db.all("SELECT key, value FROM config", [], (err, rows) => {
         if (err) return res.status(500).json({ error: 'Error consultando configuración' });
         const configMap = {};
         (rows || []).forEach(r => configMap[r.key] = r.value);
-        res.json(configMap);
+
+        db.get("SELECT COUNT(*) as total, SUM(CASE WHEN estado = 'APROBADO' THEN 1 ELSE 0 END) as aprobados, SUM(CASE WHEN estado = 'PENDIENTE' THEN 1 ELSE 0 END) as pendientes FROM enrollments WHERE estado != 'RECHAZADO'", (countErr, countRow) => {
+            res.json({
+                precio_monto: configMap.precio_monto || '100.000',
+                precio_texto: configMap.precio_texto || 'Cien mil pesos',
+                precio_instrucciones: configMap.precio_instrucciones || 'El costo de inscripción para la Travesía en Kayaks 2026 es de $100.000 (Cien mil pesos). Adjuntá el comprobante de transferencia bancaria.',
+                cupo_maximo: configMap.cupo_maximo || '100',
+                inscripciones_habilitadas: configMap.inscripciones_habilitadas !== '0' ? '1' : '0',
+                mensaje_cierre: configMap.mensaje_cierre || 'Cupos completos para la edición 2026. Muchas gracias por el interés.',
+                totalInscriptos: countRow ? countRow.total : 0,
+                inscriptosAprobados: countRow ? (countRow.aprobados || 0) : 0,
+                inscriptosPendientes: countRow ? (countRow.pendientes || 0) : 0
+            });
+        });
     });
 });
 
 app.put('/api/admin/config', authenticateToken, (req, res) => {
-    const { precio_monto, precio_texto, precio_instrucciones } = req.body;
+    const { precio_monto, precio_texto, precio_instrucciones, cupo_maximo, inscripciones_habilitadas, mensaje_cierre } = req.body;
 
     const stmt = db.prepare("INSERT OR REPLACE INTO config (key, value, actualizado_at) VALUES (?, ?, CURRENT_TIMESTAMP)");
     if (precio_monto !== undefined) stmt.run('precio_monto', String(precio_monto));
     if (precio_texto !== undefined) stmt.run('precio_texto', String(precio_texto));
     if (precio_instrucciones !== undefined) stmt.run('precio_instrucciones', String(precio_instrucciones));
+    if (cupo_maximo !== undefined) stmt.run('cupo_maximo', String(cupo_maximo));
+    if (inscripciones_habilitadas !== undefined) stmt.run('inscripciones_habilitadas', String(inscripciones_habilitadas));
+    if (mensaje_cierre !== undefined) stmt.run('mensaje_cierre', String(mensaje_cierre));
     stmt.finalize();
 
     res.json({ message: 'Configuración actualizada con éxito' });

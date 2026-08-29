@@ -375,22 +375,50 @@
 
   let comprobante = null;
 
-  // Cargar precio de inscripción dinámico desde API
+  // Cargar precio de inscripción dinámico y estado de cupo desde API
   function loadDynamicEnrollPrice() {
     fetch(`${API_BASE}/api/config/precio`)
       .then(res => res.json())
       .then(data => {
         if (!data) return;
-        const montoEl     = $('#priceNoticeMonto');
-        const textoEl     = $('#priceNoticeTexto');
-        const instEl      = $('#priceNoticeInstrucciones');
-        const barPriceEl  = $('#mobileBarPrice');
+        const montoEl        = $('#priceNoticeMonto');
+        const textoEl        = $('#priceNoticeTexto');
+        const instEl         = $('#priceNoticeInstrucciones');
+        const barPriceEl     = $('#mobileBarPrice');
+        const closedBanner   = $('#enrollClosedBanner');
+        const closedMsg      = $('#enrollClosedMessage');
+        const closedTitle    = $('#enrollClosedTitle');
+        const openDesc       = $('#enrollOpenDesc');
+        const enrollForm     = $('#enrollmentForm');
+        const heroBtn        = $('#openEnrollHeroBtn');
+        const heroSubEl      = heroBtn ? heroBtn.querySelector('.btn__sub') : null;
 
         const displayMonto = `$${data.monto || '100.000'}`;
         if (montoEl)    montoEl.textContent    = displayMonto;
         if (barPriceEl) barPriceEl.textContent = displayMonto;
         if (textoEl)    textoEl.textContent    = `(${data.texto || 'Cien mil pesos'})`;
         if (instEl)     instEl.textContent     = data.instrucciones || `El costo de inscripción para la Travesía en Kayaks 2026 es de ${displayMonto} (${data.texto}). Adjuntá el comprobante.`;
+
+        // Si la convocatoria está deshabilitada o el cupo se completó
+        if (data.habilitadas === false) {
+          if (closedBanner) {
+            closedBanner.style.display = 'block';
+            if (data.motivoCierre === 'cupo_completo') {
+              if (closedTitle) closedTitle.textContent = '🚫 Cupo Máximo Completo';
+            } else {
+              if (closedTitle) closedTitle.textContent = '🔒 Convocatoria Temporalmente Pausada';
+            }
+            if (closedMsg && data.mensajeCierre) closedMsg.textContent = data.mensajeCierre;
+          }
+          if (openDesc) openDesc.style.display = 'none';
+          if (enrollForm) enrollForm.style.display = 'none';
+          if (heroSubEl) heroSubEl.textContent = '🚫 Cupos completos';
+        } else {
+          if (closedBanner) closedBanner.style.display = 'none';
+          if (openDesc) openDesc.style.display = 'block';
+          if (enrollForm) enrollForm.style.display = 'block';
+          if (heroSubEl) heroSubEl.textContent = `${displayMonto} · ${data.texto || 'Inscripción abierta'}`;
+        }
       })
       .catch(() => {});
   }
@@ -784,53 +812,6 @@
   };
 
   /* ------------------------------------------------------------------------
-     11b · CONFIGURACIÓN DE PRECIOS ($100.000 / Promociones)
-     ------------------------------------------------------------------------ */
-  const adminConfigForm = $('#adminConfigForm');
-  const configSuccessAlert = $('#configSuccessAlert');
-
-  function loadAdminConfig() {
-    if (!authToken || !adminConfigForm) return;
-    fetch(`${API_BASE}/api/admin/config`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    })
-    .then(res => res.json())
-    .then(data => {
-      $('#cfgPrecioMonto').value = data.precio_monto || '100.000';
-      $('#cfgPrecioTexto').value = data.precio_texto || 'Cien mil pesos';
-      $('#cfgPrecioInstrucciones').value = data.precio_instrucciones || 'El costo de inscripción para la Travesía en Kayaks 2026 es de $100.000 (Cien mil pesos)...';
-    });
-  }
-
-  if (adminConfigForm) {
-    adminConfigForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const payload = {
-        precio_monto: $('#cfgPrecioMonto').value.trim(),
-        precio_texto: $('#cfgPrecioTexto').value.trim(),
-        precio_instrucciones: $('#cfgPrecioInstrucciones').value.trim()
-      };
-
-      fetch(`${API_BASE}/api/admin/config`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
-        },
-        body: JSON.stringify(payload)
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (configSuccessAlert) {
-          configSuccessAlert.style.display = 'block';
-          setTimeout(() => { configSuccessAlert.style.display = 'none'; }, 4000);
-        }
-        loadDynamicEnrollPrice();
-      });
-    });
-  }
-
-  /* ------------------------------------------------------------------------
      11c · BENEFICIOS Y PROMOCIONES
      ------------------------------------------------------------------------ */
   const benefitDialog = $('#benefitEditorDialog');
@@ -1203,6 +1184,140 @@
       loadAdminUsers();
     });
   };
+
+  /* ------------------------------------------------------------------------
+     11f · CONFIGURACIÓN DE PRECIOS, CUPOS, PROMOCIONES & TOGGLE CONVOCATORIA
+     ------------------------------------------------------------------------ */
+  const adminConfigForm             = $('#adminConfigForm');
+  const cfgInscripcionesHabilitadas = $('#cfgInscripcionesHabilitadas');
+  const cfgToggleStatusTag          = $('#cfgToggleStatusTag');
+  const cfgCupoMaximo               = $('#cfgCupoMaximo');
+  const cfgMensajeCierre            = $('#cfgMensajeCierre');
+  const cfgPrecioMonto              = $('#cfgPrecioMonto');
+  const cfgPrecioTexto              = $('#cfgPrecioTexto');
+  const cfgPrecioInstrucciones      = $('#cfgPrecioInstrucciones');
+  const configSuccessAlert          = $('#configSuccessAlert');
+
+  // Preview elements
+  const previewPrecioMonto         = $('#previewPrecioMonto');
+  const previewPrecioTexto         = $('#previewPrecioTexto');
+  const previewPrecioInstrucciones = $('#previewPrecioInstrucciones');
+
+  // Metrics
+  const cfgMetricInscriptos   = $('#cfgMetricInscriptos');
+  const cfgMetricDetalle      = $('#cfgMetricDetalle');
+  const cfgMetricCupo         = $('#cfgMetricCupo');
+  const cfgMetricDisponibles  = $('#cfgMetricDisponibles');
+
+  const btnQuickGoToConfig    = $('#btnQuickGoToConfig');
+  btnQuickGoToConfig?.addEventListener('click', () => {
+    dashTabBtns.forEach(b => b.classList.remove('active'));
+    dashContents.forEach(c => c.classList.remove('active'));
+    $('#tabBtnConfig')?.classList.add('active');
+    $('#dashTabConfig')?.classList.add('active');
+    loadAdminConfig();
+  });
+
+  function updateLivePreview() {
+    const monto = cfgPrecioMonto ? cfgPrecioMonto.value.trim() : '100.000';
+    const texto = cfgPrecioTexto ? cfgPrecioTexto.value.trim() : 'Cien mil pesos';
+    const inst  = cfgPrecioInstrucciones ? cfgPrecioInstrucciones.value.trim() : '';
+
+    if (previewPrecioMonto) previewPrecioMonto.textContent = `$${monto}`;
+    if (previewPrecioTexto) previewPrecioTexto.textContent = `(${texto})`;
+    if (previewPrecioInstrucciones) {
+      previewPrecioInstrucciones.textContent = inst || `El costo de inscripción para la Travesía en Kayaks 2026 es de $${monto} (${texto}). Adjuntá el comprobante.`;
+    }
+
+    if (cfgInscripcionesHabilitadas && cfgToggleStatusTag) {
+      if (cfgInscripcionesHabilitadas.checked) {
+        cfgToggleStatusTag.className = 'status-tag status-tag--open';
+        cfgToggleStatusTag.textContent = '🟢 Inscripciones HABILITADAS y recibiendo postulaciones en la web';
+      } else {
+        cfgToggleStatusTag.className = 'status-tag status-tag--closed';
+        cfgToggleStatusTag.textContent = '🔴 Inscripciones PAUSADAS / CERRADAS manualmente (formulario bloqueado en la web)';
+      }
+    }
+  }
+
+  [cfgPrecioMonto, cfgPrecioTexto, cfgPrecioInstrucciones].forEach(input => {
+    input?.addEventListener('input', updateLivePreview);
+  });
+  cfgInscripcionesHabilitadas?.addEventListener('change', updateLivePreview);
+
+  function loadAdminConfig() {
+    if (!authToken) return;
+    fetch(`${API_BASE}/api/admin/config`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    })
+    .then(res => res.json())
+    .then(cfg => {
+      if (!cfg) return;
+
+      if (cfgMetricInscriptos) cfgMetricInscriptos.textContent = cfg.totalInscriptos ?? '0';
+      if (cfgMetricDetalle) cfgMetricDetalle.textContent = `${cfg.inscriptosAprobados || 0} aprobados · ${cfg.inscriptosPendientes || 0} pendientes`;
+      if (cfgMetricCupo) cfgMetricCupo.textContent = cfg.cupo_maximo || '100';
+
+      const cupoMax = parseInt(cfg.cupo_maximo || '100', 10);
+      const total = parseInt(cfg.totalInscriptos || '0', 10);
+      const libres = Math.max(0, cupoMax - total);
+      if (cfgMetricDisponibles) {
+        cfgMetricDisponibles.textContent = libres;
+        cfgMetricDisponibles.style.color = libres > 0 ? 'var(--lake)' : 'var(--ember)';
+      }
+
+      if (cfgInscripcionesHabilitadas) {
+        cfgInscripcionesHabilitadas.checked = (cfg.inscripciones_habilitadas === '1');
+      }
+      if (cfgCupoMaximo) cfgCupoMaximo.value = cfg.cupo_maximo || '100';
+      if (cfgMensajeCierre) cfgMensajeCierre.value = cfg.mensaje_cierre || '';
+      if (cfgPrecioMonto) cfgPrecioMonto.value = cfg.precio_monto || '100.000';
+      if (cfgPrecioTexto) cfgPrecioTexto.value = cfg.precio_texto || 'Cien mil pesos';
+      if (cfgPrecioInstrucciones) cfgPrecioInstrucciones.value = cfg.precio_instrucciones || '';
+
+      updateLivePreview();
+    })
+    .catch(() => {});
+  }
+
+  if (adminConfigForm) {
+    adminConfigForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const payload = {
+        precio_monto: cfgPrecioMonto.value.trim(),
+        precio_texto: cfgPrecioTexto.value.trim(),
+        precio_instrucciones: cfgPrecioInstrucciones.value.trim(),
+        cupo_maximo: cfgCupoMaximo.value.trim(),
+        inscripciones_habilitadas: cfgInscripcionesHabilitadas.checked ? '1' : '0',
+        mensaje_cierre: cfgMensajeCierre.value.trim()
+      };
+
+      fetch(`${API_BASE}/api/admin/config`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          alert(data.error);
+        } else {
+          if (configSuccessAlert) {
+            configSuccessAlert.style.display = 'block';
+            setTimeout(() => { configSuccessAlert.style.display = 'none'; }, 3500);
+          }
+          loadAdminConfig();
+          loadDynamicEnrollPrice();
+        }
+      })
+      .catch(() => {
+        alert('Error al guardar la configuración.');
+      });
+    });
+  }
 
   /* ------------------------------------------------------------------------
      12 · AÑO EN EL PIE
