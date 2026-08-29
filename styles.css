@@ -371,6 +371,7 @@ em { font-style: italic; }
 .wordmark__text i { font-style: normal; font-size: .68rem; letter-spacing: .085em; text-transform: uppercase; color: var(--ink-3); }
 
 .nav { display: flex; gap: .35rem; }
+.nav__mobile-actions { display: none; }
 .nav a {
   position: relative;
   padding: .5rem .78rem;
