@@ -2720,6 +2720,19 @@ dialog.dlg--fullscreen[open] {
   }
 }
 
+.table-scroll-hint {
+  display: none;
+  font-size: .78rem;
+  font-weight: 500;
+  color: var(--ink-3);
+  margin: 0 0 .5rem;
+}
+@media (max-width: 768px) {
+  .table-scroll-hint {
+    display: block;
+  }
+}
+
 .table-wrap {
   width: 100%;
   overflow-x: auto;
