@@ -338,15 +338,20 @@
     fetch(`${API_BASE}/api/blog/${slug}`)
       .then(res => res.json())
       .then(post => {
-        if (!post) return;
+        if (!post || post.error) return;
+        const imgUrl = (post.imagen_url && post.imagen_url.trim()) ? post.imagen_url : 'assets/gallery-1.jpg';
         $('#readPostCategoryTitle').textContent = `${post.categoria || 'Noticia'} · Travesía Los Alerces`;
         const body = $('#readPostBody');
         body.innerHTML = `
           <article class="post-detail">
-            ${post.imagen_url ? `<div class="news-card__img-container" style="max-height:360px;margin-bottom:1.2rem;"><img src="${post.imagen_url}" alt="${post.titulo}" style="width:100%;height:100%;object-fit:contain;border-radius:4px;"></div>` : ''}
-            <h1 class="post-detail__title" style="font-family:var(--serif);font-size:1.8rem;margin-bottom:0.8rem;line-height:1.15;">${post.titulo}</h1>
-            <p class="text-muted" style="font-size:0.85rem;margin-bottom:1.5rem;">Publicado el ${new Date(post.creado_at).toLocaleDateString('es-AR')}</p>
-            <div class="post-detail__content" style="white-space:pre-line;line-height:1.65;font-size:1rem;color:var(--ink-2);">${post.contenido}</div>
+            ${imgUrl ? `<div class="post-detail__media"><img class="post-detail__hero-img" src="${imgUrl}" alt="${post.titulo}"></div>` : ''}
+            <div class="post-detail__header">
+              <span class="news-card__tag" style="margin-bottom: 0.5rem; display: inline-block;">${post.categoria || 'Novedades'}</span>
+              <h1 class="post-detail__title" style="font-family:var(--serif);font-size:1.85rem;margin-bottom:0.6rem;line-height:1.2;color:var(--ink);">${post.titulo}</h1>
+              <p class="text-muted" style="font-size:0.85rem;margin-bottom:1.2rem;">Publicado el ${new Date(post.creado_at).toLocaleDateString('es-AR')}</p>
+            </div>
+            ${post.resumen ? `<p style="font-size:1.05rem;font-weight:500;line-height:1.55;color:var(--ink);margin-bottom:1.2rem;border-left:3px solid var(--lake);padding-left:12px;">${post.resumen}</p>` : ''}
+            <div class="post-detail__content" style="white-space:pre-line;line-height:1.7;font-size:1rem;color:var(--ink-2);">${post.contenido}</div>
           </article>
         `;
         lock(true);
