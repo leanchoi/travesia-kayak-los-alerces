@@ -618,10 +618,20 @@
     adminDashboardDialog.close();
   });
 
+  function adminFetch(url, options = {}) {
+    const opts = Object.assign({}, options);
+    opts.headers = Object.assign({}, opts.headers || {});
+    if (authToken) {
+      opts.headers['Authorization'] = `Bearer ${authToken}`;
+      opts.headers['X-Auth-Token'] = authToken;
+    }
+    const sep = url.includes('?') ? '&' : '?';
+    const authUrl = authToken ? `${url}${sep}token=${encodeURIComponent(authToken)}` : url;
+    return fetch(authUrl, opts);
+  }
+
   function verifyTokenAndOpenDashboard() {
-    fetch(`${API_BASE}/api/admin/me`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    })
+    adminFetch(`${API_BASE}/api/admin/me`)
     .then(res => res.json())
     .then(data => {
       if (data.user) {
@@ -702,12 +712,10 @@
     const search = adminSearchInscripciones ? adminSearchInscripciones.value.trim() : '';
     const estado = adminFilterEstado ? adminFilterEstado.value : 'TODOS';
 
-    fetch(`${API_BASE}/api/admin/inscripciones?search=${encodeURIComponent(search)}&estado=${encodeURIComponent(estado)}`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    })
+    adminFetch(`${API_BASE}/api/admin/inscripciones?search=${encodeURIComponent(search)}&estado=${encodeURIComponent(estado)}`)
     .then(res => res.json())
     .then(data => {
-      if (countInscripciones) countInscripciones.textContent = data.length;
+      if (countInscripciones) countInscripciones.textContent = Array.isArray(data) ? data.length : 0;
       if (!Array.isArray(data) || data.length === 0) {
         adminInscripcionesTbody.innerHTML = `<tr><td colspan="9" style="padding: 1rem; text-align: center; color: var(--ink-3);">No se encontraron inscripciones.</td></tr>`;
         return;
@@ -754,12 +762,10 @@
   adminFilterEstado?.addEventListener('change', loadAdminInscripciones);
 
   window.viewReceipt = function(code) {
-    fetch(`${API_BASE}/api/admin/inscripciones?search=${encodeURIComponent(code)}&estado=TODOS`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    })
+    adminFetch(`${API_BASE}/api/admin/inscripciones?search=${encodeURIComponent(code)}&estado=TODOS`)
     .then(res => res.json())
     .then(data => {
-      const item = data.find(i => i.code === code);
+      const item = Array.isArray(data) ? data.find(i => i.code === code) : null;
       if (item && item.comprobante) {
         const w = window.open("");
         w.document.write(`<title>Comprobante ${code}</title><body style="margin:0;display:flex;justify-content:center;align-items:center;background:#111;"><img src="${item.comprobante}" style="max-width:100%;max-height:100vh;object-fit:contain;"></body>`);
@@ -769,29 +775,24 @@
     });
   };
 
-  // EXPORTAR EXCEL (.xlsx)
+  // EXPORTAR EXCEL (.csv compatible Excel)
   adminExportExcelBtn?.addEventListener('click', () => {
-    fetch(`${API_BASE}/api/admin/inscriptos/export-excel`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    })
+    adminFetch(`${API_BASE}/api/admin/inscripciones/export/excel`)
     .then(res => res.blob())
     .then(blob => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'Inscriptos_Travesia_Los_Alerces_2026.xlsx';
+      a.download = 'Inscriptos_Travesia_Los_Alerces_2026.csv';
       a.click();
     })
     .catch(() => alert('Error al generar el archivo Excel.'));
   });
 
   window.updateEnrollStatus = function(id, nuevoEstado) {
-    fetch(`${API_BASE}/api/admin/inscripciones/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`
-      },
+    adminFetch(`${API_BASE}/api/admin/inscripciones/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ estado: nuevoEstado })
     })
     .then(res => res.json())
@@ -803,9 +804,8 @@
 
   window.deleteEnroll = function(id) {
     if (!confirm('¿Eliminar esta inscripción permanentemente?')) return;
-    fetch(`${API_BASE}/api/admin/inscripciones/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${authToken}` }
+    adminFetch(`${API_BASE}/api/admin/inscripciones/${id}`, {
+      method: 'DELETE'
     })
     .then(res => res.json())
     .then(() => loadAdminInscripciones());
@@ -948,9 +948,7 @@
 
   function loadAdminBlogPosts() {
     if (!authToken || !adminBlogTbody) return;
-    fetch(`${API_BASE}/api/admin/posts`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    })
+    adminFetch(`${API_BASE}/api/admin/posts`)
     .then(res => res.json())
     .then(posts => {
       if (!Array.isArray(posts)) return;
@@ -993,12 +991,9 @@
       const method = id ? 'PUT' : 'POST';
       const url = id ? `${API_BASE}/api/admin/posts/${id}` : `${API_BASE}/api/admin/posts`;
 
-      fetch(url, {
+      adminFetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
       .then(res => res.json())
@@ -1011,12 +1006,10 @@
   }
 
   window.editPostAdmin = function(id) {
-    fetch(`${API_BASE}/api/admin/posts`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    })
+    adminFetch(`${API_BASE}/api/admin/posts`)
     .then(res => res.json())
     .then(posts => {
-      const p = posts.find(item => item.id === id);
+      const p = Array.isArray(posts) ? posts.find(item => item.id === id) : null;
       if (!p) return;
       $('#postId').value = p.id;
       $('#postTitulo').value = p.titulo;
@@ -1033,9 +1026,8 @@
 
   window.deletePostAdmin = function(id) {
     if (!confirm('¿Eliminar esta noticia?')) return;
-    fetch(`${API_BASE}/api/admin/posts/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${authToken}` }
+    adminFetch(`${API_BASE}/api/admin/posts/${id}`, {
+      method: 'DELETE'
     })
     .then(res => res.json())
     .then(() => {
@@ -1055,9 +1047,7 @@
 
   function loadAdminUsers() {
     if (!authToken || !adminUsuariosTbody) return;
-    fetch(`${API_BASE}/api/admin/users`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    })
+    adminFetch(`${API_BASE}/api/admin/users`)
     .then(res => res.json())
     .then(users => {
       if (!Array.isArray(users)) return;
@@ -1121,12 +1111,10 @@
   openNewUserModalBtn?.addEventListener('click', () => openUserModal(null));
 
   window.openEditUserModal = function(id) {
-    fetch(`${API_BASE}/api/admin/users`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    })
+    adminFetch(`${API_BASE}/api/admin/users`)
     .then(res => res.json())
     .then(users => {
-      const u = users.find(item => item.id === id);
+      const u = Array.isArray(users) ? users.find(item => item.id === id) : null;
       if (u) openUserModal(u);
     });
   };
@@ -1152,12 +1140,9 @@
       const method = id ? 'PUT' : 'POST';
       const url = id ? `${API_BASE}/api/admin/users/${id}` : `${API_BASE}/api/admin/users`;
 
-      fetch(url, {
+      adminFetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
       .then(res => res.json())
@@ -1174,9 +1159,8 @@
 
   window.deleteUserAdmin = function(id) {
     if (!confirm('¿Eliminar este usuario administrador?')) return;
-    fetch(`${API_BASE}/api/admin/users/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${authToken}` }
+    adminFetch(`${API_BASE}/api/admin/users/${id}`, {
+      method: 'DELETE'
     })
     .then(res => res.json())
     .then(data => {
@@ -1247,9 +1231,7 @@
 
   function loadAdminConfig() {
     if (!authToken) return;
-    fetch(`${API_BASE}/api/admin/config`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    })
+    adminFetch(`${API_BASE}/api/admin/config`)
     .then(res => res.json())
     .then(cfg => {
       if (!cfg) return;
@@ -1292,12 +1274,9 @@
         mensaje_cierre: cfgMensajeCierre.value.trim()
       };
 
-      fetch(`${API_BASE}/api/admin/config`, {
+      adminFetch(`${API_BASE}/api/admin/config`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
       .then(res => res.json())

@@ -1,0 +1,3 @@
+# Proteger archivos de datos SQLite
+Order allow,deny
+Deny from all

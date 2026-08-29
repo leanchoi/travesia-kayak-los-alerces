@@ -9,7 +9,7 @@ require_once __DIR__ . '/db.php';
 // Headers CORS y JSON
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Auth-Token');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -24,8 +24,9 @@ function jsonResponse($data, $statusCode = 200) {
 }
 
 function getJsonInput() {
-    $raw = file_get_contents('php://input');
-    $decoded = json_decode($raw, true);
+    $raw = @file_get_contents('php://input');
+    if (empty($raw)) return [];
+    $decoded = @json_decode($raw, true);
     return is_array($decoded) ? $decoded : [];
 }
 
@@ -40,13 +41,52 @@ function createJWT($payload) {
     return $base64Header . '.' . $base64Payload . '.' . $base64Signature;
 }
 
+function getAuthToken() {
+    // 1. Cabeceras HTTP estándar y FastCGI
+    $auth = '';
+    if (!empty($_SERVER['HTTP_AUTHORIZATION'])) {
+        $auth = $_SERVER['HTTP_AUTHORIZATION'];
+    } elseif (!empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+        $auth = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+    } elseif (!empty($_SERVER['HTTP_X_AUTH_TOKEN'])) {
+        $auth = $_SERVER['HTTP_X_AUTH_TOKEN'];
+    } elseif (function_exists('getallheaders')) {
+        $headers = getallheaders();
+        $auth = $headers['Authorization'] ?? $headers['authorization'] ?? $headers['X-Auth-Token'] ?? '';
+    } elseif (function_exists('apache_request_headers')) {
+        $headers = apache_request_headers();
+        $auth = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+    }
+
+    if (preg_match('/Bearer\s(\S+)/i', $auth, $m)) {
+        return $m[1];
+    }
+    if (!empty($auth) && substr_count($auth, '.') === 2) {
+        return trim($auth);
+    }
+
+    // 2. Parámetro GET ?token= o ?auth=
+    if (!empty($_GET['token'])) {
+        return trim($_GET['token']);
+    }
+    if (!empty($_GET['auth'])) {
+        return trim($_GET['auth']);
+    }
+
+    // 3. Fallback en payload JSON si aplica
+    $input = getJsonInput();
+    if (!empty($input['token'])) {
+        return trim($input['token']);
+    }
+
+    return '';
+}
+
 function verifyJWT() {
-    $headers = getallheaders();
-    $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
-    if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+    $jwt = getAuthToken();
+    if (empty($jwt)) {
         jsonResponse(['error' => 'Token no proporcionado'], 401);
     }
-    $jwt = $matches[1];
     $tokenParts = explode('.', $jwt);
     if (count($tokenParts) !== 3) {
         jsonResponse(['error' => 'Token inválido'], 401);
@@ -283,8 +323,8 @@ if ($path === 'admin/inscripciones' && $method === 'GET') {
     jsonResponse($stmt->fetchAll());
 }
 
-// PUT /api/admin/inscripciones/{id}
-if (count($parts) === 3 && $parts[0] === 'admin' && $parts[1] === 'inscripciones' && $method === 'PUT') {
+// PUT o PATCH /api/admin/inscripciones/{id}
+if (count($parts) === 3 && $parts[0] === 'admin' && $parts[1] === 'inscripciones' && ($method === 'PUT' || $method === 'PATCH')) {
     checkPermission($user, 'gestionar_inscriptos');
     $id = intval($parts[2]);
     $input = getJsonInput();
@@ -355,8 +395,6 @@ if ($path === 'admin/config' && $method === 'GET') {
 // PUT /api/admin/config
 if ($path === 'admin/config' && $method === 'PUT') {
     $input = getJsonInput();
-    $stmt = $db->prepare("INSERT INTO config (cfg_key, cfg_value, actualizado_at) VALUES (?, ?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE cfg_value = VALUES(cfg_value), actualizado_at = CURRENT_TIMESTAMP");
-    // Fallback PDO for SQLite insert or replace
     try {
         foreach (['precio_monto', 'precio_texto', 'precio_instrucciones', 'cupo_maximo', 'inscripciones_habilitadas', 'mensaje_cierre'] as $k) {
             if (isset($input[$k])) {

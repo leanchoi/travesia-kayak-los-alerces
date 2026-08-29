@@ -33,14 +33,18 @@ function getDB() {
             ]);
             $isMySQL = true;
         } else {
-            // Fallback automático a SQLite local si no configuró MySQL todavía
+            // Fallback automático a SQLite local dentro del slot de Hostinger
             $dbDir = __DIR__ . '/../data';
-            if (!is_dir($dbDir)) {
-                @mkdir($dbDir, 0755, true);
+            if (!file_exists($dbDir)) {
+                @mkdir($dbDir, 0777, true);
+                @chmod($dbDir, 0777);
             }
-            $pdo = new PDO('sqlite:' . $dbDir . '/travesia.db');
+            $dbFile = $dbDir . '/travesia.db';
+            $pdo = new PDO('sqlite:' . $dbFile);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $pdo->exec('PRAGMA journal_mode = WAL;');
+            $pdo->exec('PRAGMA busy_timeout = 5000;');
             $isMySQL = false;
         }
 
@@ -48,6 +52,7 @@ function getDB() {
         return $pdo;
     } catch (Exception $e) {
         http_response_code(500);
+        header('Content-Type: application/json; charset=utf-8');
         echo json_encode(['error' => 'Error de conexión a la base de datos: ' . $e->getMessage()]);
         exit;
     }
@@ -56,7 +61,7 @@ function getDB() {
 function initTables($pdo, $isMySQL) {
     $pk = $isMySQL ? 'INT AUTO_INCREMENT PRIMARY KEY' : 'INTEGER PRIMARY KEY AUTOINCREMENT';
     $textType = $isMySQL ? 'LONGTEXT' : 'TEXT';
-    $timestamp = $isMySQL ? 'DATETIME DEFAULT CURRENT_TIMESTAMP' : 'DATETIME DEFAULT CURRENT_TIMESTAMP';
+    $timestamp = 'DATETIME DEFAULT CURRENT_TIMESTAMP';
 
     // 1. Users
     $pdo->exec("
