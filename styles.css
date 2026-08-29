@@ -1457,15 +1457,34 @@ html.dark .wordmark__img {
 .foot__grid { display: flex; flex-wrap: wrap; gap: 2rem; justify-content: space-between; align-items: flex-start; }
 .foot__inst { font-family: var(--serif); font-size: 1.14rem; margin: 0 0 .2rem; }
 .foot__univ { font-size: .88rem; color: var(--ink-2); margin: 0 0 .9rem; max-width: 46ch; }
-.foot__legal { font-size: .76rem; color: var(--ink-3); margin: 0; }
+.foot__legal { font-size: .78rem; color: var(--ink-3); margin: 0; line-height: 1.4; }
+.foot__collab-row {
+  margin-top: .7rem;
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  flex-wrap: wrap;
+}
 .foot__collab {
-  display: inline-block;
-  margin-left: 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .8rem;
   color: var(--ink-2);
+  background: color-mix(in oklab, var(--paper) 92%, transparent);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: .35rem .75rem;
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.foot__collab:hover {
+  border-color: var(--ink-3);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 .foot__collab a {
   color: var(--ink);
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 2px;
   transition: color var(--dur) var(--ease);
