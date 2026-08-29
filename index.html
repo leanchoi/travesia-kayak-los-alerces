@@ -110,6 +110,14 @@
       <a href="#organizacion">Organización</a>
       <a href="#voces">Voces</a>
       <a href="beneficios.html">Beneficios</a>
+      <div class="nav__mobile-actions">
+        <button class="btn btn--solid btn--md w-100" id="openEnrollNavBtn" type="button">
+          🛶 Inscribirme 2026
+        </button>
+        <a class="btn btn--ghost btn--md w-100" href="beneficios.html">
+          🎁 Beneficios para remeros
+        </a>
+      </div>
     </nav>
 
     <button class="btn btn--solid masthead__cta" id="openEnrollHeaderBtn" type="button">
@@ -635,6 +643,21 @@
     </nav>
   </div>
 </footer>
+
+<!-- ══ BARRA FLOTANTE MÓVIL DE ACCIÓN RÁPIDA ══ -->
+<aside class="mobile-bar" id="mobileBottomBar" aria-label="Acceso rápido a inscripción móvil">
+  <div class="mobile-bar__info">
+    <span class="mobile-bar__tag">Inscripción 2026</span>
+    <span class="mobile-bar__price" id="mobileBarPrice">$100.000</span>
+  </div>
+  <div class="mobile-bar__actions">
+    <a class="btn btn--ghost btn--sm mobile-bar__btn-perks" href="beneficios.html" title="Beneficios">🎁 Beneficios</a>
+    <button class="btn btn--solid btn--sm mobile-bar__btn" id="openEnrollMobileBarBtn" type="button">
+      Inscribirme
+      <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+    </button>
+  </div>
+</aside>
 
 <!-- ══ DIÁLOGO · FORMULARIO DE INSCRIPCIÓN ══ -->
 <dialog class="dlg dlg--wide" id="enrollDialog" aria-labelledby="enrollTitle">

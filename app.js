@@ -362,9 +362,12 @@
   const enrollDialog = $('#enrollDialog');
   wireDialog(enrollDialog);
 
-  const openEnrollHeaderBtn = $('#openEnrollHeaderBtn');
-  const openEnrollHeroBtn   = $('#openEnrollHeroBtn');
-  const openEnrollFormBtn   = $('#openEnrollFormBtn');
+  const openEnrollHeaderBtn    = $('#openEnrollHeaderBtn');
+  const openEnrollHeroBtn      = $('#openEnrollHeroBtn');
+  const openEnrollFormBtn      = $('#openEnrollFormBtn');
+  const openEnrollNavBtn       = $('#openEnrollNavBtn');
+  const openEnrollMobileBarBtn = $('#openEnrollMobileBarBtn');
+  const mobileBottomBar        = $('#mobileBottomBar');
 
   const enrollmentForm    = $('#enrollmentForm');
   const enrollSuccessBox  = $('#enrollSuccessBox');
@@ -378,13 +381,16 @@
       .then(res => res.json())
       .then(data => {
         if (!data) return;
-        const montoEl = $('#priceNoticeMonto');
-        const textoEl = $('#priceNoticeTexto');
-        const instEl  = $('#priceNoticeInstrucciones');
+        const montoEl     = $('#priceNoticeMonto');
+        const textoEl     = $('#priceNoticeTexto');
+        const instEl      = $('#priceNoticeInstrucciones');
+        const barPriceEl  = $('#mobileBarPrice');
 
-        if (montoEl) montoEl.textContent = `$${data.monto || '100.000'}`;
-        if (textoEl) textoEl.textContent = `(${data.texto || 'Cien mil pesos'})`;
-        if (instEl)  instEl.textContent  = data.instrucciones || `El costo de inscripción para la Travesía en Kayaks 2026 es de $${data.monto} (${data.texto}). Adjuntá el comprobante.`;
+        const displayMonto = `$${data.monto || '100.000'}`;
+        if (montoEl)    montoEl.textContent    = displayMonto;
+        if (barPriceEl) barPriceEl.textContent = displayMonto;
+        if (textoEl)    textoEl.textContent    = `(${data.texto || 'Cien mil pesos'})`;
+        if (instEl)     instEl.textContent     = data.instrucciones || `El costo de inscripción para la Travesía en Kayaks 2026 es de ${displayMonto} (${data.texto}). Adjuntá el comprobante.`;
       })
       .catch(() => {});
   }
@@ -400,8 +406,31 @@
     if (nameEl) nameEl.textContent = 'Adjuntar foto del comprobante *';
     comprobante = null;
     loadDynamicEnrollPrice();
+    // Cerrar menú móvil si estaba abierto
+    if (nav && nav.classList.contains('is-open')) {
+      nav.classList.remove('is-open');
+      navToggle?.setAttribute('aria-expanded', 'false');
+    }
     lock(true);
     enrollDialog.showModal();
+  }
+
+  // Barra de acción rápida móvil al scrollear
+  if (mobileBottomBar) {
+    const coverEl = $('.cover');
+    if (coverEl && 'IntersectionObserver' in window) {
+      const barObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          // Si el hero NO intersecta (ya bajó en la página), mostrar la barra
+          mobileBottomBar.classList.toggle('is-visible', !entry.isIntersecting);
+        });
+      }, { threshold: 0.1 });
+      barObserver.observe(coverEl);
+    } else {
+      window.addEventListener('scroll', () => {
+        mobileBottomBar.classList.toggle('is-visible', window.scrollY > 400);
+      }, { passive: true });
+    }
   }
 
   const fileInput = $('#regComprobante');
@@ -433,7 +462,7 @@
     reader.readAsDataURL(file);
   });
 
-  [openEnrollHeaderBtn, openEnrollHeroBtn, openEnrollFormBtn].forEach(btn => {
+  [openEnrollHeaderBtn, openEnrollHeroBtn, openEnrollFormBtn, openEnrollNavBtn, openEnrollMobileBarBtn].forEach(btn => {
     btn?.addEventListener('click', openEnrollmentModal);
   });
 
