@@ -310,7 +310,7 @@
         }
 
         newsGrid.innerHTML = posts.map(p => `
-          <article class="news-card">
+          <article class="news-card" data-slug="${p.slug}" tabindex="0" role="button" aria-label="Leer ${p.titulo}">
             <div class="news-card__img-container">
               <img src="${p.imagen_url || 'assets/gallery-1.jpg'}" alt="${p.titulo}" class="news-card__img" loading="lazy">
             </div>
@@ -318,15 +318,25 @@
               <span class="news-card__tag">${p.categoria || 'Novedades'}</span>
               <h3 class="news-card__title">${p.titulo}</h3>
               <p class="news-card__desc">${p.resumen}</p>
-              <button class="btn btn--ghost btn--sm read-post-btn" data-slug="${p.slug}">
+              <button class="btn btn--ghost btn--sm read-post-btn" data-slug="${p.slug}" type="button">
                 Leer artículo completo
               </button>
             </div>
           </article>
         `).join('');
 
-        $$('.read-post-btn', newsGrid).forEach(btn => {
-          btn.addEventListener('click', () => openPostReader(btn.dataset.slug));
+        $$('.news-card', newsGrid).forEach(card => {
+          card.addEventListener('click', () => {
+            const slug = card.dataset.slug;
+            if (slug) openPostReader(slug);
+          });
+          card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              const slug = card.dataset.slug;
+              if (slug) openPostReader(slug);
+            }
+          });
         });
       })
       .catch(() => {
