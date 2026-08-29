@@ -8,7 +8,7 @@ require_once __DIR__ . '/db.php';
 
 // Headers CORS y JSON
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Auth-Token');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -115,13 +115,13 @@ function checkPermission($reqUser, $permissionKey) {
 
 // ── Routing Logic ──────────────────────────────────────────────────────────
 $db = getDB();
-$method = $_SERVER['REQUEST_METHOD'];
+$method = strtoupper($_SERVER['REQUEST_METHOD']);
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 // Normalize path to remove /api or subdirectories
-$path = preg_replace('#^.*?/api/?#i', '', $uri);
+$path = preg_replace('#^.*?api/?#i', '', $uri);
 $path = trim($path, '/');
-$parts = explode('/', $path);
+$parts = array_values(array_filter(explode('/', $path), 'strlen'));
 
 // --------------------------------------------------------------------------
 // 1. PUBLIC ROUTES
@@ -323,8 +323,8 @@ if ($path === 'admin/inscripciones' && $method === 'GET') {
     jsonResponse($stmt->fetchAll());
 }
 
-// PUT o PATCH /api/admin/inscripciones/{id}
-if (count($parts) === 3 && $parts[0] === 'admin' && $parts[1] === 'inscripciones' && ($method === 'PUT' || $method === 'PATCH')) {
+// PUT / PATCH / POST /api/admin/inscripciones/{id}
+if (count($parts) >= 3 && $parts[0] === 'admin' && $parts[1] === 'inscripciones' && is_numeric($parts[2]) && in_array($method, ['PUT', 'PATCH', 'POST'])) {
     checkPermission($user, 'gestionar_inscriptos');
     $id = intval($parts[2]);
     $input = getJsonInput();
@@ -337,8 +337,8 @@ if (count($parts) === 3 && $parts[0] === 'admin' && $parts[1] === 'inscripciones
     jsonResponse(['message' => 'Estado actualizado', 'id' => $id, 'estado' => $estado]);
 }
 
-// DELETE /api/admin/inscripciones/{id}
-if (count($parts) === 3 && $parts[0] === 'admin' && $parts[1] === 'inscripciones' && $method === 'DELETE') {
+// DELETE / POST /api/admin/inscripciones/{id}
+if (count($parts) >= 3 && $parts[0] === 'admin' && $parts[1] === 'inscripciones' && is_numeric($parts[2]) && in_array($method, ['DELETE'])) {
     checkPermission($user, 'gestionar_inscriptos');
     $id = intval($parts[2]);
     $stmt = $db->prepare("DELETE FROM enrollments WHERE id = ?");
@@ -392,8 +392,8 @@ if ($path === 'admin/config' && $method === 'GET') {
     ]);
 }
 
-// PUT /api/admin/config
-if ($path === 'admin/config' && $method === 'PUT') {
+// PUT / PATCH / POST /api/admin/config
+if ($path === 'admin/config' && in_array($method, ['PUT', 'PATCH', 'POST'])) {
     $input = getJsonInput();
     try {
         foreach (['precio_monto', 'precio_texto', 'precio_instrucciones', 'cupo_maximo', 'inscripciones_habilitadas', 'mensaje_cierre'] as $k) {
@@ -424,14 +424,14 @@ if ($path === 'admin/posts' && $method === 'POST') {
     $ins->execute([$i['titulo'] ?? '', $slug, $i['resumen'] ?? '', $i['contenido'] ?? '', $i['imagenUrl'] ?? 'assets/gallery-1.jpg', $i['categoria'] ?? 'Novedades', !empty($i['publicado']) ? 1 : 0]);
     jsonResponse(['message' => 'Artículo creado', 'id' => $db->lastInsertId(), 'slug' => $slug], 201);
 }
-if (count($parts) === 3 && $parts[0] === 'admin' && $parts[1] === 'posts' && $method === 'PUT') {
+if (count($parts) >= 3 && $parts[0] === 'admin' && $parts[1] === 'posts' && is_numeric($parts[2]) && in_array($method, ['PUT', 'PATCH', 'POST'])) {
     checkPermission($user, 'gestion_noticias');
     $i = getJsonInput();
     $upd = $db->prepare("UPDATE posts SET titulo = ?, resumen = ?, contenido = ?, imagen_url = ?, categoria = ?, publicado = ?, actualizado_at = CURRENT_TIMESTAMP WHERE id = ?");
     $upd->execute([$i['titulo'] ?? '', $i['resumen'] ?? '', $i['contenido'] ?? '', $i['imagenUrl'] ?? '', $i['categoria'] ?? 'Novedades', !empty($i['publicado']) ? 1 : 0, intval($parts[2])]);
     jsonResponse(['message' => 'Artículo actualizado']);
 }
-if (count($parts) === 3 && $parts[0] === 'admin' && $parts[1] === 'posts' && $method === 'DELETE') {
+if (count($parts) >= 3 && $parts[0] === 'admin' && $parts[1] === 'posts' && is_numeric($parts[2]) && in_array($method, ['DELETE'])) {
     checkPermission($user, 'gestion_noticias');
     $db->prepare("DELETE FROM posts WHERE id = ?")->execute([intval($parts[2])]);
     jsonResponse(['message' => 'Artículo eliminado']);
@@ -449,14 +449,14 @@ if ($path === 'admin/beneficios' && $method === 'POST') {
     $ins->execute([$i['prestador'] ?? '', $i['rubro'] ?? '', $i['descripcion'] ?? '', $i['oferta'] ?? '', $i['detalle'] ?? '', $i['codigo'] ?? '', $i['vigencia'] ?? '', $i['logoUrl'] ?? '', $i['enlace'] ?? '', intval($i['orden'] ?? 0), !empty($i['activo']) ? 1 : 0]);
     jsonResponse(['message' => 'Beneficio creado', 'id' => $db->lastInsertId()], 201);
 }
-if (count($parts) === 3 && $parts[0] === 'admin' && $parts[1] === 'beneficios' && $method === 'PUT') {
+if (count($parts) >= 3 && $parts[0] === 'admin' && $parts[1] === 'beneficios' && is_numeric($parts[2]) && in_array($method, ['PUT', 'PATCH', 'POST'])) {
     checkPermission($user, 'gestion_beneficios');
     $i = getJsonInput();
     $upd = $db->prepare("UPDATE benefits SET prestador = ?, rubro = ?, descripcion = ?, oferta = ?, detalle = ?, codigo = ?, vigencia = ?, logo_url = ?, enlace = ?, orden = ?, activo = ?, actualizado_at = CURRENT_TIMESTAMP WHERE id = ?");
     $upd->execute([$i['prestador'] ?? '', $i['rubro'] ?? '', $i['descripcion'] ?? '', $i['oferta'] ?? '', $i['detalle'] ?? '', $i['codigo'] ?? '', $i['vigencia'] ?? '', $i['logoUrl'] ?? '', $i['enlace'] ?? '', intval($i['orden'] ?? 0), !empty($i['activo']) ? 1 : 0, intval($parts[2])]);
     jsonResponse(['message' => 'Beneficio actualizado']);
 }
-if (count($parts) === 3 && $parts[0] === 'admin' && $parts[1] === 'beneficios' && $method === 'DELETE') {
+if (count($parts) >= 3 && $parts[0] === 'admin' && $parts[1] === 'beneficios' && is_numeric($parts[2]) && in_array($method, ['DELETE'])) {
     checkPermission($user, 'gestion_beneficios');
     $db->prepare("DELETE FROM benefits WHERE id = ?")->execute([intval($parts[2])]);
     jsonResponse(['message' => 'Beneficio eliminado']);
@@ -482,7 +482,7 @@ if ($path === 'admin/users' && $method === 'POST') {
     $ins->execute([$i['email'] ?? '', $hash, $i['name'] ?? '', $i['role'] ?? 'EDITOR', $perms]);
     jsonResponse(['message' => 'Usuario creado', 'id' => $db->lastInsertId()], 201);
 }
-if (count($parts) === 3 && $parts[0] === 'admin' && $parts[1] === 'users' && $method === 'PUT') {
+if (count($parts) >= 3 && $parts[0] === 'admin' && $parts[1] === 'users' && is_numeric($parts[2]) && in_array($method, ['PUT', 'PATCH', 'POST'])) {
     checkPermission($user, 'gestion_usuarios');
     $id = intval($parts[2]);
     $i = getJsonInput();
@@ -497,7 +497,7 @@ if (count($parts) === 3 && $parts[0] === 'admin' && $parts[1] === 'users' && $me
     }
     jsonResponse(['message' => 'Usuario actualizado']);
 }
-if (count($parts) === 3 && $parts[0] === 'admin' && $parts[1] === 'users' && $method === 'DELETE') {
+if (count($parts) >= 3 && $parts[0] === 'admin' && $parts[1] === 'users' && is_numeric($parts[2]) && in_array($method, ['DELETE'])) {
     checkPermission($user, 'gestion_usuarios');
     $id = intval($parts[2]);
     $db->prepare("DELETE FROM users WHERE id = ? AND email != 'admin@economicasunp.edu.ar' AND email != 'admin'")->execute([$id]);
