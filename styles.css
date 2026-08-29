@@ -1083,12 +1083,14 @@ html.dark .wordmark__img {
   align-items: start;
 }
 .film--portrait {
-  position: relative;
+  position: sticky;
+  top: 96px;
   aspect-ratio: 9 / 16;
   margin-bottom: 0;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  z-index: 10;
 }
 .film--portrait .film__ring { width: 58px; height: 58px; }
 .reelhub__side { display: flex; flex-direction: column; }
