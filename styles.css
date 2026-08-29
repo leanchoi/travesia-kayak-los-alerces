@@ -106,28 +106,26 @@
   --dur: .45s;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper:      #0C1513;
-    --paper-2:    #101B18;
-    --paper-3:    #15211D;
+html.dark {
+  --paper:      #0C1513;
+  --paper-2:    #101B18;
+  --paper-3:    #15211D;
 
-    --ink:        #E9E4D8;
-    --ink-2:      #A6B2AC;
-    --ink-3:      #7F8D87;
+  --ink:        #E9E4D8;
+  --ink-2:      #A6B2AC;
+  --ink-3:      #7F8D87;
 
-    --rule:       #23332E;
-    --rule-soft:  #1A2723;
+  --rule:       #23332E;
+  --rule-soft:  #1A2723;
 
-    --lake:       #6FC6BC;
-    --lake-2:     #93D9CD;
-    --lake-wash:  #102926;
-    --deep:       #0A2C2E;
-    --on-deep:    #E9E4D8;
+  --lake:       #6FC6BC;
+  --lake-2:     #93D9CD;
+  --lake-wash:  #102926;
+  --deep:       #0A2C2E;
+  --on-deep:    #E9E4D8;
 
-    --ember:      #E5885C;
-    --ember-wash: #27170F;
-  }
+  --ember:      #E5885C;
+  --ember-wash: #27170F;
 }
 
 /* --------------------------------------------------------------------------
@@ -1101,8 +1099,18 @@ html.dark .wordmark__img {
 .reelhub .plates { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
 @media (max-width: 860px) {
-  .reelhub { grid-template-columns: 1fr; }
-  .film--portrait { position: static; max-width: 300px; margin-inline: auto; }
+  .reelhub {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .film--portrait {
+    position: static;
+    max-width: 220px;
+    margin-inline: auto;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+  }
 }
 
 /* Borrador: la cita todavía no fue aprobada por la persona a la que se le
