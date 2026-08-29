@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const ExcelJS = require('exceljs');
 
 const app = express();
 const PORT = process.env.PORT || 80;
@@ -17,9 +18,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'unpsjb_fce_travesia_los_alerces_ke
 
 // Middleware
 app.use(cors());
-// 8 MB: el comprobante de pago viaja como data URL dentro del JSON. El cliente
-// ya reduce las fotos antes de mandarlas, pero un PDF puede pesar más que el
-// límite de 100 kb que trae express por defecto.
+// 8 MB: el comprobante de pago viaja como data URL dentro del JSON.
 app.use(express.json({ limit: '8mb' }));
 app.use(express.urlencoded({ extended: true, limit: '8mb' }));
 
@@ -42,7 +41,17 @@ db.serialize(() => {
             password TEXT NOT NULL,
             name TEXT NOT NULL,
             role TEXT DEFAULT 'EDITOR',
+            permissions TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // Dynamic Config Table (Precios, promociones, leyendas de pago)
+    db.run(`
+        CREATE TABLE IF NOT EXISTS config (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            actualizado_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
 
@@ -66,12 +75,12 @@ db.serialize(() => {
         )
     `);
 
-    // Columnas agregadas después de la primera versión. Se aplican sobre bases
-    // ya creadas; si la columna existe, SQLite devuelve error y se ignora.
+    // Columnas agregadas progresivamente
     [
         "ALTER TABLE enrollments ADD COLUMN declaracion_salud INTEGER DEFAULT 0",
         "ALTER TABLE enrollments ADD COLUMN comprobante TEXT",
-        "ALTER TABLE enrollments ADD COLUMN comprobante_nombre TEXT"
+        "ALTER TABLE enrollments ADD COLUMN comprobante_nombre TEXT",
+        "ALTER TABLE users ADD COLUMN permissions TEXT"
     ].forEach(sql => db.run(sql, () => {}));
 
     // Beneficios / promociones de prestadores
@@ -110,16 +119,40 @@ db.serialize(() => {
         )
     `);
 
-    // Seed default admin if none exists
-    db.get("SELECT COUNT(*) as count FROM users", (err, row) => {
-        if (!err && row && row.count === 0) {
-            const adminEmail = 'admin@economicasunp.edu.ar';
-            const adminPass = 'admin123';
-            const hashed = bcrypt.hashSync(adminPass, 10);
-            db.run("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)", [
-                adminEmail, hashed, 'Cr. Adrián Cardacci (Admin)', 'ADMIN'
+    // Seed Config de Precio por defecto
+    const defaultConfigs = [
+        ['precio_monto', '100.000'],
+        ['precio_texto', 'Cien mil pesos'],
+        ['precio_instrucciones', 'El costo de inscripción para la Travesía en Kayaks 2026 es de $100.000 (Cien mil pesos). Adjuntá la foto o captura legible del comprobante de transferencia bancaria de la reserva o pago completo.']
+    ];
+
+    defaultConfigs.forEach(([key, val]) => {
+        db.run("INSERT OR IGNORE INTO config (key, value) VALUES (?, ?)", [key, val]);
+    });
+
+    // Default Super Admin Permissions
+    const fullPermissions = JSON.stringify({
+        ver_inscriptos: true,
+        gestionar_inscriptos: true,
+        gestion_noticias: true,
+        gestion_beneficios: true,
+        gestion_usuarios: true
+    });
+
+    // Seed/Update Admin User
+    db.get("SELECT * FROM users WHERE email = 'admin@economicasunp.edu.ar' OR email = 'admin' OR name LIKE '%Cardacci%'", (err, row) => {
+        const hashed = bcrypt.hashSync('admin123', 10);
+        if (!row) {
+            db.run("INSERT INTO users (email, password, name, role, permissions) VALUES (?, ?, ?, ?, ?)", [
+                'admin@economicasunp.edu.ar', hashed, 'Administrador (Admin)', 'ADMIN', fullPermissions
             ]);
-            console.log('👤 Usuario Admin inicial creado: admin@economicasunp.edu.ar / admin123');
+            console.log('👤 Usuario Admin creado: admin@economicasunp.edu.ar / admin123');
+        } else {
+            // Update existing admin account to 'admin' / 'admin@economicasunp.edu.ar' and full permissions
+            db.run("UPDATE users SET email = 'admin@economicasunp.edu.ar', name = 'Administrador (Admin)', role = 'ADMIN', permissions = ? WHERE id = ?", [
+                fullPermissions, row.id
+            ]);
+            console.log('👤 Usuario Admin actualizado a: Administrador (Admin) con email admin@economicasunp.edu.ar / admin');
         }
     });
 
@@ -148,37 +181,37 @@ db.serialize(() => {
                  'Sobre picadas para dos o más personas. Ideal para la noche de Bahía Rosales.',
                  'PICADA15', 'Hasta el 13/12/2026', 'assets/auspiciantes/la-fiambreria.webp', '', 4],
                 ['Esquel Pádel', 'Complejo deportivo',
-                 'Canchas de pádel, alquiler de paletas y clases para todos los niveles.',
-                 'Primer turno de cancha sin cargo',
-                 'Un turno de 90 minutos por inscripción, sujeto a disponibilidad. Para los días previos a la travesía.',
-                 'PADEL1', 'Diciembre 2026', 'assets/auspiciantes/esquel-padel.webp', '', 5],
-                ['El Rastro · Mercado de Regalos', 'Regalería',
-                 'Mates, termos y regalería para llevarse algo de la Comarca.',
-                 '10% OFF en mates y termos',
-                 'Presentando el código de inscripción en el local. No acumulable con liquidaciones.',
-                 'RASTRO10', 'Hasta el 31/12/2026', 'assets/auspiciantes/el-rastro.webp', '', 6]
+                 'Canchas sintéticas techadas, vestuarios y quincho para tercer tiempo.',
+                 '15% OFF en alquiler de canchas',
+                 'Válido para turnos diurnos y nocturnos durante toda la semana de la travesía.',
+                 'PADEL26', 'Diciembre 2026', 'assets/auspiciantes/esquel-padel.webp', '', 5],
+                ['Alerce Studio', 'Fotografía · Audiovisual',
+                 'Fotografía de aventura, cobertura de eventos y registros en alta resolución.',
+                 '10% OFF en paquetes de fotos personalizadas',
+                 'Descuento exclusivo en el pack de fotos de alta resolución de tu paso por el Río Arrayanes.',
+                 'FOTOALERCES', 'Hasta el 20/12/2026', 'assets/auspiciantes/alerce-studio.webp', '', 6]
             ];
-            const stmt = db.prepare(`INSERT INTO benefits
-                (prestador, rubro, descripcion, oferta, detalle, codigo, vigencia, logo_url, enlace, orden, activo)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`);
-            seed.forEach(r => stmt.run(r));
+
+            const stmt = db.prepare(`INSERT INTO benefits (prestador, rubro, descripcion, oferta, detalle, codigo, vigencia, logo_url, enlace, orden)
+                                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+            seed.forEach(item => stmt.run(item));
             stmt.finalize();
-            console.log('🎟️  Beneficios de ejemplo creados.');
+            console.log('🎁 Beneficios iniciales cargados con éxito.');
         }
     });
 
-    // Seed initial blog posts if none exist
+    // Seed de artículos de blog
     db.get("SELECT COUNT(*) as count FROM posts", (err, row) => {
         if (!err && row && row.count === 0) {
-            const post1Title = 'Reseña – Próxima Bajada en Kayaks PNLA 2026';
-            const post1Slug = 'resena-proxima-bajada-en-kayaks-pnla-2026';
-            const post1Resumen = 'De acuerdo con lo previsto en la edición realizada en abril, y a pedido de los propios participantes, nos complace anunciar que la próxima Bajada en Kayaks del Parque Nacional Los Alerces se llevará a cabo los días 12 y 13 de diciembre de 2026.';
-            const post1Contenido = 'De acuerdo con lo previsto en la edición realizada en abril, y a pedido de los propios participantes, nos complace anunciar que la próxima Bajada en Kayaks del Parque Nacional Los Alerces se llevará a cabo los días 12 y 13 de diciembre de 2026.\n\nEl rotundo éxito alcanzado en la última edición —por su organización, seguridad, atención y el entusiasmo compartido— nos impulsa a consolidar esta actividad año tras año, transformándola en una tradición que fortalece la identidad institucional y comunitaria.\n\nNuestra intención es seguir promoviendo la pertenencia, empatía, atracción, admiración, compromiso y orgullo hacia nuestra Comarca Andina, destacando su belleza natural y el espíritu colaborativo que caracteriza a quienes la habitan y la disfrutan.\n\nLa Facultad de Ciencias Económicas de la UNPSJB – Sede Esquel reafirma así su compromiso con el desarrollo de actividades que integran deporte, naturaleza y comunidad, generando espacios de encuentro que trascienden lo académico y fortalecen los lazos sociales y territoriales.';
+            const post1Title = 'Abierta la inscripción para la VIII Travesía en Kayaks del Parque Nacional Los Alerces';
+            const post1Slug = 'abierta-inscripcion-viii-travesia-kayaks-2026';
+            const post1Resumen = 'La Facultad de Ciencias Económicas (UNPSJB Sede Esquel) confirmó las fechas oficiales para la edición 2026. Los cupos son limitados a 100 embarcaciones.';
+            const post1Contenido = 'La Facultad de Ciencias Económicas de la Universidad Nacional de la Patagonia San Juan Bosco (UNPSJB), Sede Esquel, anuncia la apertura del proceso de inscripción para la VIII Edición de la Travesía en Kayaks del Parque Nacional Los Alerces, a realizarse en diciembre de 2026.\n\nEl evento reunirá a navegantes de todo el país en un recorrido no competitivo de 20 kilómetros que une el Lago Verde, el Río Arrayanes, Hostería Cumehué y el Camping Agreste Bahía Rosales.\n\nLos interesados pueden completar el formulario oficial de inscripción en este portal.';
 
-            const post2Title = 'Balance de la VII Edición: 42 remeros y 33 embarcaciones recorrieron el PNLA';
-            const post2Slug = 'balance-vii-edicion-42-remeros-33-embarcaciones-pnla';
+            const post2Title = 'La VII Travesía reunió a 42 remeros en las aguas del Río Arrayanes';
+            const post2Slug = 'vii-travesia-reunio-42-remeros-rio-arrayanes';
             const post2Resumen = 'Resumen completo de la jornada de 20 km entre el Lago Verde, el Río Arrayanes, la playa de Hostería Cumehué y el Camping Agreste Bahía Rosales.';
-            const post2Contenido = 'Organizada por la Facultad de Ciencias Económicas de la Universidad Nacional de la Patagonia San Juan Bosco (UNPSJB), la séptima edición de la Travesía en Kayaks del Parque Nacional Los Alerces fue una experiencia inolvidable que reunió a 42 remeros y 33 embarcaciones en un recorrido único por los paisajes más emblemáticos de la cordillera.\n\nEl recorrido constó de cuatro hitos centrales:\n• Inicio en el Lago Verde, rodeado de aguas cristalinas.\n• Descenso por el majestuoso Río Arrayanes, un verdadero espectáculo natural.\n• Paso por la playa de la Hostería Cumehué, donde la camaradería se hizo sentir.\n• Llegada al Camping Agreste Bahía Rosales, coronando una jornada de aventura y emoción.\n\nAventura, placer, naturaleza, atención y seguridad se combinaron para dar forma a un evento que dejó huella en cada participante.';
+            const post2Contenido = 'Organizada por la Facultad de Ciencias Económicas de la UNPSJB, la séptima edición de la Travesía en Kayaks del Parque Nacional Los Alerces fue una experiencia inolvidable que reunió a 42 remeros y 33 embarcaciones en un recorrido único por los paisajes más emblemáticos de la cordillera.\n\nAventura, placer, naturaleza, atención y seguridad se combinaron para dar forma a un evento que dejó huella en cada participante.';
 
             db.run(`INSERT INTO posts (titulo, slug, resumen, contenido, imagen_url, categoria, publicado) VALUES (?, ?, ?, ?, ?, ?, 1)`, [
                 post1Title, post1Slug, post1Resumen, post1Contenido, 'assets/gallery-2.jpg', 'Oficial'
@@ -205,9 +238,37 @@ function authenticateToken(req, res, next) {
     });
 }
 
+// Helper middleware for Granular Permissions Check
+function checkPermission(requiredPermission) {
+    return (req, res, next) => {
+        if (!req.user) return res.status(401).json({ error: 'No autenticado' });
+        if (req.user.role === 'ADMIN') return next(); // Super admin bypass
+
+        const perms = req.user.permissions || {};
+        if (perms[requiredPermission] === true) {
+            return next();
+        }
+        return res.status(403).json({ error: `Permiso insuficiente: requiere '${requiredPermission}'` });
+    };
+}
+
 // --------------------------------------------------------------------------
 // PUBLIC REST API ENDPOINTS
 // --------------------------------------------------------------------------
+
+// Public Price & Instructions Endpoint
+app.get('/api/config/precio', (req, res) => {
+    db.all("SELECT key, value FROM config WHERE key IN ('precio_monto', 'precio_texto', 'precio_instrucciones')", [], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Error leyendo precio de inscripción' });
+        const configMap = {};
+        (rows || []).forEach(r => configMap[r.key] = r.value);
+        res.json({
+            monto: configMap.precio_monto || '100.000',
+            texto: configMap.precio_texto || 'Cien mil pesos',
+            instrucciones: configMap.precio_instrucciones || 'El costo de inscripción para la Travesía en Kayaks 2026 es de $100.000 (Cien mil pesos). Adjuntá el comprobante de transferencia bancaria.'
+        });
+    });
+});
 
 // 1. Submit Registration (Formulario de Inscripción)
 app.post('/api/inscribirse', (req, res) => {
@@ -278,16 +339,32 @@ app.get('/api/beneficios', (req, res) => {
 
 app.post('/api/admin/login', (req, res) => {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: 'Email y contraseña requeridos' });
+    if (!email || !password) return res.status(400).json({ error: 'Email/Usuario y contraseña requeridos' });
 
-    db.get("SELECT * FROM users WHERE email = ?", [email], (err, user) => {
+    // Allow login by email or username 'admin'
+    const loginQuery = (email === 'admin' || email === 'admin@economicasunp.edu.ar')
+        ? "SELECT * FROM users WHERE email = 'admin@economicasunp.edu.ar' OR email = 'admin'"
+        : "SELECT * FROM users WHERE email = ?";
+
+    db.get(loginQuery, [email], (err, user) => {
         if (err || !user) return res.status(401).json({ error: 'Credenciales inválidas' });
 
         const isValid = bcrypt.compareSync(password, user.password);
         if (!isValid) return res.status(401).json({ error: 'Credenciales inválidas' });
 
-        const token = jwt.sign({ id: user.id, email: user.email, name: user.name, role: user.role }, JWT_SECRET, { expiresIn: '12h' });
-        res.json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role } });
+        let perms = {};
+        try { perms = JSON.parse(user.permissions || '{}'); } catch(e){}
+
+        const payload = {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            permissions: perms
+        };
+
+        const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '12h' });
+        res.json({ token, user: payload });
     });
 });
 
@@ -295,7 +372,8 @@ app.get('/api/admin/me', authenticateToken, (req, res) => {
     res.json({ user: req.user });
 });
 
-app.get('/api/admin/inscripciones', authenticateToken, (req, res) => {
+// ── Inscriptos / Enrollments ─────────────────────────────────────────────
+app.get('/api/admin/inscripciones', authenticateToken, checkPermission('ver_inscriptos'), (req, res) => {
     const { search, estado } = req.query;
     let query = "SELECT * FROM enrollments WHERE 1=1";
     let params = [];
@@ -319,48 +397,139 @@ app.get('/api/admin/inscripciones', authenticateToken, (req, res) => {
     });
 });
 
-app.patch('/api/admin/inscripciones/:id', authenticateToken, (req, res) => {
+app.patch('/api/admin/inscripciones/:id', authenticateToken, checkPermission('gestionar_inscriptos'), (req, res) => {
     const { estado } = req.body;
-    if (!['PENDIENTE', 'CONFIRMADA', 'CANCELADA'].includes(estado)) {
-        return res.status(400).json({ error: 'Estado inválido' });
+    const validStates = ['PENDIENTE', 'APROBADO', 'RECHAZADO', 'CONFIRMADA', 'CANCELADA'];
+    if (!validStates.includes((estado || '').toUpperCase())) {
+        return res.status(400).json({ error: 'Estado inválido. Debe ser PENDIENTE, APROBADO o RECHAZADO.' });
     }
 
-    db.run("UPDATE enrollments SET estado = ? WHERE id = ?", [estado, req.params.id], function(err) {
+    const stateUpper = estado.toUpperCase();
+    db.run("UPDATE enrollments SET estado = ? WHERE id = ?", [stateUpper, req.params.id], function(err) {
         if (err) return res.status(500).json({ error: 'Error actualizando estado' });
-        res.json({ message: 'Estado actualizado', id: req.params.id, estado });
+        res.json({ message: 'Estado actualizado', id: req.params.id, estado: stateUpper });
     });
 });
 
-app.delete('/api/admin/inscripciones/:id', authenticateToken, (req, res) => {
+app.delete('/api/admin/inscripciones/:id', authenticateToken, checkPermission('gestionar_inscriptos'), (req, res) => {
     db.run("DELETE FROM enrollments WHERE id = ?", [req.params.id], function(err) {
         if (err) return res.status(500).json({ error: 'Error eliminando registro' });
         res.json({ message: 'Inscripción eliminada', id: req.params.id });
     });
 });
 
-app.get('/api/admin/inscripciones/export', authenticateToken, (req, res) => {
-    db.all("SELECT * FROM enrollments ORDER BY id DESC", [], (err, rows) => {
-        if (err) return res.status(500).json({ error: 'Error generando CSV' });
+// Excel Export Endpoint (.xlsx)
+app.get(['/api/admin/inscriptos/export-excel', '/api/admin/inscripciones/export-excel', '/api/admin/inscripciones/export'], authenticateToken, checkPermission('ver_inscriptos'), (req, res) => {
+    db.all("SELECT * FROM enrollments ORDER BY id DESC", [], async (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Error generando reporte Excel' });
 
-        let csv = 'Código,Nombre,Apellido,DNI,Email,Teléfono,Localidad,Tipo Kayak,Experiencia,Contacto Emergencia,Estado,Fecha\n';
-        (rows || []).forEach(r => {
-            csv += `"${r.code}","${r.nombre}","${r.apellido}","${r.dni}","${r.email}","${r.telefono}","${r.localidad}","${r.tipo_kayak}","${r.experiencia}","${r.contacto_emergencia}","${r.estado}","${r.creado_at}"\n`;
+        const workbook = new ExcelJS.Workbook();
+        workbook.creator = 'Travesía Los Alerces UNPSJB';
+        workbook.created = new Date();
+
+        const worksheet = workbook.addWorksheet('Inscriptos 2026', {
+            views: [{ showGridLines: true }]
         });
 
-        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-        res.setHeader('Content-Disposition', 'attachment; filename="inscripciones_travesia_los_alerces.csv"');
-        res.send(csv);
+        worksheet.columns = [
+            { header: 'Código', key: 'code', width: 14 },
+            { header: 'Nombre', key: 'nombre', width: 18 },
+            { header: 'Apellido', key: 'apellido', width: 18 },
+            { header: 'DNI', key: 'dni', width: 14 },
+            { header: 'Email', key: 'email', width: 26 },
+            { header: 'Teléfono', key: 'telefono', width: 16 },
+            { header: 'Localidad', key: 'localidad', width: 18 },
+            { header: 'Tipo Kayak', key: 'tipo_kayak', width: 14 },
+            { header: 'Experiencia', key: 'experiencia', width: 18 },
+            { header: 'Contacto Emergencia', key: 'contacto_emergencia', width: 24 },
+            { header: 'Observaciones', key: 'observaciones', width: 28 },
+            { header: 'Declaración Salud', key: 'declaracion_salud', width: 18 },
+            { header: 'Comprobante', key: 'comprobante', width: 16 },
+            { header: 'Estado', key: 'estado', width: 14 },
+            { header: 'Fecha Registro', key: 'creado_at', width: 20 }
+        ];
+
+        // Header styling
+        const headerRow = worksheet.getRow(1);
+        headerRow.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+        headerRow.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF003366' }
+        };
+        headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+        headerRow.height = 26;
+
+        (rows || []).forEach((r, idx) => {
+            const row = worksheet.addRow({
+                code: r.code || '',
+                nombre: r.nombre || '',
+                apellido: r.apellido || '',
+                dni: r.dni || '',
+                email: r.email || '',
+                telefono: r.telefono || '',
+                localidad: r.localidad || '',
+                tipo_kayak: r.tipo_kayak || '',
+                experiencia: r.experiencia || '',
+                contacto_emergencia: r.contacto_emergencia || '',
+                observaciones: r.observaciones || '',
+                declaracion_salud: r.declaracion_salud ? 'Aceptada' : 'No aceptada',
+                comprobante: r.comprobante ? 'Adjunto' : 'Pendiente',
+                estado: r.estado || 'PENDIENTE',
+                creado_at: r.creado_at || ''
+            });
+
+            row.alignment = { vertical: 'middle' };
+            row.height = 20;
+
+            if (idx % 2 === 1) {
+                row.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFF4F6F8' }
+                };
+            }
+        });
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename="Inscriptos_Travesia_Los_Alerces_2026.xlsx"');
+
+        await workbook.xlsx.write(res);
+        res.end();
     });
 });
 
-app.get('/api/admin/posts', authenticateToken, (req, res) => {
+// ── Dynamic Config (Precios & Promociones) ──────────────────────────────────
+app.get('/api/admin/config', authenticateToken, (req, res) => {
+    db.all("SELECT key, value FROM config", [], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Error consultando configuración' });
+        const configMap = {};
+        (rows || []).forEach(r => configMap[r.key] = r.value);
+        res.json(configMap);
+    });
+});
+
+app.put('/api/admin/config', authenticateToken, (req, res) => {
+    const { precio_monto, precio_texto, precio_instrucciones } = req.body;
+
+    const stmt = db.prepare("INSERT OR REPLACE INTO config (key, value, actualizado_at) VALUES (?, ?, CURRENT_TIMESTAMP)");
+    if (precio_monto !== undefined) stmt.run('precio_monto', String(precio_monto));
+    if (precio_texto !== undefined) stmt.run('precio_texto', String(precio_texto));
+    if (precio_instrucciones !== undefined) stmt.run('precio_instrucciones', String(precio_instrucciones));
+    stmt.finalize();
+
+    res.json({ message: 'Configuración actualizada con éxito' });
+});
+
+// ── Blog / Noticias ABM ───────────────────────────────────────────────────
+app.get('/api/admin/posts', authenticateToken, checkPermission('gestion_noticias'), (req, res) => {
     db.all("SELECT * FROM posts ORDER BY id DESC", [], (err, rows) => {
         if (err) return res.status(500).json({ error: 'Error consultando artículos de admin' });
         res.json(rows || []);
     });
 });
 
-app.post('/api/admin/posts', authenticateToken, (req, res) => {
+app.post('/api/admin/posts', authenticateToken, checkPermission('gestion_noticias'), (req, res) => {
     const { titulo, resumen, contenido, imagenUrl, categoria, publicado } = req.body;
     if (!titulo || !contenido) return res.status(400).json({ error: 'Título y contenido requeridos' });
 
@@ -375,7 +544,7 @@ app.post('/api/admin/posts', authenticateToken, (req, res) => {
     });
 });
 
-app.put('/api/admin/posts/:id', authenticateToken, (req, res) => {
+app.put('/api/admin/posts/:id', authenticateToken, checkPermission('gestion_noticias'), (req, res) => {
     const { titulo, resumen, contenido, imagenUrl, categoria, publicado } = req.body;
 
     db.run("UPDATE posts SET titulo = ?, resumen = ?, contenido = ?, imagen_url = ?, categoria = ?, publicado = ?, actualizado_at = CURRENT_TIMESTAMP WHERE id = ?", [
@@ -386,7 +555,7 @@ app.put('/api/admin/posts/:id', authenticateToken, (req, res) => {
     });
 });
 
-app.delete('/api/admin/posts/:id', authenticateToken, (req, res) => {
+app.delete('/api/admin/posts/:id', authenticateToken, checkPermission('gestion_noticias'), (req, res) => {
     db.run("DELETE FROM posts WHERE id = ?", [req.params.id], function(err) {
         if (err) return res.status(500).json({ error: 'Error eliminando artículo' });
         res.json({ message: 'Artículo eliminado', id: req.params.id });
@@ -394,14 +563,14 @@ app.delete('/api/admin/posts/:id', authenticateToken, (req, res) => {
 });
 
 // ── Beneficios · ABM completo ───────────────────────────────────────────────
-app.get('/api/admin/beneficios', authenticateToken, (req, res) => {
+app.get('/api/admin/beneficios', authenticateToken, checkPermission('gestion_beneficios'), (req, res) => {
     db.all("SELECT * FROM benefits ORDER BY orden ASC, id ASC", [], (err, rows) => {
         if (err) return res.status(500).json({ error: 'Error consultando beneficios' });
         res.json(rows || []);
     });
 });
 
-app.post('/api/admin/beneficios', authenticateToken, (req, res) => {
+app.post('/api/admin/beneficios', authenticateToken, checkPermission('gestion_beneficios'), (req, res) => {
     const { prestador, rubro, descripcion, oferta, detalle, codigo, vigencia, logoUrl, enlace, orden, activo } = req.body;
     if (!prestador || !oferta) return res.status(400).json({ error: 'Prestador y oferta son requeridos' });
 
@@ -415,7 +584,7 @@ app.post('/api/admin/beneficios', authenticateToken, (req, res) => {
         });
 });
 
-app.put('/api/admin/beneficios/:id', authenticateToken, (req, res) => {
+app.put('/api/admin/beneficios/:id', authenticateToken, checkPermission('gestion_beneficios'), (req, res) => {
     const { prestador, rubro, descripcion, oferta, detalle, codigo, vigencia, logoUrl, enlace, orden, activo } = req.body;
 
     db.run(`UPDATE benefits SET prestador = ?, rubro = ?, descripcion = ?, oferta = ?, detalle = ?,
@@ -429,37 +598,81 @@ app.put('/api/admin/beneficios/:id', authenticateToken, (req, res) => {
         });
 });
 
-app.delete('/api/admin/beneficios/:id', authenticateToken, (req, res) => {
+app.delete('/api/admin/beneficios/:id', authenticateToken, checkPermission('gestion_beneficios'), (req, res) => {
     db.run("DELETE FROM benefits WHERE id = ?", [req.params.id], function(err) {
         if (err) return res.status(500).json({ error: 'Error eliminando beneficio' });
         res.json({ message: 'Beneficio eliminado', id: req.params.id });
     });
 });
 
-app.get('/api/admin/users', authenticateToken, (req, res) => {
-    db.all("SELECT id, email, name, role, created_at FROM users ORDER BY id DESC", [], (err, rows) => {
+// ── Usuarios & Permisos ABM ────────────────────────────────────────────────
+app.get('/api/admin/users', authenticateToken, checkPermission('gestion_usuarios'), (req, res) => {
+    db.all("SELECT id, email, name, role, permissions, created_at FROM users ORDER BY id DESC", [], (err, rows) => {
         if (err) return res.status(500).json({ error: 'Error obteniendo usuarios' });
-        res.json(rows || []);
+        const parsedRows = (rows || []).map(r => {
+            let perms = {};
+            try { perms = JSON.parse(r.permissions || '{}'); } catch(e){}
+            return { ...r, permissions: perms };
+        });
+        res.json(parsedRows);
     });
 });
 
-app.post('/api/admin/users', authenticateToken, (req, res) => {
-    const { email, password, name, role } = req.body;
-    if (!email || !password || !name) return res.status(400).json({ error: 'Email, contraseña y nombre son requeridos' });
+app.post('/api/admin/users', authenticateToken, checkPermission('gestion_usuarios'), (req, res) => {
+    const { email, password, name, role, permissions } = req.body;
+    if (!email || !password || !name) return res.status(400).json({ error: 'Email/Usuario, contraseña y nombre son requeridos' });
 
     const hashed = bcrypt.hashSync(password, 10);
-    db.run("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)", [
-        email, hashed, name, role || 'EDITOR'
+    const permsJson = JSON.stringify(permissions || {
+        ver_inscriptos: true,
+        gestionar_inscriptos: false,
+        gestion_noticias: true,
+        gestion_beneficios: false,
+        gestion_usuarios: false
+    });
+
+    db.run("INSERT INTO users (email, password, name, role, permissions) VALUES (?, ?, ?, ?, ?)", [
+        email, hashed, name, role || 'EDITOR', permsJson
     ], function(err) {
         if (err) return res.status(500).json({ error: 'Error creando usuario o el email ya existe' });
         res.status(201).json({ message: 'Usuario creado con éxito', id: this.lastID, email, name });
     });
 });
 
-app.delete('/api/admin/users/:id', authenticateToken, (req, res) => {
-    db.run("DELETE FROM users WHERE id = ?", [req.params.id], function(err) {
-        if (err) return res.status(500).json({ error: 'Error eliminando usuario' });
-        res.json({ message: 'Usuario eliminado' });
+app.put('/api/admin/users/:id', authenticateToken, checkPermission('gestion_usuarios'), (req, res) => {
+    const { email, password, name, role, permissions } = req.body;
+    if (!email || !name) return res.status(400).json({ error: 'Email y nombre son requeridos' });
+
+    const permsJson = JSON.stringify(permissions || {});
+
+    if (password && password.trim()) {
+        const hashed = bcrypt.hashSync(password, 10);
+        db.run("UPDATE users SET email = ?, password = ?, name = ?, role = ?, permissions = ? WHERE id = ?", [
+            email, hashed, name, role || 'EDITOR', permsJson, req.params.id
+        ], function(err) {
+            if (err) return res.status(500).json({ error: 'Error actualizando usuario' });
+            res.json({ message: 'Usuario actualizado con éxito' });
+        });
+    } else {
+        db.run("UPDATE users SET email = ?, name = ?, role = ?, permissions = ? WHERE id = ?", [
+            email, name, role || 'EDITOR', permsJson, req.params.id
+        ], function(err) {
+            if (err) return res.status(500).json({ error: 'Error actualizando usuario' });
+            res.json({ message: 'Usuario actualizado con éxito' });
+        });
+    }
+});
+
+app.delete('/api/admin/users/:id', authenticateToken, checkPermission('gestion_usuarios'), (req, res) => {
+    // Prevent deleting main admin
+    db.get("SELECT email FROM users WHERE id = ?", [req.params.id], (err, user) => {
+        if (user && (user.email === 'admin@economicasunp.edu.ar' || user.email === 'admin')) {
+            return res.status(400).json({ error: 'No se puede eliminar el usuario administrador principal.' });
+        }
+        db.run("DELETE FROM users WHERE id = ?", [req.params.id], function(err) {
+            if (err) return res.status(500).json({ error: 'Error eliminando usuario' });
+            res.json({ message: 'Usuario eliminado' });
+        });
     });
 });
 

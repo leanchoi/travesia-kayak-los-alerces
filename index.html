@@ -740,6 +740,17 @@
 
       <fieldset class="d-group">
         <legend class="d-legend"><span class="d-legend__n">4</span> Comprobante de pago *</legend>
+        <div class="price-notice-box" id="priceNoticeBox">
+          <div class="price-notice-box__badge">Valor de Inscripción 2026</div>
+          <div class="price-notice-box__amount">
+            <span id="priceNoticeMonto">$100.000</span>
+            <em id="priceNoticeTexto">(Cien mil pesos)</em>
+          </div>
+          <p id="priceNoticeInstrucciones" class="price-notice-box__hint">
+            El costo de inscripción para la Travesía en Kayaks 2026 es de $100.000 (Cien mil pesos). Adjuntá la foto o captura legible del comprobante de transferencia bancaria de la reserva o pago completo.
+          </p>
+        </div>
+
         <div class="d-drop" id="regComprobanteDrop">
           <input type="file" id="regComprobante" accept="image/*,application/pdf" class="d-drop__input" required>
           <span class="d-drop__face">
@@ -777,8 +788,8 @@
   <div class="dlg__body">
     <form id="adminLoginForm">
       <div class="d-field">
-        <label for="adminEmail">Email Institucional</label>
-        <input type="email" id="adminEmail" required placeholder="admin@economicasunp.edu.ar">
+        <label for="adminEmail">Email / Usuario</label>
+        <input type="text" id="adminEmail" required placeholder="admin (o email)">
       </div>
       <div class="d-field margin-top-sm">
         <label for="adminPassword">Contraseña</label>
@@ -800,7 +811,7 @@
       <span id="adminUserTag">Conectado como: Admin</span>
     </div>
     <div class="dash-actions">
-      <button class="btn btn--ghost btn--sm" id="adminExportCsvBtn" type="button">Exportar CSV</button>
+      <button class="btn btn--ghost btn--sm" id="adminExportExcelBtn" type="button">📊 Exportar Excel (.xlsx)</button>
       <button class="btn btn--ghost btn--sm btn--danger" id="adminLogoutBtn" type="button">Cerrar Sesión</button>
       <button class="icon-btn" type="button" data-close aria-label="Cerrar dashboard">
         <svg class="ic" aria-hidden="true"><use href="#i-close"/></svg>
@@ -809,10 +820,11 @@
   </header>
 
   <nav class="dash-tabs">
-    <button class="dash-tab-btn active" data-dash-tab="inscripciones">Inscripciones (<span id="countInscripciones">0</span>)</button>
-    <button class="dash-tab-btn" data-dash-tab="blog">Blog & Novedades</button>
-    <button class="dash-tab-btn" data-dash-tab="beneficios">Beneficios (<span id="countBeneficios">0</span>)</button>
-    <button class="dash-tab-btn" data-dash-tab="usuarios">Usuarios Admin</button>
+    <button class="dash-tab-btn active" data-dash-tab="inscripciones" id="tabBtnInscripciones">Inscripciones (<span id="countInscripciones">0</span>)</button>
+    <button class="dash-tab-btn" data-dash-tab="blog" id="tabBtnBlog">Blog & Novedades</button>
+    <button class="dash-tab-btn" data-dash-tab="beneficios" id="tabBtnBeneficios">Beneficios (<span id="countBeneficios">0</span>)</button>
+    <button class="dash-tab-btn" data-dash-tab="usuarios" id="tabBtnUsuarios">Usuarios & Permisos</button>
+    <button class="dash-tab-btn" data-dash-tab="config" id="tabBtnConfig">⚙️ Configuración</button>
   </nav>
 
   <div class="dash-body">
@@ -822,9 +834,9 @@
         <input type="text" id="adminSearchInscripciones" class="dash-search" placeholder="Buscar por Nombre, DNI, Código o Email...">
         <select id="adminFilterEstado" class="dash-select">
           <option value="TODOS">Todos los Estados</option>
-          <option value="PENDIENTE">Pendientes</option>
-          <option value="CONFIRMADA">Confirmadas</option>
-          <option value="CANCELADA">Canceladas</option>
+          <option value="PENDIENTE">Pendiente</option>
+          <option value="APROBADO">Aprobado</option>
+          <option value="RECHAZADO">Rechazado</option>
         </select>
       </div>
       <div class="table-wrap">
@@ -837,6 +849,7 @@
               <th>Contacto</th>
               <th>Localidad</th>
               <th>Kayak / Nivel</th>
+              <th>Comprobante</th>
               <th>Estado</th>
               <th>Acciones</th>
             </tr>
@@ -868,8 +881,7 @@
       </div>
     </div>
 
-    <!-- TAB 3: USUARIOS -->
-    <!-- TAB: BENEFICIOS -->
+    <!-- TAB 3: BENEFICIOS -->
     <div class="dash-content" id="dashTabBeneficios">
       <div class="dash-toolbar">
         <h3>Beneficios y promociones</h3>
@@ -894,9 +906,10 @@
       </div>
     </div>
 
+    <!-- TAB 4: USUARIOS -->
     <div class="dash-content" id="dashTabUsuarios">
       <div class="dash-toolbar">
-        <h3>Usuarios Administradores</h3>
+        <h3>Usuarios Administradores & Permisos</h3>
         <button class="btn btn--solid btn--sm" id="openNewUserModalBtn" type="button">+ Crear Usuario</button>
       </div>
       <div class="table-wrap">
@@ -904,8 +917,9 @@
           <thead>
             <tr>
               <th>Nombre</th>
-              <th>Email</th>
+              <th>Usuario / Email</th>
               <th>Rol</th>
+              <th>Permisos Asignados</th>
               <th>Fecha Registro</th>
               <th>Acciones</th>
             </tr>
@@ -913,6 +927,35 @@
           <tbody id="adminUsuariosTbody"></tbody>
         </table>
       </div>
+    </div>
+
+    <!-- TAB 5: CONFIGURACIÓN -->
+    <div class="dash-content" id="dashTabConfig">
+      <div class="dash-toolbar">
+        <h3>⚙️ Configuración del Valor de Inscripción y Leyendas</h3>
+      </div>
+      <form id="adminConfigForm" style="max-width: 680px; margin-top: 1rem;">
+        <div class="d-form-grid">
+          <div class="d-field">
+            <label for="cfgPrecioMonto">Valor de Inscripción ($)</label>
+            <input type="text" id="cfgPrecioMonto" required placeholder="100.000">
+          </div>
+          <div class="d-field">
+            <label for="cfgPrecioTexto">Valor en Letras</label>
+            <input type="text" id="cfgPrecioTexto" required placeholder="Cien mil pesos">
+          </div>
+          <div class="d-field d-full">
+            <label for="cfgPrecioInstrucciones">Instrucciones y detalles de pago para el usuario</label>
+            <textarea id="cfgPrecioInstrucciones" rows="3" required placeholder="El costo de inscripción para la Travesía en Kayaks 2026 es de $100.000 (Cien mil pesos)..."></textarea>
+          </div>
+        </div>
+        <div id="configSuccessAlert" class="success-alert margin-top-sm" style="display:none; padding:.75rem 1rem;">✅ Configuración de precios guardada con éxito.</div>
+        <div class="margin-top-md">
+          <button class="btn btn--solid btn--lg" type="submit">
+            Guardar Configuración
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </dialog>
@@ -1028,6 +1071,87 @@
       </div>
       <button class="btn btn--solid btn--lg w-100" type="submit" style="margin-top:1.4rem">
         Guardar beneficio
+        <svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>
+      </button>
+    </form>
+  </div>
+</dialog>
+
+<!-- ══ DIÁLOGO · EDITOR DE USUARIOS Y PERMISOS ══ -->
+<dialog class="dlg dlg--wide" id="userEditorDialog" aria-labelledby="userEditorTitle">
+  <div class="dlg__head">
+    <h2 id="userEditorTitle">Usuario Administrador</h2>
+    <button class="icon-btn" type="button" data-close aria-label="Cerrar">
+      <svg class="ic" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
+  </div>
+  <div class="dlg__body">
+    <form id="userForm">
+      <input type="hidden" id="usrId">
+      <div class="d-form-grid">
+        <div class="d-field">
+          <label for="usrName">Nombre Completo *</label>
+          <input type="text" id="usrName" required placeholder="Ej. Juan Pérez">
+        </div>
+        <div class="d-field">
+          <label for="usrEmail">Usuario / Email *</label>
+          <input type="text" id="usrEmail" required placeholder="usuario@economicasunp.edu.ar">
+        </div>
+        <div class="d-field">
+          <label for="usrPassword">Contraseña <small style="font-weight:400; color:var(--ink-3);">(dejar vacía para no cambiar)</small></label>
+          <input type="password" id="usrPassword" placeholder="••••••••">
+        </div>
+        <div class="d-field">
+          <label for="usrRole">Rol Principal</label>
+          <select id="usrRole">
+            <option value="EDITOR">Editor / Operador</option>
+            <option value="ADMIN">Super Administrador (Acceso Total)</option>
+          </select>
+        </div>
+        
+        <div class="d-field d-full" style="margin-top: 0.8rem;">
+          <label style="font-weight: 600; font-size: 0.92rem; display: block; margin-bottom: 0.5rem;">Matriz de Permisos Granulares</label>
+          <div class="perm-grid">
+            <label class="perm-check">
+              <input type="checkbox" id="permVerInscriptos" checked>
+              <span>
+                <b>🔍 Ver padrón de inscriptos</b>
+                Permite consultar la lista de participantes inscritos y exportar el reporte en Excel.
+              </span>
+            </label>
+            <label class="perm-check">
+              <input type="checkbox" id="permGestionarInscriptos">
+              <span>
+                <b>✅ Gestionar estado de inscriptos</b>
+                Permite cambiar el estado (Aprobado, Pendiente, Rechazado) y eliminar registros.
+              </span>
+            </label>
+            <label class="perm-check">
+              <input type="checkbox" id="permGestionNoticias">
+              <span>
+                <b>📰 Gestión de Noticias y Blog</b>
+                Permite crear, editar y eliminar publicaciones del sitio oficial.
+              </span>
+            </label>
+            <label class="perm-check">
+              <input type="checkbox" id="permGestionBeneficios">
+              <span>
+                <b>🎁 Gestión de Beneficios</b>
+                Permite administrar las promociones y comercios adheridos.
+              </span>
+            </label>
+            <label class="perm-check">
+              <input type="checkbox" id="permGestionUsuarios">
+              <span>
+                <b>⚙️ Gestión de Usuarios & Permisos</b>
+                Permite crear otros usuarios y modificar la matriz de accesos (Super Admin).
+              </span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn--solid btn--lg w-100" type="submit" style="margin-top:1.4rem">
+        Guardar Usuario
         <svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>
       </button>
     </form>

@@ -1798,6 +1798,88 @@ body.is-locked {
   margin-top: 1.1rem;
   padding: .9rem 1.1rem;
   border: 1px solid var(--rule);
+
+/* Cuadro destacado de precio de inscripción */
+.price-notice-box {
+  background: color-mix(in oklab, var(--lake) 8%, var(--paper));
+  border: 1.5px solid color-mix(in oklab, var(--lake) 35%, transparent);
+  border-radius: 8px;
+  padding: 1.1rem 1.3rem;
+  margin-bottom: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+}
+.price-notice-box__badge {
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--lake);
+}
+.price-notice-box__amount {
+  display: flex;
+  align-items: baseline;
+  gap: .6rem;
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--ink);
+  font-family: var(--serif);
+}
+.price-notice-box__amount em {
+  font-size: .92rem;
+  font-weight: 500;
+  font-style: normal;
+  color: var(--ink-2);
+  font-family: var(--sans);
+}
+.price-notice-box__hint {
+  font-size: .84rem;
+  color: var(--ink-2);
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* Matriz de Permisos Granulares */
+.perm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: .75rem;
+  margin-top: .4rem;
+}
+.perm-check {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  padding: .8rem .95rem;
+  background: color-mix(in oklab, var(--paper) 70%, transparent);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color .15s var(--ease), background .15s var(--ease);
+}
+.perm-check:hover {
+  border-color: var(--lake);
+  background: color-mix(in oklab, var(--lake) 5%, var(--paper));
+}
+.perm-check input[type="checkbox"] {
+  margin-top: .2rem;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+.perm-check span {
+  display: flex;
+  flex-direction: column;
+  font-size: .83rem;
+  color: var(--ink-2);
+  line-height: 1.35;
+}
+.perm-check b {
+  font-size: .88rem;
+  color: var(--ink);
+  font-weight: 600;
+}
   border-radius: 8px;
   background: color-mix(in oklab, var(--lake) 4%, transparent);
   cursor: pointer;

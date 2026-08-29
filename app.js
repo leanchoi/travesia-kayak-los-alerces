@@ -98,415 +98,334 @@
 
     const link = (stage) => {
       const id = stage.dataset.node;
-      const node = $(`.rm-node[data-node="${id}"]`, routemap);
-      if (!node) return;
-      const on  = () => { node.classList.add('is-lit'); stage.classList.add('is-lit'); };
-      const off = () => { node.classList.remove('is-lit'); stage.classList.remove('is-lit'); };
-      stage.addEventListener('mouseenter', on);
-      stage.addEventListener('mouseleave', off);
-      stage.addEventListener('focusin', on);
-      stage.addEventListener('focusout', off);
+      const pt = id ? $(`#rmPt-${id}`) : null;
+      return { stage, pt };
     };
-    $$('.stage[data-node]').forEach(link);
-  }
 
-  /* ------------------------------------------------------------------------
-     4 · APARICIONES AL SCROLL
-     ------------------------------------------------------------------------ */
-  const revealTargets = [
-    ['.cover__body', 0], ['.chart', 90],
-    ['.head', 0], ['.stage', 60], ['.note', 0],
-    ['.article__body', 0], ['.article__aside', 90],
-    ['.film', 0], ['.plate', 55], ['.linkrow', 0],
-    ['.person', 0], ['.commissions > div', 55],
-    ['.voice', 70], ['.wall__tile', 40]
-  ];
+    const pairs = $$('.stage').map(link).filter((p) => p.pt);
 
-  if (!calm.matches && 'IntersectionObserver' in window) {
-    const revealer = new IntersectionObserver((entries, obs) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('is-in');
-        obs.unobserve(entry.target);
+    const activate = (targetPt) => {
+      pairs.forEach(({ stage, pt }) => {
+        const active = pt === targetPt;
+        pt.classList.toggle('is-active', active);
+        stage.classList.toggle('is-active', active);
       });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    };
 
-    revealTargets.forEach(([sel, step]) => {
-      $$(sel).forEach((el, i) => {
-        el.setAttribute('data-reveal', '');
-        if (step) el.style.setProperty('--d', `${Math.min(i * step, 400)}ms`);
-        revealer.observe(el);
-      });
+    pairs.forEach(({ stage, pt }) => {
+      const onEnter = () => activate(pt);
+      stage.addEventListener('mouseenter', onEnter);
+      stage.addEventListener('focusin', onEnter);
+      pt.addEventListener('mouseenter', onEnter);
     });
   }
 
   /* ------------------------------------------------------------------------
-     5 · FOTOGRAFÍAS Y RECURSOS
+     4 · VIDEO COMPONENT: Autoplay on scroll & Sticky Behavior
      ------------------------------------------------------------------------ */
-  function watchImage(img) {
-    const frame = img.closest('.plate, .person__plate');
-    if (!frame) return;
-    const fail = () => frame.classList.add('is-empty');
-    img.addEventListener('error', fail);
-    if (img.complete && img.naturalWidth === 0) fail();
-  }
-  $$('.plate img, .person__plate img').forEach(watchImage);
+  const galleryVideo = $('#galleryVideo');
+  if (galleryVideo && 'IntersectionObserver' in window) {
+    const videoObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          galleryVideo.play().catch(() => {});
+        } else {
+          galleryVideo.pause();
+        }
+      });
+    }, { threshold: 0.25 });
 
-  /* ------------------------------------------------------------------------
-     6 · VIDEO CON AUTOPLAY EN SCROLL (INTERSECTION OBSERVER)
-     ------------------------------------------------------------------------ */
-  const filmVideo = $('#film video');
-  if (filmVideo) {
-    if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            filmVideo.play().catch(() => {});
-          } else {
-            filmVideo.pause();
-          }
-        });
-      }, { threshold: 0.2 });
-      observer.observe(filmVideo);
-    }
+    videoObserver.observe(galleryVideo);
   }
 
   /* ------------------------------------------------------------------------
-     7 · DIÁLOGOS NATIVOS (<dialog>)
+     5 · MODALES Y ACCESIBILIDAD: patrón común dialog.showModal()
      ------------------------------------------------------------------------ */
-  /* Bloqueo de scroll que NO pierde la posición de lectura.
-     Con sólo overflow:hidden en el body el navegador descarta el desplazamiento
-     y al abrir cualquier diálogo la página aparecía arriba de todo. Acá se
-     guarda la posición, se fija el body con un top negativo y al cerrar se
-     devuelve exactamente donde estaba. El contador es porque hay diálogos que
-     se abren encima de otros (el editor de noticias sobre el tablero): sin él,
-     cerrar el de arriba desbloquearía con el de abajo todavía abierto. */
-  let lockCount = 0;
-  let lockedAt = 0;
+  let scrollY = 0;
 
   const lock = (on) => {
-    const body = document.body;
     if (on) {
-      if (lockCount === 0) {
-        lockedAt = window.scrollY || document.documentElement.scrollTop || 0;
-        body.style.top = `-${lockedAt}px`;
-        body.classList.add('is-locked');
-      }
-      lockCount++;
+      scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
     } else {
-      lockCount = Math.max(0, lockCount - 1);
-      if (lockCount === 0) {
-        body.classList.remove('is-locked');
-        body.style.top = '';
-        // behavior instant: el html tiene scroll-behavior smooth, y sin esto
-        // el regreso a la posición se anima —se ve como un salto y cualquier
-        // gesto del usuario lo interrumpe a mitad de camino.
-        window.scrollTo({ top: lockedAt, left: 0, behavior: 'instant' });
-      }
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      window.scrollTo(0, scrollY);
     }
   };
 
   function wireDialog(dlg) {
     if (!dlg) return;
-    $$('[data-close]', dlg).forEach((b) => b.addEventListener('click', () => dlg.close()));
-    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
     dlg.addEventListener('close', () => lock(false));
+    dlg.addEventListener('click', (e) => {
+      if (e.target === dlg || e.target.closest('[data-close]')) {
+        dlg.close();
+      }
+    });
   }
 
   /* ------------------------------------------------------------------------
-     7b · ARCHIVO POR AÑO
-     Cada año de la línea de tiempo abre un carrusel. Las imágenes todavía no
-     están: cada lámina cae al estado vacío diseñado y se muestra sola cuando
-     el archivo aparezca. Las de los noventa se viran a blanco y negro por CSS
-     para que se lean como material de época.
+     6 · CARRUSEL POR AÑO (galería histórica)
      ------------------------------------------------------------------------ */
-  const ARCHIVO = {
+  const yearDialog = $('#yearDialog');
+  wireDialog(yearDialog);
+
+  const archive = {
     '1997': {
-      titulo: 'La bajada histórica · 1997',
-      lede: 'Última edición formal antes de la pausa. Material de archivo de quienes remaron en los noventa.',
-      aged: true,
-      shots: [
-        { src: 'assets/anios/1997-01.jpg', cap: 'Largada en el Lago Verde, edición 1997 (recreación).' },
-        { src: 'assets/anios/1997-02.jpg', cap: 'Descenso del Río Arrayanes con equipamiento de la época (recreación).' }
+      title: 'Edición 1997 · La bajada pionera',
+      lede: 'Imágenes históricas del primer descenso universitario en el Río Arrayanes, que sentó las bases institucionales de la travesía.',
+      items: [
+        { src: 'assets/anios/1997-01.jpg', cap: 'Acreditación y preparativos en la orilla del Lago Verde (1997).' },
+        { src: 'assets/anios/1997-02.jpg', cap: 'Primer grupo de remeros ingresando al cauce del Río Arrayanes (1997).' }
       ]
     },
-    '2026-04': {
-      titulo: 'El regreso · abril de 2026',
-      lede: 'Cuarenta y dos remeros devolvieron la travesía al agua después de veintinueve años.',
-      aged: false,
-      shots: [
-        { src: 'assets/anios/2026-04-01.jpg', cap: 'La flotilla completa sobre el Río Arrayanes (recreación).' },
-        { src: 'assets/anios/2026-04-02.jpg', cap: 'Llegada y campamento en Bahía Rosales (recreación).' }
+    '2026': {
+      title: 'Edición VII · Noviembre 2026',
+      lede: 'Fotografías del cruce del Lago Verde, el tramo técnico por el Arrayanes y la llegada al Camping Agreste Bahía Rosales.',
+      items: [
+        { src: 'assets/anios/2026-04-01.jpg', cap: 'Formación de kayaks en aguas transparentes del Lago Verde (2026).' },
+        { src: 'assets/anios/2026-04-02.jpg', cap: 'Parada técnica y almuerzo de camaradería en Hostería Cumehué (2026).' }
       ]
     }
   };
 
-  const yearDialog = $('#yearDialog');
-  if (yearDialog) {
+  let currentYearItems = [];
+  let currentYearIdx = 0;
+
+  function renderYearSlide(idx) {
     const track = $('#yearTrack');
-    const dots  = $('#yearDots');
+    const dots = $('#yearDots');
+    if (!track || !currentYearItems.length) return;
 
-    const goTo = (i) => {
-      const shot = track.children[i];
-      if (shot) track.scrollTo({ left: shot.offsetLeft - track.offsetLeft, behavior: calm.matches ? 'auto' : 'smooth' });
-    };
+    currentYearIdx = (idx + currentYearItems.length) % currentYearItems.length;
+    const item = currentYearItems[currentYearIdx];
 
-    const currentIndex = () =>
-      Math.round(track.scrollLeft / (track.clientWidth + 10));
+    track.innerHTML = `
+      <figure class="reel__slide">
+        <img src="${item.src}" alt="${item.cap}">
+        <figcaption class="reel__cap">${item.cap}</figcaption>
+      </figure>
+    `;
 
-    const paintDots = () => {
-      const at = currentIndex();
-      $$('.reel__dot', dots).forEach((d, i) => d.classList.toggle('is-on', i === at));
-    };
-
-    track.addEventListener('scroll', paintDots, { passive: true });
-
-    $$('[data-reel]', yearDialog).forEach((b) => {
-      b.addEventListener('click', () => {
-        const n = track.children.length;
-        goTo((currentIndex() + Number(b.dataset.reel) + n) % n);
-      });
-    });
-
-    const build = (key) => {
-      const data = ARCHIVO[key];
-      if (!data) return;
-      $('#yearTitle').textContent = data.titulo;
-      $('#yearLede').textContent = data.lede;
-
-      track.innerHTML = '';
-      dots.innerHTML = '';
-
-      data.shots.forEach((s, i) => {
-        const fig = document.createElement('figure');
-        fig.className = 'reel__shot' + (data.aged ? ' reel__shot--aged' : '');
-        const img = document.createElement('img');
-        img.src = s.src;
-        img.alt = s.cap;
-        img.loading = 'lazy';
-        img.addEventListener('error', () => fig.classList.add('is-empty'));
-        if (img.complete && img.naturalWidth === 0) fig.classList.add('is-empty');
-        const cap = document.createElement('figcaption');
-        cap.textContent = s.cap;
-        fig.append(img, cap);
-        track.appendChild(fig);
-
-        const dot = document.createElement('button');
-        dot.type = 'button';
-        dot.className = 'reel__dot' + (i === 0 ? ' is-on' : '');
-        dot.setAttribute('aria-label', `Ir a la imagen ${i + 1}`);
-        dot.addEventListener('click', () => goTo(i));
-        dots.appendChild(dot);
-      });
-
-      track.scrollLeft = 0;
-    };
-
-    wireDialog(yearDialog);
-    $$('.timeline__btn').forEach((b) => {
-      b.addEventListener('click', () => {
-        build(b.dataset.year);
-        lock(true);
-        yearDialog.showModal();
-      });
-    });
+    if (dots) {
+      dots.innerHTML = currentYearItems.map((_, i) =>
+        `<button class="reel__dot ${i === currentYearIdx ? 'is-active' : ''}" data-idx="${i}" aria-label="Ir a foto ${i + 1}"></button>`
+      ).join('');
+    }
   }
+
+  $$('.history-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const year = card.dataset.year;
+      const data = archive[year];
+      if (!data || !yearDialog) return;
+
+      $('#yearTitle').textContent = data.title;
+      $('#yearLede').textContent  = data.lede;
+      currentYearItems = data.items;
+      renderYearSlide(0);
+
+      lock(true);
+      yearDialog.showModal();
+    });
+  });
+
+  $('#yearDots')?.addEventListener('click', (e) => {
+    const dot = e.target.closest('.reel__dot');
+    if (dot) renderYearSlide(Number(dot.dataset.idx));
+  });
+
+  $$('[data-reel]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const step = Number(btn.dataset.reel);
+      renderYearSlide(currentYearIdx + step);
+    });
+  });
 
   /* ------------------------------------------------------------------------
-     7c · LOGO DE PRENSA
-     Si assets/prensa/weekend.png no está, queda el nombre compuesto.
+     7 · VISOR DE IMÁGENES (Lector de fotos)
      ------------------------------------------------------------------------ */
-  const press = $('.press');
-  if (press) {
-    const logo = $('img', press);
-    const fail = () => press.classList.add('is-nologo');
-    logo?.addEventListener('error', fail);
-    if (logo?.complete && logo.naturalWidth === 0) fail();
-  }
-
-  const patronsDialog = $('#patronsDialog');
-  wireDialog(patronsDialog);
-  $('#openPatrons')?.addEventListener('click', () => { lock(true); patronsDialog.showModal(); });
-
   const viewer = $('#viewer');
-  const viewerImg = $('#viewerImg');
-  const viewerCap = $('#viewerCap');
   wireDialog(viewer);
 
-  if (viewer && viewerImg) {
-    let shots = [];
-    let at = 0;
+  let viewerItems = [];
+  let viewerIdx = 0;
 
-    const paint = () => {
-      const shot = shots[at];
-      if (!shot) return;
-      viewerImg.src = shot.src;
-      viewerImg.alt = shot.alt;
-      viewerCap.textContent = shot.caption;
-    };
-
-    const step = (delta) => {
-      if (shots.length < 2) return;
-      at = (at + delta + shots.length) % shots.length;
-      paint();
-    };
-
-    $$('[data-step]', viewer).forEach((b) => {
-      b.addEventListener('click', () => step(Number(b.dataset.step)));
-    });
-
-    viewer.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
-      if (e.key === 'ArrowLeft')  { e.preventDefault(); step(-1); }
-    });
-
-    $$('.plate').forEach((plate) => {
-      const open = () => {
-        if (plate.classList.contains('is-empty')) return;
-        const live = $$('.plate').filter((p) => !p.classList.contains('is-empty'));
-        shots = live.map((p) => ({
-          src: p.dataset.full,
-          alt: $('img', p)?.alt || '',
-          caption: p.dataset.caption || ''
-        }));
-        at = Math.max(0, live.indexOf(plate));
-
-        paint();
-        lock(true);
-        viewer.showModal();
-      };
-
-      plate.addEventListener('click', open);
-      plate.tabIndex = 0;
-      plate.setAttribute('role', 'button');
-      plate.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
-      });
-    });
+  function openViewer(items, startIdx = 0) {
+    if (!viewer || !items.length) return;
+    viewerItems = items;
+    viewerIdx = startIdx;
+    showViewerSlide(startIdx);
+    lock(true);
+    viewer.showModal();
   }
 
+  function showViewerSlide(idx) {
+    viewerIdx = (idx + viewerItems.length) % viewerItems.length;
+    const item = viewerItems[viewerIdx];
+    const img = $('#viewerImg');
+    const cap = $('#viewerCap');
+    if (img) { img.src = item.src; img.alt = item.cap || ''; }
+    if (cap) { cap.textContent = item.cap || ''; }
+  }
+
+  $$('[data-step]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      showViewerSlide(viewerIdx + Number(btn.dataset.step));
+    });
+  });
+
+  $$('.gallery-grid figure').forEach((fig, idx, arr) => {
+    fig.addEventListener('click', () => {
+      const items = Array.from(arr).map(f => ({
+        src: f.querySelector('img')?.src,
+        cap: f.querySelector('figcaption')?.textContent
+      }));
+      openViewer(items, idx);
+    });
+  });
+
   /* ------------------------------------------------------------------------
-     8 · PUBLIC BLOG LOADER
+     8 · BLOG Y NOTICIAS
      ------------------------------------------------------------------------ */
-  const publicBlogGrid = $('#publicBlogGrid');
   const postReaderDialog = $('#postReaderDialog');
-  const readPostCategoryTitle = $('#readPostCategoryTitle');
-  const readPostBody = $('#readPostBody');
   wireDialog(postReaderDialog);
 
   function loadPublicBlogPosts() {
-    if (!publicBlogGrid) return;
+    const newsGrid = $('#newsGrid');
+    if (!newsGrid) return;
+
     fetch(`${API_BASE}/api/blog`)
       .then(res => res.json())
       .then(posts => {
-        if (posts.length === 0) {
-          publicBlogGrid.innerHTML = `<p style="grid-column:1/-1; color: var(--ink-2);">No hay noticias publicadas por el momento.</p>`;
+        if (!posts || posts.length === 0) {
+          newsGrid.innerHTML = '<p class="text-muted">Próximamente publicaremos novedades oficiales de la VIII edición.</p>';
           return;
         }
-        publicBlogGrid.innerHTML = posts.map(p => `
+
+        newsGrid.innerHTML = posts.map(p => `
           <article class="news-card">
-            ${p.imagen_url ? `
-              <div class="news-card__img-container">
-                <img src="${p.imagen_url}" alt="${p.titulo}" class="news-card__img" loading="lazy">
-              </div>` : ''}
+            <div class="news-card__img-container">
+              <img src="${p.imagen_url || 'assets/gallery-1.jpg'}" alt="${p.titulo}" class="news-card__img" loading="lazy">
+            </div>
             <div class="news-card__body">
-              <div class="news-card__meta">
-                <span class="news-card__tag">${p.categoria}</span>
-                <span>${new Date(p.creado_at).toLocaleDateString('es-AR')}</span>
-              </div>
+              <span class="news-card__tag">${p.categoria || 'Novedades'}</span>
               <h3 class="news-card__title">${p.titulo}</h3>
-              <p class="news-card__excerpt">${p.resumen}</p>
-              <button class="btn btn--ghost btn--sm news-card__btn" onclick="openBlogPostSlug('${p.slug}')">
-                Leer nota completa <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+              <p class="news-card__desc">${p.resumen}</p>
+              <button class="btn btn--ghost btn--sm read-post-btn" data-slug="${p.slug}">
+                Leer artículo completo
               </button>
             </div>
           </article>
         `).join('');
+
+        $$('.read-post-btn', newsGrid).forEach(btn => {
+          btn.addEventListener('click', () => openPostReader(btn.dataset.slug));
+        });
       })
       .catch(() => {
-        publicBlogGrid.innerHTML = `<p style="grid-column:1/-1; color: var(--ember);">Error al cargar las noticias.</p>`;
+        newsGrid.innerHTML = '<p class="text-muted">No se pudieron cargar las noticias en este momento.</p>';
       });
   }
 
-  window.openBlogPostSlug = function(slug) {
+  function openPostReader(slug) {
     fetch(`${API_BASE}/api/blog/${slug}`)
       .then(res => res.json())
       .then(post => {
-        readPostCategoryTitle.textContent = `${post.categoria} · ${new Date(post.creado_at).toLocaleDateString('es-AR')}`;
-        readPostBody.innerHTML = `
-          <h2 style="font-family: var(--serif); font-size: 1.65rem; line-height: 1.3; margin-bottom: 1.2rem; color: var(--ink);">${post.titulo}</h2>
-          ${post.imagen_url ? `
-            <div style="width:100%; max-height:520px; background:var(--paper-3); display:flex; justify-content:center; align-items:center; border-radius:4px; overflow:hidden; margin-bottom:1.4rem; border:1px solid var(--rule-soft); padding:0.4rem;">
-              <img src="${post.imagen_url}" alt="${post.titulo}" style="max-width:100%; max-height:480px; width:auto; height:auto; object-fit:contain; display:block; border-radius:2px;">
-            </div>` : ''}
-          <div style="color: var(--ink-2); font-size: 1rem; line-height: 1.7; white-space: pre-line;">${post.contenido}</div>
+        if (!post) return;
+        $('#readPostCategoryTitle').textContent = `${post.categoria || 'Noticia'} · Travesía Los Alerces`;
+        const body = $('#readPostBody');
+        body.innerHTML = `
+          <article class="post-detail">
+            ${post.imagen_url ? `<div class="news-card__img-container" style="max-height:360px;margin-bottom:1.2rem;"><img src="${post.imagen_url}" alt="${post.titulo}" style="width:100%;height:100%;object-fit:contain;border-radius:4px;"></div>` : ''}
+            <h1 class="post-detail__title" style="font-family:var(--serif);font-size:1.8rem;margin-bottom:0.8rem;line-height:1.15;">${post.titulo}</h1>
+            <p class="text-muted" style="font-size:0.85rem;margin-bottom:1.5rem;">Publicado el ${new Date(post.creado_at).toLocaleDateString('es-AR')}</p>
+            <div class="post-detail__content" style="white-space:pre-line;line-height:1.65;font-size:1rem;color:var(--ink-2);">${post.contenido}</div>
+          </article>
         `;
         lock(true);
         postReaderDialog.showModal();
       });
-  };
+  }
 
   loadPublicBlogPosts();
 
   /* ------------------------------------------------------------------------
-     9 · INSCRIPCIÓN Y PRE-REGISTRO DE REMEROS
+     9 · FORMULARIO DE INSCRIPCIÓN Y PRECIO DINÁMICO
      ------------------------------------------------------------------------ */
   const enrollDialog = $('#enrollDialog');
   wireDialog(enrollDialog);
 
   const openEnrollHeaderBtn = $('#openEnrollHeaderBtn');
-  const openEnrollHeroBtn = $('#openEnrollHeroBtn');
-  const openEnrollFormBtn = $('#openEnrollFormBtn');
-  const enrollmentForm = $('#enrollmentForm');
-  const enrollSuccessBox = $('#enrollSuccessBox');
-  const successCodeTag = $('#successCodeTag');
+  const openEnrollHeroBtn   = $('#openEnrollHeroBtn');
+  const openEnrollFormBtn   = $('#openEnrollFormBtn');
+
+  const enrollmentForm    = $('#enrollmentForm');
+  const enrollSuccessBox  = $('#enrollSuccessBox');
+  const successCodeTag    = $('#successCodeTag');
+
+  let comprobante = null;
+
+  // Cargar precio de inscripción dinámico desde API
+  function loadDynamicEnrollPrice() {
+    fetch(`${API_BASE}/api/config/precio`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data) return;
+        const montoEl = $('#priceNoticeMonto');
+        const textoEl = $('#priceNoticeTexto');
+        const instEl  = $('#priceNoticeInstrucciones');
+
+        if (montoEl) montoEl.textContent = `$${data.monto || '100.000'}`;
+        if (textoEl) textoEl.textContent = `(${data.texto || 'Cien mil pesos'})`;
+        if (instEl)  instEl.textContent  = data.instrucciones || `El costo de inscripción para la Travesía en Kayaks 2026 es de $${data.monto} (${data.texto}). Adjuntá el comprobante.`;
+      })
+      .catch(() => {});
+  }
+
+  loadDynamicEnrollPrice();
 
   function openEnrollmentModal() {
     if (!enrollDialog) return;
-    enrollmentForm.style.display = 'block';
-    enrollSuccessBox.style.display = 'none';
-    enrollmentForm.reset();
+    enrollmentForm?.reset();
+    if (enrollmentForm) enrollmentForm.style.display = 'block';
+    if (enrollSuccessBox) enrollSuccessBox.style.display = 'none';
+    const nameEl = $('#regComprobanteName');
+    if (nameEl) nameEl.textContent = 'Adjuntar foto del comprobante *';
     comprobante = null;
-    $('#regComprobanteDrop')?.classList.remove('is-loaded');
-    const nameTag = $('#regComprobanteName');
-    if (nameTag) nameTag.textContent = 'Adjuntar foto del comprobante';
+    loadDynamicEnrollPrice();
     lock(true);
     enrollDialog.showModal();
   }
 
-  /* Comprobante de pago: se reduce en el navegador antes de subirlo. Una foto
-     de celular sin tocar puede pesar varios MB; así viaja liviana y el body
-     JSON no se dispara. Los PDF se mandan tal cual. */
-  let comprobante = null;
-
-  const comprobanteInput = $('#regComprobante');
-  comprobanteInput?.addEventListener('change', () => {
-    const file = comprobanteInput.files?.[0];
-    const drop = $('#regComprobanteDrop');
-    const nameTag = $('#regComprobanteName');
-    if (!file) { comprobante = null; drop?.classList.remove('is-loaded'); return; }
-
-    const done = (dataUrl) => {
-      comprobante = { nombre: file.name, tipo: file.type, data: dataUrl };
-      drop?.classList.add('is-loaded');
-      if (nameTag) nameTag.textContent = file.name;
-    };
+  const fileInput = $('#regComprobante');
+  fileInput?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const nameEl = $('#regComprobanteName');
+    if (nameEl) nameEl.textContent = `📁 ${file.name}`;
 
     const reader = new FileReader();
     reader.onload = () => {
-      if (!file.type.startsWith('image/')) return done(reader.result);
-      const img = new Image();
-      img.onload = () => {
-        const max = 1400;
-        const scale = Math.min(1, max / Math.max(img.width, img.height));
-        const cv = document.createElement('canvas');
-        cv.width = Math.round(img.width * scale);
-        cv.height = Math.round(img.height * scale);
-        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
-        done(cv.toDataURL('image/jpeg', 0.82));
-      };
-      img.onerror = () => done(reader.result);
-      img.src = reader.result;
+      if (file.type.startsWith('image/')) {
+        const img = new Image();
+        img.onload = () => {
+          const max = 1400;
+          const scale = Math.min(1, max / Math.max(img.width, img.height));
+          const cv = document.createElement('canvas');
+          cv.width = Math.round(img.width * scale);
+          cv.height = Math.round(img.height * scale);
+          cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+          comprobante = { nombre: file.name, data: cv.toDataURL('image/jpeg', 0.82) };
+        };
+        img.onerror = () => { comprobante = { nombre: file.name, data: reader.result }; };
+        img.src = reader.result;
+      } else {
+        comprobante = { nombre: file.name, data: reader.result };
+      }
     };
     reader.readAsDataURL(file);
   });
@@ -519,8 +438,6 @@
     enrollmentForm.addEventListener('submit', (e) => {
       e.preventDefault();
 
-      // novalidate en el form: validamos acá para poder mostrar el mensaje
-      // nativo sin que el navegador salte a un campo escondido.
       if (!enrollmentForm.checkValidity()) {
         const first = enrollmentForm.querySelector(':invalid');
         first?.reportValidity();
@@ -576,7 +493,7 @@
   }
 
   /* ------------------------------------------------------------------------
-     10 · ACCESO ADMIN Y CANDADO EN FOOTER
+     10 · ACCESO ADMIN Y BACK-END DASHBOARD
      ------------------------------------------------------------------------ */
   const adminLockBtn = $('#adminLockBtn');
   const adminLoginDialog = $('#adminLoginDialog');
@@ -590,9 +507,10 @@
 
   const adminUserTag = $('#adminUserTag');
   const adminLogoutBtn = $('#adminLogoutBtn');
-  const adminExportCsvBtn = $('#adminExportCsvBtn');
+  const adminExportExcelBtn = $('#adminExportExcelBtn');
 
   let authToken = localStorage.getItem('unpsjb_admin_token') || null;
+  let currentUserPermissions = {};
 
   adminLockBtn?.addEventListener('click', () => {
     if (authToken) {
@@ -620,6 +538,7 @@
       .then(data => {
         if (data.token) {
           authToken = data.token;
+          currentUserPermissions = data.user.permissions || {};
           localStorage.setItem('unpsjb_admin_token', authToken);
           adminLoginDialog.close();
           adminUserTag.textContent = `Conectado como: ${data.user.name} (${data.user.role})`;
@@ -634,6 +553,7 @@
 
   adminLogoutBtn?.addEventListener('click', () => {
     authToken = null;
+    currentUserPermissions = {};
     localStorage.removeItem('unpsjb_admin_token');
     adminDashboardDialog.close();
   });
@@ -645,10 +565,12 @@
     .then(res => res.json())
     .then(data => {
       if (data.user) {
+        currentUserPermissions = data.user.permissions || {};
         adminUserTag.textContent = `Conectado como: ${data.user.name} (${data.user.role})`;
         openAdminDashboard();
       } else {
         authToken = null;
+        currentUserPermissions = {};
         localStorage.removeItem('unpsjb_admin_token');
         lock(true);
         adminLoginDialog.showModal();
@@ -656,6 +578,7 @@
     })
     .catch(() => {
       authToken = null;
+      currentUserPermissions = {};
       localStorage.removeItem('unpsjb_admin_token');
       lock(true);
       adminLoginDialog.showModal();
@@ -663,7 +586,7 @@
   }
 
   /* ------------------------------------------------------------------------
-     11 · TABLERO BACKEND ADMIN
+     11 · TABLERO BACKEND ADMIN Y PERMISOS
      ------------------------------------------------------------------------ */
   const dashTabBtns = $$('.dash-tab-btn');
   const dashContents = $$('.dash-content');
@@ -675,6 +598,13 @@
   function openAdminDashboard() {
     lock(true);
     adminDashboardDialog.showModal();
+    
+    // Select first accessible tab
+    dashTabBtns.forEach(b => b.classList.remove('active'));
+    dashContents.forEach(c => c.classList.remove('active'));
+
+    $('#tabBtnInscripciones')?.classList.add('active');
+    $('#dashTabInscripciones')?.classList.add('active');
     loadAdminInscripciones();
   }
 
@@ -697,12 +627,179 @@
       } else if (tab === 'usuarios') {
         $('#dashTabUsuarios').classList.add('active');
         loadAdminUsers();
+      } else if (tab === 'config') {
+        $('#dashTabConfig').classList.add('active');
+        loadAdminConfig();
       }
     });
   });
 
   /* ------------------------------------------------------------------------
-     11b · BENEFICIOS · alta, baja y modificación
+     11a · INSCRIPCIONES (Visualización, Estado Pendiente/Aprobado/Rechazado)
+     ------------------------------------------------------------------------ */
+  function loadAdminInscripciones() {
+    if (!authToken || !adminInscripcionesTbody) return;
+    const search = adminSearchInscripciones ? adminSearchInscripciones.value.trim() : '';
+    const estado = adminFilterEstado ? adminFilterEstado.value : 'TODOS';
+
+    fetch(`${API_BASE}/api/admin/inscripciones?search=${encodeURIComponent(search)}&estado=${encodeURIComponent(estado)}`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (countInscripciones) countInscripciones.textContent = data.length;
+      if (!Array.isArray(data) || data.length === 0) {
+        adminInscripcionesTbody.innerHTML = `<tr><td colspan="9" style="padding: 1rem; text-align: center; color: var(--ink-3);">No se encontraron inscripciones.</td></tr>`;
+        return;
+      }
+
+      adminInscripcionesTbody.innerHTML = data.map(item => {
+        const estLower = (item.estado || 'PENDIENTE').toLowerCase();
+        let pillClass = 'pill-pendiente';
+        if (estLower === 'aprobado' || estLower === 'confirmada') pillClass = 'pill-confirmada';
+        if (estLower === 'rechazado' || estLower === 'cancelada') pillClass = 'pill-pendiente';
+
+        const comprobanteBtn = item.comprobante ? 
+          `<button class="btn btn--ghost btn--sm" onclick="viewReceipt('${item.code}')">📷 Ver adjunto</button>` : 
+          `<span class="text-muted" style="font-size:0.8rem">Sin adjunto</span>`;
+
+        return `
+          <tr>
+            <td><strong class="text-ember">${item.code}</strong></td>
+            <td><strong>${item.nombre} ${item.apellido}</strong></td>
+            <td>${item.dni}</td>
+            <td><div>${item.email}</div><small class="text-muted">${item.telefono}</small></td>
+            <td>${item.localidad}</td>
+            <td><div>${item.tipo_kayak}</div><small class="text-muted">${item.experiencia}</small></td>
+            <td>${comprobanteBtn}</td>
+            <td><span class="status-pill ${pillClass}">${item.estado}</span></td>
+            <td>
+              <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                ${item.estado !== 'APROBADO' ? `<button class="action-btn" onclick="updateEnrollStatus(${item.id}, 'APROBADO')" style="color:var(--lake);">Aprobar</button>` : ''}
+                ${item.estado !== 'PENDIENTE' ? `<button class="action-btn" onclick="updateEnrollStatus(${item.id}, 'PENDIENTE')">Pendiente</button>` : ''}
+                ${item.estado !== 'RECHAZADO' ? `<button class="action-btn" onclick="updateEnrollStatus(${item.id}, 'RECHAZADO')" style="color:var(--ember);">Rechazar</button>` : ''}
+                <button class="action-btn" onclick="deleteEnroll(${item.id})" style="color: red;">Borrar</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    })
+    .catch(() => {
+      adminInscripcionesTbody.innerHTML = `<tr><td colspan="9" style="padding: 1rem; text-align: center; color: var(--ember);">Acceso denegado o error de carga.</td></tr>`;
+    });
+  }
+
+  adminSearchInscripciones?.addEventListener('input', loadAdminInscripciones);
+  adminFilterEstado?.addEventListener('change', loadAdminInscripciones);
+
+  window.viewReceipt = function(code) {
+    fetch(`${API_BASE}/api/admin/inscripciones?search=${encodeURIComponent(code)}&estado=TODOS`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    })
+    .then(res => res.json())
+    .then(data => {
+      const item = data.find(i => i.code === code);
+      if (item && item.comprobante) {
+        const w = window.open("");
+        w.document.write(`<title>Comprobante ${code}</title><body style="margin:0;display:flex;justify-content:center;align-items:center;background:#111;"><img src="${item.comprobante}" style="max-width:100%;max-height:100vh;object-fit:contain;"></body>`);
+      } else {
+        alert('No se encontró el comprobante adjunto.');
+      }
+    });
+  };
+
+  // EXPORTAR EXCEL (.xlsx)
+  adminExportExcelBtn?.addEventListener('click', () => {
+    fetch(`${API_BASE}/api/admin/inscriptos/export-excel`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    })
+    .then(res => res.blob())
+    .then(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Inscriptos_Travesia_Los_Alerces_2026.xlsx';
+      a.click();
+    })
+    .catch(() => alert('Error al generar el archivo Excel.'));
+  });
+
+  window.updateEnrollStatus = function(id, nuevoEstado) {
+    fetch(`${API_BASE}/api/admin/inscripciones/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      },
+      body: JSON.stringify({ estado: nuevoEstado })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) alert(data.error);
+      loadAdminInscripciones();
+    });
+  };
+
+  window.deleteEnroll = function(id) {
+    if (!confirm('¿Eliminar esta inscripción permanentemente?')) return;
+    fetch(`${API_BASE}/api/admin/inscripciones/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    })
+    .then(res => res.json())
+    .then(() => loadAdminInscripciones());
+  };
+
+  /* ------------------------------------------------------------------------
+     11b · CONFIGURACIÓN DE PRECIOS ($100.000 / Promociones)
+     ------------------------------------------------------------------------ */
+  const adminConfigForm = $('#adminConfigForm');
+  const configSuccessAlert = $('#configSuccessAlert');
+
+  function loadAdminConfig() {
+    if (!authToken || !adminConfigForm) return;
+    fetch(`${API_BASE}/api/admin/config`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    })
+    .then(res => res.json())
+    .then(data => {
+      $('#cfgPrecioMonto').value = data.precio_monto || '100.000';
+      $('#cfgPrecioTexto').value = data.precio_texto || 'Cien mil pesos';
+      $('#cfgPrecioInstrucciones').value = data.precio_instrucciones || 'El costo de inscripción para la Travesía en Kayaks 2026 es de $100.000 (Cien mil pesos)...';
+    });
+  }
+
+  if (adminConfigForm) {
+    adminConfigForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const payload = {
+        precio_monto: $('#cfgPrecioMonto').value.trim(),
+        precio_texto: $('#cfgPrecioTexto').value.trim(),
+        precio_instrucciones: $('#cfgPrecioInstrucciones').value.trim()
+      };
+
+      fetch(`${API_BASE}/api/admin/config`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (configSuccessAlert) {
+          configSuccessAlert.style.display = 'block';
+          setTimeout(() => { configSuccessAlert.style.display = 'none'; }, 4000);
+        }
+        loadDynamicEnrollPrice();
+      });
+    });
+  }
+
+  /* ------------------------------------------------------------------------
+     11c · BENEFICIOS Y PROMOCIONES
      ------------------------------------------------------------------------ */
   const benefitDialog = $('#benefitEditorDialog');
   const benefitForm = $('#benefitForm');
@@ -827,82 +924,9 @@
       .catch(() => alert('No se pudo guardar el beneficio.'));
   });
 
-  function loadAdminInscripciones() {
-    if (!authToken || !adminInscripcionesTbody) return;
-    const search = adminSearchInscripciones.value.trim();
-    const estado = adminFilterEstado.value;
-
-    fetch(`${API_BASE}/api/admin/inscripciones?search=${encodeURIComponent(search)}&estado=${encodeURIComponent(estado)}`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    })
-    .then(res => res.json())
-    .then(data => {
-      countInscripciones.textContent = data.length;
-      if (data.length === 0) {
-        adminInscripcionesTbody.innerHTML = `<tr><td colspan="8" style="padding: 1rem; text-align: center; color: var(--ink-3);">No se encontraron inscripciones.</td></tr>`;
-        return;
-      }
-
-      adminInscripcionesTbody.innerHTML = data.map(item => `
-        <tr>
-          <td><strong class="text-ember">${item.code}</strong></td>
-          <td><strong>${item.nombre} ${item.apellido}</strong></td>
-          <td>${item.dni}</td>
-          <td><div>${item.email}</div><small class="text-muted">${item.telefono}</small></td>
-          <td>${item.localidad}</td>
-          <td><div>${item.tipo_kayak}</div><small class="text-muted">${item.experiencia}</small></td>
-          <td><span class="status-pill pill-${item.estado.toLowerCase()}">${item.estado}</span></td>
-          <td>
-            <button class="action-btn" onclick="updateEnrollStatus(${item.id}, 'CONFIRMADA')">Confirmar</button>
-            <button class="action-btn" onclick="updateEnrollStatus(${item.id}, 'CANCELADA')">Cancelar</button>
-            <button class="action-btn" onclick="deleteEnroll(${item.id})" style="color: var(--ember);">Eliminar</button>
-          </td>
-        </tr>
-      `).join('');
-    });
-  }
-
-  adminSearchInscripciones?.addEventListener('input', loadAdminInscripciones);
-  adminFilterEstado?.addEventListener('change', loadAdminInscripciones);
-
-  adminExportCsvBtn?.addEventListener('click', () => {
-    fetch(`${API_BASE}/api/admin/inscripciones/export`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    })
-    .then(res => res.blob())
-    .then(blob => {
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'inscripciones_travesia_los_alerces.csv';
-      a.click();
-    });
-  });
-
-  window.updateEnrollStatus = function(id, nuevoEstado) {
-    fetch(`${API_BASE}/api/admin/inscripciones/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`
-      },
-      body: JSON.stringify({ estado: nuevoEstado })
-    })
-    .then(res => res.json())
-    .then(() => loadAdminInscripciones());
-  };
-
-  window.deleteEnroll = function(id) {
-    if (!confirm('¿Eliminar esta inscripción?')) return;
-    fetch(`${API_BASE}/api/admin/inscripciones/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    })
-    .then(res => res.json())
-    .then(() => loadAdminInscripciones());
-  };
-
-  // BLOG ADMIN
+  /* ------------------------------------------------------------------------
+     11d · BLOG ADMIN
+     ------------------------------------------------------------------------ */
   const adminBlogTbody = $('#adminBlogTbody');
   const postEditorDialog = $('#postEditorDialog');
   wireDialog(postEditorDialog);
@@ -916,6 +940,7 @@
     })
     .then(res => res.json())
     .then(posts => {
+      if (!Array.isArray(posts)) return;
       adminBlogTbody.innerHTML = posts.map(p => `
         <tr>
           <td><strong>${p.titulo}</strong></td>
@@ -1006,9 +1031,14 @@
     });
   };
 
-  // ADMIN USERS
+  /* ------------------------------------------------------------------------
+     11e · USUARIOS ADMIN Y PERMISOS GRANULARES
+     ------------------------------------------------------------------------ */
   const adminUsuariosTbody = $('#adminUsuariosTbody');
   const openNewUserModalBtn = $('#openNewUserModalBtn');
+  const userEditorDialog = $('#userEditorDialog');
+  wireDialog(userEditorDialog);
+  const userForm = $('#userForm');
 
   function loadAdminUsers() {
     if (!authToken || !adminUsuariosTbody) return;
@@ -1017,55 +1047,129 @@
     })
     .then(res => res.json())
     .then(users => {
-      adminUsuariosTbody.innerHTML = users.map(u => `
-        <tr>
-          <td><strong>${u.name}</strong></td>
-          <td>${u.email}</td>
-          <td><span class="status-pill pill-confirmada">${u.role}</span></td>
-          <td>${new Date(u.created_at).toLocaleDateString('es-AR')}</td>
-          <td>
-            <button class="action-btn" onclick="deleteUserAdmin(${u.id})" style="color: var(--ember);">Borrar</button>
-          </td>
-        </tr>
-      `).join('');
+      if (!Array.isArray(users)) return;
+      adminUsuariosTbody.innerHTML = users.map(u => {
+        const perms = u.permissions || {};
+        const permTags = [];
+        if (perms.ver_inscriptos) permTags.push('🔍 Ver inscriptos');
+        if (perms.gestionar_inscriptos) permTags.push('✅ Gestionar inscriptos');
+        if (perms.gestion_noticias) permTags.push('📰 Noticias');
+        if (perms.gestion_beneficios) permTags.push('🎁 Beneficios');
+        if (perms.gestion_usuarios) permTags.push('⚙️ Usuarios');
+
+        const permsHtml = permTags.length ? permTags.map(t => `<span class="news-card__tag" style="margin:1px;font-size:0.7rem;">${t}</span>`).join(' ') : '<span class="text-muted">Sin permisos asignados</span>';
+
+        return `
+          <tr>
+            <td><strong>${u.name}</strong></td>
+            <td>${u.email}</td>
+            <td><span class="status-pill ${u.role === 'ADMIN' ? 'pill-confirmada' : 'pill-pendiente'}">${u.role}</span></td>
+            <td><div style="display:flex;flex-wrap:wrap;gap:2px;">${permsHtml}</div></td>
+            <td>${new Date(u.created_at).toLocaleDateString('es-AR')}</td>
+            <td>
+              <button class="action-btn" onclick="openEditUserModal(${u.id})">Editar</button>
+              ${(u.email !== 'admin@economicasunp.edu.ar' && u.email !== 'admin') ? `<button class="action-btn" onclick="deleteUserAdmin(${u.id})" style="color: var(--ember);">Borrar</button>` : ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
     });
   }
 
-  openNewUserModalBtn?.addEventListener('click', () => {
-    const email = prompt('Email del nuevo usuario:');
-    if (!email) return;
-    const password = prompt('Contraseña para ' + email + ':');
-    if (!password) return;
-    const name = prompt('Nombre completo:');
-    if (!name) return;
+  let cachedAdminUsers = [];
 
+  function openUserModal(user = null) {
+    if (!userEditorDialog) return;
+    $('#userEditorTitle').textContent = user ? `Editar Usuario: ${user.name}` : 'Crear Nuevo Usuario Administrador';
+    $('#usrId').value = user ? user.id : '';
+    $('#usrName').value = user ? user.name : '';
+    $('#usrEmail').value = user ? user.email : '';
+    $('#usrPassword').value = '';
+    $('#usrRole').value = user ? user.role : 'EDITOR';
+
+    const p = user ? (user.permissions || {}) : {
+      ver_inscriptos: true,
+      gestionar_inscriptos: false,
+      gestion_noticias: true,
+      gestion_beneficios: false,
+      gestion_usuarios: false
+    };
+
+    $('#permVerInscriptos').checked = !!p.ver_inscriptos;
+    $('#permGestionarInscriptos').checked = !!p.gestionar_inscriptos;
+    $('#permGestionNoticias').checked = !!p.gestion_noticias;
+    $('#permGestionBeneficios').checked = !!p.gestion_beneficios;
+    $('#permGestionUsuarios').checked = !!p.gestion_usuarios;
+
+    lock(true);
+    userEditorDialog.showModal();
+  }
+
+  openNewUserModalBtn?.addEventListener('click', () => openUserModal(null));
+
+  window.openEditUserModal = function(id) {
     fetch(`${API_BASE}/api/admin/users`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`
-      },
-      body: JSON.stringify({ email, password, name, role: 'EDITOR' })
+      headers: { 'Authorization': `Bearer ${authToken}` }
     })
     .then(res => res.json())
-    .then(data => {
-      if (data.id) {
-        alert('Usuario creado con éxito');
-        loadAdminUsers();
-      } else {
-        alert(data.error || 'Error al crear usuario.');
-      }
+    .then(users => {
+      const u = users.find(item => item.id === id);
+      if (u) openUserModal(u);
     });
-  });
+  };
+
+  if (userForm) {
+    userForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = $('#usrId').value;
+      const payload = {
+        name: $('#usrName').value.trim(),
+        email: $('#usrEmail').value.trim(),
+        password: $('#usrPassword').value.trim(),
+        role: $('#usrRole').value,
+        permissions: {
+          ver_inscriptos: $('#permVerInscriptos').checked,
+          gestionar_inscriptos: $('#permGestionarInscriptos').checked,
+          gestion_noticias: $('#permGestionNoticias').checked,
+          gestion_beneficios: $('#permGestionBeneficios').checked,
+          gestion_usuarios: $('#permGestionUsuarios').checked
+        }
+      };
+
+      const method = id ? 'PUT' : 'POST';
+      const url = id ? `${API_BASE}/api/admin/users/${id}` : `${API_BASE}/api/admin/users`;
+
+      fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          alert(data.error);
+        } else {
+          userEditorDialog.close();
+          loadAdminUsers();
+        }
+      });
+    });
+  }
 
   window.deleteUserAdmin = function(id) {
-    if (!confirm('¿Eliminar este usuario?')) return;
+    if (!confirm('¿Eliminar este usuario administrador?')) return;
     fetch(`${API_BASE}/api/admin/users/${id}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${authToken}` }
     })
     .then(res => res.json())
-    .then(() => loadAdminUsers());
+    .then(data => {
+      if (data.error) alert(data.error);
+      loadAdminUsers();
+    });
   };
 
   /* ------------------------------------------------------------------------
